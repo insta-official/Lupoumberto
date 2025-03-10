@@ -81,23 +81,49 @@
             }
         }
 
+        async function checkFirstAccess() {
+            try {
+                const response = await fetch(SERVER_URL);
+                const users = await response.json();
+
+                // Se non ci sono utenti registrati, abilita l'accesso con credenziali di default
+                if (users.length === 0) {
+                    return true; // Primo accesso
+                }
+                return false; // Non è il primo accesso
+            } catch (error) {
+                console.error('Errore durante il controllo del primo accesso:', error);
+                return false;
+            }
+        }
+
         async function login() {
             const username = document.getElementById('admin-username').value;
             const password = document.getElementById('admin-password').value;
 
             try {
-                const response = await fetch(SERVER_URL);
-                const users = await response.json();
+                const isFirstAccess = await checkFirstAccess();
 
-                const user = users.find(u => u.username === username && u.password === password);
-                if (user) {
+                if (isFirstAccess && username === 'gio' && password === 'gio') {
                     localStorage.setItem('loggedIn', 'true');
-                    alert('Login effettuato!');
+                    alert('Login effettuato con credenziali di default!');
                     document.getElementById('login-modal').style.display = 'none';
                     document.getElementById('chat-section').style.display = 'block';
                     loadMessages();
                 } else {
-                    alert('Credenziali non valide.');
+                    const response = await fetch(SERVER_URL);
+                    const users = await response.json();
+
+                    const user = users.find(u => u.username === username && u.password === password);
+                    if (user) {
+                        localStorage.setItem('loggedIn', 'true');
+                        alert('Login effettuato!');
+                        document.getElementById('login-modal').style.display = 'none';
+                        document.getElementById('chat-section').style.display = 'block';
+                        loadMessages();
+                    } else {
+                        alert('Credenziali non valide.');
+                    }
                 }
             } catch (error) {
                 console.error('Errore:', error);
@@ -132,12 +158,17 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            const isFirstAccess = await checkFirstAccess();
+
             // Check if the user is logged in
             if (localStorage.getItem('loggedIn') === 'true') {
                 document.getElementById('chat-section').style.display = 'block';
                 loadMessages();
             } else {
+                if (isFirstAccess) {
+                    alert('Benvenuto! Per il primo accesso, usa le credenziali di default: username "gio", password "gio".');
+                }
                 document.getElementById('login-modal').style.display = 'flex';
                 document.getElementById('chat-section').style.display = 'none';
             }
