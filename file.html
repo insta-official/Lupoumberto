@@ -81,56 +81,6 @@
             }
         }
 
-        async function checkFirstAccess() {
-            try {
-                const response = await fetch(SERVER_URL);
-                const users = await response.json();
-
-                // Se non ci sono utenti registrati, abilita l'accesso con credenziali di default
-                if (users.length === 0) {
-                    return true; // Primo accesso
-                }
-                return false; // Non è il primo accesso
-            } catch (error) {
-                console.error('Errore durante il controllo del primo accesso:', error);
-                return false;
-            }
-        }
-
-        async function login() {
-            const username = document.getElementById('admin-username').value;
-            const password = document.getElementById('admin-password').value;
-
-            try {
-                const isFirstAccess = await checkFirstAccess();
-
-                if (isFirstAccess && username === 'gio' && password === 'gio') {
-                    localStorage.setItem('loggedIn', 'true');
-                    alert('Login effettuato con credenziali di default!');
-                    document.getElementById('login-modal').style.display = 'none';
-                    document.getElementById('chat-section').style.display = 'block';
-                    loadMessages();
-                } else {
-                    const response = await fetch(SERVER_URL);
-                    const users = await response.json();
-
-                    const user = users.find(u => u.username === username && u.password === password);
-                    if (user) {
-                        localStorage.setItem('loggedIn', 'true');
-                        alert('Login effettuato!');
-                        document.getElementById('login-modal').style.display = 'none';
-                        document.getElementById('chat-section').style.display = 'block';
-                        loadMessages();
-                    } else {
-                        alert('Credenziali non valide.');
-                    }
-                }
-            } catch (error) {
-                console.error('Errore:', error);
-                alert('Errore durante il login.');
-            }
-        }
-
         async function register() {
             const username = document.getElementById('register-username').value.trim();
             const password = document.getElementById('register-password').value.trim();
@@ -151,27 +101,36 @@
 
                 alert('Registrazione completata! Ora puoi effettuare il login.');
                 document.getElementById('register-modal').style.display = 'none';
-                document.getElementById('login-modal').style.display = 'flex';
             } catch (error) {
                 console.error('Errore:', error);
                 alert('Errore durante la registrazione.');
             }
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const isFirstAccess = await checkFirstAccess();
+        async function login() {
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
 
-            // Check if the user is logged in
-            if (localStorage.getItem('loggedIn') === 'true') {
-                document.getElementById('chat-section').style.display = 'block';
-                loadMessages();
-            } else {
-                if (isFirstAccess) {
-                    alert('Benvenuto! Per il primo accesso, usa le credenziali di default: username "gio", password "gio".');
+            try {
+                const response = await fetch(SERVER_URL);
+                const users = await response.json();
+
+                const user = users.find(u => u.username === username && u.password === password);
+                if (user) {
+                    localStorage.setItem('loggedIn', 'true');
+                    alert('Login effettuato!');
+                    document.getElementById('login-modal').style.display = 'none';
+                } else {
+                    alert('Credenziali non valide.');
                 }
-                document.getElementById('login-modal').style.display = 'flex';
-                document.getElementById('chat-section').style.display = 'none';
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore durante il login.');
             }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMessages();
         });
     </script>
 </head>
@@ -190,7 +149,7 @@
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8" id="chat-section" style="display: none;">
+    <main class="container mx-auto px-4 py-8">
         <section class="text-center mb-12">
             <h2 class="text-4xl font-bold text-gray-800 mb-4">Scrivi un messaggio</h2>
         </section>
