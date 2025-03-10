@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Chat con Lupo Umberto</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+        const SERVER_URL = "https://67cb65973395520e6af537e3.mockapi.io/api/v3/messages"; // Usa il tuo endpoint MockAPI
+
+        let googleUser = null;
+
+        async function sendMessage() {
+            if (!googleUser) {
+                alert('Devi prima effettuare l\'accesso con Google.');
+                return;
+            }
+
+            const username = googleUser.name;
+            const message = document.getElementById('message').value.trim();
+
+            if (!message) {
+                alert('Inserisci un messaggio!');
+                return;
+            }
+
+            const button = document.querySelector('button[onclick="sendMessage()"]');
+            button.disabled = true;
+            button.textContent = 'Invio in corso...';
+
+            try {
+                const response = await fetch(SERVER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, message })
+                });
+
+                if (!response.ok) throw new Error('Errore nell\'invio.');
+
+                alert('Messaggio inviato!');
+                document.getElementById('message').value = ''; // Pulisci il campo del messaggio
+                loadMessages();
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore nell\'invio del messaggio.');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Invia Messaggio';
+            }
+        }
+
+        async function loadMessages() {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.innerHTML = '<p>Caricamento messaggi...</p>';
+
+            try {
+                const response = await fetch(SERVER_URL);
+                console.log('Risposta del server:', response);
+
+                // Verifica il tipo di contenuto della risposta
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Il server non ha restituito JSON.');
+                }
+
+                const messages = await response.json();
+                console.log('Messaggi ricevuti:', messages);
+
+                messagesContainer.innerHTML = '';
+
+                if (messages.length === 0) {
+                    messagesContainer.innerHTML = '<p>Nessun messaggio disponibile.</p>';
+                    return;
+                }
+
+                messages.forEach(msg => {
+                    const messageElement = document.createElement('div');
+                    messageElement.classList = "bg-white shadow rounded-lg p-4 mb-2";
+                    messageElement.innerHTML = `
+                        <p class="text-gray-700"><strong>${msg.username}:</strong> ${msg.message}</p>
+                    `;
+                    messagesContainer.appendChild(messageElement);
+                });
+            } catch (error) {
+                console.error('Errore:', error);
+                messagesContainer.innerHTML = '<p>Errore nel caricamento dei messaggi.</p>';
+            }
+        }
+
+        function handleCredentialResponse(response) {
+            // Decodifica il token JWT restituito da Google
+            const userData = parseJwt(response.credential);
+
+            // Salva i dati dell'utente
+            googleUser = {
+                name: userData.name,
+                email: userData.email,
+                picture: userData.picture
+            };
+
+            // Mostra la chat e nascondi il pulsante di login
+            document.getElementById('chat-section').style.display = 'block';
+            document.getElementById('google-signin-button').style.display = 'none';
+
+            alert(`Benvenuto, ${googleUser.name}! Ora puoi partecipare alla chat.`);
+            loadMessages();
+        }
+
+        function parseJwt(token) {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            return JSON.parse(jsonPayload);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inizializza il pulsante di login di Google
+            window.onload = function () {
+                google.accounts.id.initialize({
+                    client_id: '853838951974-e9prc097vnonll372lp65t7mi2lpdngt.apps.googleusercontent.com', // Client ID inserito
+                    callback: handleCredentialResponse
+                });
+                google.accounts.id.renderButton(
+                    document.getElementById('google-signin-button'),
+                    { theme: 'outline', size: 'large' } // Personalizza il pulsante
+                );
+            };
+        });
+    </script>
+</head>
+<body class="bg-gray-100">
+    <header class="bg-white shadow">
+        <div class="container mx-auto px-4 py-6 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-800">Chat con Lupo Umberto</h1>
+            <div id="google-signin-button"></div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8" id="chat-section" style="display: none;">
+        <section class="text-center mb-12">
+            <h2 class="text-4xl font-bold text-gray-800 mb-4">Scrivi un messaggio</h2>
+        </section>
+
+        <section class="bg-white shadow rounded-lg p-6">
+            <textarea id="message" class="border rounded w-full py-2 px-3 mb-4" rows="4" placeholder="Messaggio"></textarea>
+            <button class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded" onclick="sendMessage()">
+                Invia Messaggio
+            </button>
+        </section>
+
+        <section class="mt-8">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Messaggi Recenti</h3>
+            <div id="messages"></div>
+        </section>
+    </main>
+
+    <footer class="bg-white shadow mt-12">
+        <div class="container mx-auto px-4 py-6 text-center">
+            <p class="text-gray-600">© 2024 Chat Lupo Umberto. Tutti i diritti riservati.</p>
+        </div>
+    </footer>
+</body>
+</html>
