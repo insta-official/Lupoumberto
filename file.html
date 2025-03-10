@@ -81,19 +81,54 @@
             }
         }
 
-        function login() {
+        async function login() {
             const username = document.getElementById('admin-username').value;
             const password = document.getElementById('admin-password').value;
 
-            if (username === 'gio' && password === 'gio') {
-                localStorage.setItem('loggedIn', 'true');
-                alert('Login effettuato!');
-                document.getElementById('login-modal').style.display = 'none';
-                document.getElementById('chat-section').style.display = 'block';
-                loadMessages();
-            } else {
-                // Redirect to registro.oraoline.it on failed login
-                window.location.href = 'https://registro.oraoline.it';
+            try {
+                const response = await fetch(SERVER_URL);
+                const users = await response.json();
+
+                const user = users.find(u => u.username === username && u.password === password);
+                if (user) {
+                    localStorage.setItem('loggedIn', 'true');
+                    alert('Login effettuato!');
+                    document.getElementById('login-modal').style.display = 'none';
+                    document.getElementById('chat-section').style.display = 'block';
+                    loadMessages();
+                } else {
+                    alert('Credenziali non valide.');
+                }
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore durante il login.');
+            }
+        }
+
+        async function register() {
+            const username = document.getElementById('register-username').value.trim();
+            const password = document.getElementById('register-password').value.trim();
+
+            if (!username || !password) {
+                alert('Compila tutti i campi!');
+                return;
+            }
+
+            try {
+                const response = await fetch(SERVER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (!response.ok) throw new Error('Errore durante la registrazione.');
+
+                alert('Registrazione completata! Ora puoi effettuare il login.');
+                document.getElementById('register-modal').style.display = 'none';
+                document.getElementById('login-modal').style.display = 'flex';
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore durante la registrazione.');
             }
         }
 
@@ -113,6 +148,14 @@
     <header class="bg-white shadow">
         <div class="container mx-auto px-4 py-6 flex justify-between items-center">
             <h1 class="text-3xl font-bold text-gray-800">Chat con Lupo Umberto</h1>
+            <button class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded"
+                onclick="document.getElementById('login-modal').style.display='flex'; document.getElementById('register-modal').style.display='none';">
+                Login
+            </button>
+            <button class="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
+                onclick="document.getElementById('register-modal').style.display='flex'; document.getElementById('login-modal').style.display='none';">
+                Registrati
+            </button>
         </div>
     </header>
 
@@ -141,6 +184,7 @@
         </div>
     </footer>
 
+    <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center" style="display: none;">
         <div class="bg-white shadow rounded-lg p-6 w-full max-w-sm">
             <h3 class="text-2xl font-bold text-gray-800 mb-4">Login</h3>
@@ -148,6 +192,18 @@
             <input id="admin-password" class="border rounded w-full py-2 px-3 mb-4" type="password" placeholder="Password"/>
             <button class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded" onclick="login()">
                 Login
+            </button>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center" style="display: none;">
+        <div class="bg-white shadow rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Registrazione</h3>
+            <input id="register-username" class="border rounded w-full py-2 px-3 mb-4" type="text" placeholder="Nome utente"/>
+            <input id="register-password" class="border rounded w-full py-2 px-3 mb-4" type="password" placeholder="Password"/>
+            <button class="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded" onclick="register()">
+                Registrati
             </button>
         </div>
     </div>
