@@ -14,6 +14,7 @@
         async function sendMessage() {
             const username = document.getElementById('username').value.trim();
             const message = document.getElementById('message').value.trim();
+            const imageInput = document.getElementById('image');
 
             if (!username || !message) {
                 alert('Compila tutti i campi!');
@@ -25,16 +26,25 @@
             button.textContent = 'Invio in corso...';
 
             try {
+                let imageBase64 = null;
+                if (imageInput.files[0]) {
+                    // Riduci le dimensioni dell'immagine
+                    const resizedImage = await resizeImage(imageInput.files[0], 800, 800);
+                    // Converti l'immagine ridimensionata in Base64
+                    imageBase64 = await convertImageToBase64(resizedImage);
+                }
+
                 const response = await fetch(SERVER_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, message })
+                    body: JSON.stringify({ username, message, image: imageBase64 })
                 });
 
                 if (!response.ok) throw new Error('Errore nell\'invio.');
 
                 alert('Messaggio inviato!');
                 document.getElementById('message').value = ''; // Pulisci il campo del messaggio
+                document.getElementById('image').value = ''; // Pulisci il campo dell'immagine
 
                 // Incrementa il contatore dei messaggi
                 messageCount++;
@@ -48,11 +58,62 @@
                 loadMessages();
             } catch (error) {
                 console.error('Errore:', error);
-                alert('Errore nell\'invio del messaggio.');
+                alert(`Errore nell'invio del messaggio: ${error.message}`);
             } finally {
                 button.disabled = false;
                 button.textContent = 'Invia Messaggio';
             }
+        }
+
+        // Funzione per ridimensionare un'immagine
+        function resizeImage(file, maxWidth, maxHeight) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const reader = new FileReader();
+
+                reader.onload = (e) => {
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height *= maxWidth / width;
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width *= maxHeight / height;
+                                height = maxHeight;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob((blob) => {
+                            resolve(blob);
+                        }, file.type, 0.8);
+                    };
+                };
+
+                reader.onerror = (error) => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Funzione per convertire un'immagine in Base64
+        function convertImageToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Errore nella conversione dell\'immagine.'));
+                reader.readAsDataURL(file);
+            });
         }
 
         async function loadMessages() {
@@ -61,16 +122,7 @@
 
             try {
                 const response = await fetch(SERVER_URL);
-                console.log('Risposta del server:', response);
-
-                // Verifica il tipo di contenuto della risposta
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Il server non ha restituito JSON.');
-                }
-
                 const messages = await response.json();
-                console.log('Messaggi ricevuti:', messages);
 
                 messagesContainer.innerHTML = '';
 
@@ -82,8 +134,14 @@
                 messages.forEach(msg => {
                     const messageElement = document.createElement('div');
                     messageElement.classList = "bg-white shadow rounded-lg p-4 mb-2";
+                    let imageHtml = '';
+                    if (msg.image) {
+                        // Aggiungi l'immagine se presente
+                        imageHtml = `<img src="${msg.image}" alt="Immagine" class="mt-2 rounded-lg" style="max-width: 100%; height: auto;">`;
+                    }
                     messageElement.innerHTML = `
                         <p class="text-gray-700"><strong>${msg.username}:</strong> ${msg.message}</p>
+                        ${imageHtml}
                     `;
                     messagesContainer.appendChild(messageElement);
                 });
@@ -169,6 +227,8 @@
         <section class="bg-white shadow rounded-lg p-6">
             <input id="username" class="border rounded w-full py-2 px-3 mb-4" type="text" placeholder="Nome utente"/>
             <textarea id="message" class="border rounded w-full py-2 px-3 mb-4" rows="4" placeholder="Messaggio"></textarea>
+            <!-- Aggiungi un input per il caricamento delle immagini -->
+            <input id="image" class="border rounded w-full py-2 px-3 mb-4" type="file" accept="image/*"/>
             <button class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded" onclick="sendMessage()">
                 Invia Messaggio
             </button>
