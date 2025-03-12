@@ -52,7 +52,7 @@
                         message,
                         image: imageBase64,
                         profileImage: currentProfile.image,
-                        likes: 0 // Inizializza i "mi piace" a 0
+                        like: '' // Inizialmente il campo "like" è vuoto
                     })
                 });
 
@@ -110,18 +110,22 @@
                         // Aggiungi l'immagine del profilo se presente
                         profileImageHtml = `<img src="${msg.profileImage}" alt="Profilo" class="w-10 h-10 rounded-full mr-2">`;
                     }
+                    // Aggiungi il pulsante "Like"
+                    let likeButtonHtml = '';
+                    if (currentProfile) {
+                        likeButtonHtml = `
+                            <button class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded ml-2" onclick="likeMessage('${msg.id}')">
+                                Like (${msg.like || 0})
+                            </button>
+                        `;
+                    }
                     messageElement.innerHTML = `
                         <div class="flex items-center">
                             ${profileImageHtml}
                             <p class="text-gray-700"><strong>${msg.username}:</strong> ${msg.message}</p>
+                            ${likeButtonHtml}
                         </div>
                         ${imageHtml}
-                        <div class="flex items-center mt-2">
-                            <button onclick="likeMessage('${msg.id}')" class="text-red-500 hover:text-red-700">
-                                <i class="fas fa-heart"></i>
-                            </button>
-                            <span class="ml-2">${msg.likes}</span>
-                        </div>
                     `;
                     messagesContainer.appendChild(messageElement);
                 });
@@ -131,30 +135,35 @@
             }
         }
 
-        // Funzione per gestire i "mi piace"
+        // Funzione per lasciare un "like"
         async function likeMessage(messageId) {
+            if (!currentProfile) {
+                alert('Devi avere un profilo per lasciare un like!');
+                return;
+            }
+
             try {
                 // Recupera il messaggio corrente
                 const response = await fetch(`${MESSAGES_SERVER_URL}/${messageId}`);
                 const message = await response.json();
 
-                // Incrementa il conteggio dei "mi piace"
-                const updatedLikes = message.likes + 1;
+                // Aggiorna il campo "like"
+                const updatedLike = (parseInt(message.like) || 0) + 1;
 
-                // Aggiorna il messaggio sul server
+                // Invia l'aggiornamento al server
                 const updateResponse = await fetch(`${MESSAGES_SERVER_URL}/${messageId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ likes: updatedLikes })
+                    body: JSON.stringify({ like: updatedLike })
                 });
 
-                if (!updateResponse.ok) throw new Error('Errore nell\'aggiornamento dei "mi piace".');
+                if (!updateResponse.ok) throw new Error('Errore nell\'aggiornamento del like.');
 
-                // Ricarica i messaggi per mostrare il conteggio aggiornato
-                loadMessages();
+                alert('Like aggiunto!');
+                loadMessages(); // Ricarica i messaggi per aggiornare il conteggio dei like
             } catch (error) {
                 console.error('Errore:', error);
-                alert('Errore nell\'aggiornamento dei "mi piace".');
+                alert('Errore nell\'aggiunta del like.');
             }
         }
 
