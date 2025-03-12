@@ -51,7 +51,8 @@
                         username: currentProfile.username,
                         message,
                         image: imageBase64,
-                        profileImage: currentProfile.image
+                        profileImage: currentProfile.image,
+                        likes: 0 // Inizializza i "mi piace" a 0
                     })
                 });
 
@@ -115,12 +116,45 @@
                             <p class="text-gray-700"><strong>${msg.username}:</strong> ${msg.message}</p>
                         </div>
                         ${imageHtml}
+                        <div class="flex items-center mt-2">
+                            <button onclick="likeMessage('${msg.id}')" class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                            <span class="ml-2">${msg.likes}</span>
+                        </div>
                     `;
                     messagesContainer.appendChild(messageElement);
                 });
             } catch (error) {
                 console.error('Errore:', error);
                 messagesContainer.innerHTML = '<p>Errore nel caricamento dei messaggi.</p>';
+            }
+        }
+
+        // Funzione per gestire i "mi piace"
+        async function likeMessage(messageId) {
+            try {
+                // Recupera il messaggio corrente
+                const response = await fetch(`${MESSAGES_SERVER_URL}/${messageId}`);
+                const message = await response.json();
+
+                // Incrementa il conteggio dei "mi piace"
+                const updatedLikes = message.likes + 1;
+
+                // Aggiorna il messaggio sul server
+                const updateResponse = await fetch(`${MESSAGES_SERVER_URL}/${messageId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ likes: updatedLikes })
+                });
+
+                if (!updateResponse.ok) throw new Error('Errore nell\'aggiornamento dei "mi piace".');
+
+                // Ricarica i messaggi per mostrare il conteggio aggiornato
+                loadMessages();
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore nell\'aggiornamento dei "mi piace".');
             }
         }
 
