@@ -110,12 +110,14 @@
                         // Aggiungi l'immagine del profilo se presente
                         profileImageHtml = `<img src="${msg.profileImage}" alt="Profilo" class="w-10 h-10 rounded-full mr-2">`;
                     }
-                    // Aggiungi il pulsante "Like"
+                    // Aggiungi il pulsante "Like" e il conteggio dei like
                     let likeButtonHtml = '';
                     if (currentProfile) {
+                        const likes = msg.like ? msg.like.split(',') : [];
+                        const hasLiked = likes.includes(currentProfile.username);
                         likeButtonHtml = `
-                            <button class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded ml-2" onclick="likeMessage('${msg.id}')">
-                                Like (${msg.like || 0})
+                            <button class="bg-blue-500 hover:bg-blue-700 text-white py-1 px-2 rounded ml-2" onclick="likeMessage('${msg.id}', '${msg.like || ''}')" ${hasLiked ? 'disabled' : ''}>
+                                Like (${likes.length})
                             </button>
                         `;
                     }
@@ -136,25 +138,29 @@
         }
 
         // Funzione per lasciare un "like"
-        async function likeMessage(messageId) {
+        async function likeMessage(messageId, currentLikes) {
             if (!currentProfile) {
                 alert('Devi avere un profilo per lasciare un like!');
                 return;
             }
 
             try {
-                // Recupera il messaggio corrente
-                const response = await fetch(`${MESSAGES_SERVER_URL}/${messageId}`);
-                const message = await response.json();
+                // Verifica se l'utente ha già messo like
+                const likes = currentLikes ? currentLikes.split(',') : [];
+                if (likes.includes(currentProfile.username)) {
+                    alert('Hai già messo like a questo post!');
+                    return;
+                }
 
-                // Aggiorna il campo "like"
-                const updatedLike = (parseInt(message.like) || 0) + 1;
+                // Aggiungi l'utente alla lista dei like
+                likes.push(currentProfile.username);
+                const updatedLikes = likes.join(',');
 
                 // Invia l'aggiornamento al server
                 const updateResponse = await fetch(`${MESSAGES_SERVER_URL}/${messageId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ like: updatedLike })
+                    body: JSON.stringify({ like: updatedLikes })
                 });
 
                 if (!updateResponse.ok) throw new Error('Errore nell\'aggiornamento del like.');
