@@ -304,6 +304,7 @@
                 document.getElementById('profile-preview').style.display = profileImageBase64 ? 'block' : 'none';
                 alert('Profilo aggiornato!');
                 document.getElementById('profile-modal').style.display = 'none';
+                loadMessages(); // Carica i messaggi dopo aver impostato il profilo
             } catch (error) {
                 console.error('Errore:', error);
                 alert('Errore nel salvataggio del profilo.');
@@ -403,7 +404,6 @@
 
         // Carica i messaggi all'avvio
         document.addEventListener('DOMContentLoaded', () => {
-            loadMessages(); // Carica i messaggi all'avvio
             showProfileModal(); // Mostra la modale del profilo all'avvio
         });
     </script>
@@ -418,7 +418,7 @@
                     Profilo
                 </button>
                 <button class="publish-button"
-                    onclick="document.getElementById('publish-modal').style.display='flex';">
+                    onclick="if (!currentProfile || !currentProfile.username) { alert('Imposta prima il tuo profilo!'); showProfileModal(); } else { document.getElementById('publish-modal').style.display='flex'; }">
                     Pubblica
                 </button>
             </div>
@@ -437,7 +437,7 @@
     </footer>
     <!-- Modale Profilo -->
     <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center" style="display: none;">
-        <div class="bg-gray-800 shadow-lg rounded-xl p-6 w-full max-w-sm animate__animated animate__fadeIn glassmorphism custom-shadow">
+                <div class="bg-gray-800 shadow-lg rounded-xl p-6 w-full max-w-sm animate__animated animate__fadeIn glassmorphism custom-shadow">
             <h3 class="text-2xl font-bold text-white mb-4">Pubblica un Messaggio</h3>
             <textarea id="message" class="bg-gray-700 border border-gray-600 rounded-xl w-full py-2 px-4 mb-4 text-white" rows="4" placeholder="Messaggio"></textarea>
             <input id="image" class="bg-gray-700 border border-gray-600 rounded-xl w-full py-2 px-4 mb-4 text-white" type="file" accept="image/*"/>
@@ -448,4 +448,3 @@
     </div>
 </body>
 </html>
-
