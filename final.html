@@ -132,12 +132,58 @@
             transform: translateY(0);
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
+
+        /* Stile per il menu dei colori */
+        .color-menu {
+            display: none;
+            position: absolute;
+            top: 80px;
+            left: 20px;
+            background: var(--card-background);
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .color-menu input[type="color"] {
+            width: 100%;
+            height: 40px;
+            border: none;
+            cursor: pointer;
+        }
+        .color-menu label {
+            color: var(--text-color);
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+        }
     </style>
     <script>
         // URL del server
         const SERVER_URL = "https://67cb65973395520e6af537e3.mockapi.io/api/v3/messages"; // Server per messaggi e commenti
         let messageCount = 0; // Contatore dei messaggi inviati
         let currentProfile = null; // Profilo attuale (username e immagine)
+        let backgroundColor = '#1C1C1E'; // Colore di sfondo predefinito
+        let postColor = '#2D2D2D'; // Colore dei post predefinito
+
+        // Funzione per aprire/chiudere il menu dei colori
+        function toggleColorMenu() {
+            const menu = document.getElementById('color-menu');
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Funzione per cambiare il colore di sfondo
+        function changeBackgroundColor(color) {
+            backgroundColor = color;
+            document.body.style.backgroundColor = color;
+        }
+
+        // Funzione per cambiare il colore dei post
+        function changePostColor(color) {
+            postColor = color;
+            document.querySelectorAll('.post').forEach(post => {
+                post.style.backgroundColor = color;
+            });
+        }
 
         // Funzione per aggiungere animazione al click
         function animateButton(button) {
@@ -149,7 +195,7 @@
             }, 500);
         }
 
-        // Funzione per mostrare la modale del profilo all'avvio
+        // Funzione per mostrare la modale del profilo
         function showProfileModal() {
             document.getElementById('profile-modal').style.display = 'flex';
         }
@@ -222,7 +268,8 @@
                 }
                 messages.forEach(msg => {
                     const messageElement = document.createElement('div');
-                    messageElement.classList = "bg-gray-800 shadow-lg rounded-xl p-6 mb-4 animate__animated animate__fadeInUp transition-all hover-scale glassmorphism custom-shadow glow-effect";
+                    messageElement.classList = "post shadow-lg rounded-xl p-6 mb-4 animate__animated animate__fadeInUp transition-all hover-scale glassmorphism custom-shadow glow-effect";
+                    messageElement.style.backgroundColor = postColor; // Colore uniforme per i post
                     let imageHtml = '';
                     if (msg.image) {
                         imageHtml = `<img src="${msg.image}" alt="Immagine" class="mt-4 rounded-xl hover-rotate transition-all" style="max-width: 100%; height: auto;">`;
@@ -238,7 +285,7 @@
                         </div>
                         ${imageHtml}
                         <div class="flex items-center mt-4">
-                            <button class="text-gray-400 hover:text-red-500 transition-all glow-on-hover" onclick="likeMessage('${msg.id}', ${msg.likes || 0})">
+                            <button class="text-gray-400 hover:text-red-500 transition-all glow-on-hover" onclick="if (!currentProfile || !currentProfile.username) { alert('Imposta prima il tuo profilo!'); showProfileModal(); } else { likeMessage('${msg.id}', ${msg.likes || 0}); }">
                                 <i class="fas fa-heart"></i> ${msg.likes || 0}
                             </button>
                         </div>
@@ -246,7 +293,7 @@
                             <h4 class="text-gray-200 font-bold">Commenti</h4>
                             <div id="comments-${msg.id}" class="mt-2"></div>
                             <input type="text" id="comment-${msg.id}" placeholder="Aggiungi un commento" class="bg-gray-700 border border-gray-600 rounded-xl w-full py-2 px-4 mb-2 text-gray-200"/>
-                            <button class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-xl transition-all hover-scale glow-on-hover" onclick="addComment('${msg.id}')">Invia Commento</button>
+                            <button class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-xl transition-all hover-scale glow-on-hover" onclick="if (!currentProfile || !currentProfile.username) { alert('Imposta prima il tuo profilo!'); showProfileModal(); } else { addComment('${msg.id}'); }">Invia Commento</button>
                         </div>
                     `;
                     messagesContainer.appendChild(messageElement);
@@ -304,7 +351,6 @@
                 document.getElementById('profile-preview').style.display = profileImageBase64 ? 'block' : 'none';
                 alert('Profilo aggiornato!');
                 document.getElementById('profile-modal').style.display = 'none';
-                loadMessages(); // Carica i messaggi dopo aver impostato il profilo
             } catch (error) {
                 console.error('Errore:', error);
                 alert('Errore nel salvataggio del profilo.');
@@ -404,14 +450,16 @@
 
         // Carica i messaggi all'avvio
         document.addEventListener('DOMContentLoaded', () => {
-            showProfileModal(); // Mostra la modale del profilo all'avvio
+            loadMessages(); // Carica i messaggi all'avvio
         });
     </script>
 </head>
 <body class="bg-black text-white">
     <header class="bg-black shadow-lg">
         <div class="container mx-auto px-4 py-6 flex justify-between items-center">
-            <h1 class="text-3xl font-bold text-white animate__animated animate__fadeInLeft float-animation">Boom Chat</h1>
+            <h1 class="text-3xl font-bold text-white animate__animated animate__fadeInLeft float-animation cursor-pointer" onclick="toggleColorMenu()">
+                Boom Chat
+            </h1>
             <div class="flex items-center">
                 <button class="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-xl mr-2 transition-all hover-scale button-hover glow-on-hover"
                     onclick="document.getElementById('profile-modal').style.display='flex';">
@@ -424,6 +472,13 @@
             </div>
         </div>
     </header>
+    <!-- Menu dei colori -->
+    <div id="color-menu" class="color-menu">
+        <label for="background-color">Colore Sfondo:</label>
+        <input type="color" id="background-color" value="#1C1C1E" onchange="changeBackgroundColor(this.value)">
+        <label for="post-color" class="mt-4">Colore Post:</label>
+        <input type="color" id="post-color" value="#2D2D2D" onchange="changePostColor(this.value)">
+    </div>
     <main class="container mx-auto px-4 py-8">
         <section class="mt-8">
             <h3 class="text-2xl font-bold text-white mb-4 animate__animated animate__fadeIn float-animation">Messaggi Recenti</h3>
@@ -437,7 +492,19 @@
     </footer>
     <!-- Modale Profilo -->
     <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center" style="display: none;">
-                <div class="bg-gray-800 shadow-lg rounded-xl p-6 w-full max-w-sm animate__animated animate__fadeIn glassmorphism custom-shadow">
+        <div class="bg-gray-800 shadow-lg rounded-xl p-6 w-full max-w-sm animate__animated animate__fadeIn glassmorphism custom-shadow">
+            <h3 class="text-2xl font-bold text-white mb-4">Profilo</h3>
+            <input id="profile-username" class="bg-gray-700 border border-gray-600 rounded-xl w-full py-2 px-4 mb-4 text-white" type="text" placeholder="Nome utente"/>
+            <input id="profile-image" class="bg-gray-700 border border-gray-600 rounded-xl w-full py-2 px-4 mb-4 text-white" type="file" accept="image/*"/>
+            <img id="profile-preview" src="" alt="Anteprima immagine profilo" class="w-20 h-20 rounded-full mb-4 transition-all hover-rotate" style="display: none;"/>
+            <button class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-xl transition-all hover-scale button-hover" onclick="setProfile()">
+Salva Profilo
+            </button>
+        </div>
+    </div>
+    <!-- Modale Pubblica -->
+    <div id="publish-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center" style="display: none;">
+        <div class="bg-gray-800 shadow-lg rounded-xl p-6 w-full max-w-sm animate__animated animate__fadeIn glassmorphism custom-shadow">
             <h3 class="text-2xl font-bold text-white mb-4">Pubblica un Messaggio</h3>
             <textarea id="message" class="bg-gray-700 border border-gray-600 rounded-xl w-full py-2 px-4 mb-4 text-white" rows="4" placeholder="Messaggio"></textarea>
             <input id="image" class="bg-gray-700 border border-gray-600 rounded-xl w-full py-2 px-4 mb-4 text-white" type="file" accept="image/*"/>
