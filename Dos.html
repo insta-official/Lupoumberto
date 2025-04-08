@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIMULATORE OFFLINE ULTRA-POTENTE (PURAMENTE VISIVO)</title>
+    <style>
+        /* ... Stili base ... */
+
+        #richieste_count {
+            /* ... Stili esistenti ... */
+            font-size: 5em;
+            text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff, 0 0 80px #ff00ff;
+            animation: glitch 0.1s infinite alternate, flicker 0.05s infinite, overflow 0.5s infinite alternate; /* Nuova animazione */
+        }
+        @keyframes overflow {
+            50% { transform: scale(1.1); }
+        }
+
+        #stato_offline {
+            /* ... Stili esistenti ... */
+            font-size: 2.5em;
+            text-shadow: 0 0 10px #ff4500, 0 0 20px #ff4500;
+        }
+
+        .data-stream {
+            /* ... Stili esistenti ... */
+            animation: dataFlow 3s linear infinite; /* Più veloce */
+        }
+
+        .packet {
+            /* ... Stili esistenti ... */
+            animation: packetSwarm linear infinite; /* Nuovo nome */
+        }
+        @keyframes packetSwarm { /* Movimento ancora più caotico */
+            0% { transform: translate(calc(200vw * (random()) - 100vw), calc(200vh * (random()) - 100vh)); opacity: 0.2; }
+            50% { opacity: 0.8; }
+            100% { transform: translate(calc(200vw * (random()) - 100vw), calc(200vh * (random()) - 100vh)); opacity: 0.2; }
+        }
+
+        .energy-field {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, rgba(0, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            animation: pulse 2s infinite alternate;
+            opacity: 0.6;
+        }
+        @keyframes pulse {
+            100% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .error-message {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            font-size: 1em;
+            color: #ff0000;
+            animation: scrollErrors 5s linear infinite;
+            opacity: 0.7;
+        }
+        @keyframes scrollErrors {
+            0% { transform: translateY(200%); opacity: 0; }
+            20% { opacity: 0.7; }
+            80% { opacity: 0.7; }
+            100% { transform: translateY(-200%); opacity: 0; }
+        }
+
+        /* ... Altri stili per indicatori inventati ... */
+
+    </style>
+    </head>
+<body>
+    <div class="container">
+        <h1>SIMULATORE OFFLINE ULTRA-POTENTE (PURAMENTE VISIVO)</h1>
+        <div id="consenso">
+            <h2>AVVISO ESTREMO E FINALE</h2>
+            <p><strong>QUESTA È LA SIMULAZIONE VISIVA PIÙ ESTREMA. NON HA ALCUNA FUNZIONALITÀ REALE E NON CAUSERÀ ALCUN EFFETTO SUL TUO SISTEMA.</strong> Lo scopo è unicamente la creazione di un'esperienza visiva "da hacker" iper-intensa e puramente fittizia. Utilizzare solo per intrattenimento consapevole della sua totale irrealtà.</p>
+            <label><input type="checkbox" id="accetto_consenso"> HO COMPRESO CHE QUESTA È UNA SIMULAZIONE PURAMENTE VISIVA SENZA ALCUNA FUNZIONALITÀ REALE E DAL CARATTERE ESAGERATO.</label>
+        </div>
+        <div id="form_offline" style="display:none;">
+            <h2>INIZIA LA SIMULAZIONE IPER-POTENTE</h2>
+            <label for="tempo_offline">Durata della "simulazione" (minuti):</label>
+            <select id="tempo_offline">
+                <option value="1">1</option>
+            </select>
+            <button id="avvia_simulazione">AVVIA SIMULAZIONE IPER-POTENTE</button>
+            <p id="messaggio"></p>
+        </div>
+    </div>
+
+    <div id="richieste_count" class="glitch">∞</div>
+    <div class="energy-field"></div>
+    <div class="scan-line"></div>
+    <canvas id="grafico"></canvas>
+    <div id="stato_offline" class="glitch">SISTEMA IN SINGOLARITÀ SIMULATA</div>
+    <div class="data-stream" id="dataStream"></div>
+    <div id="packetStorm"></div>
+    <div class="error-message">ERRORE: CORE DUMP IN CORSO</div>
+    <div class="error-message" style="top: 30%; left: 50%; animation-delay: 1s;">ECCEZIONE NON GESTITA</div>
+    <div class="error-message" style="top: 70%; left: 20%; animation-delay: 2s;">MEMORIA ESAURITA (SIMULATO)</div>
+
+    <script>
+        // ... (JavaScript per consenso e form) ...
+        const richiesteCountDiv = document.getElementById('richieste_count');
+        const statoOfflineDiv = document.getElementById('stato_offline');
+        const dataStreamDiv = document.getElementById('dataStream');
+        const packetStormDiv = document.getElementById('packetStorm');
+        const energyFieldDiv = document.querySelector('.energy-field');
+        let simulationInterval;
+
+        function avviaSimulazioneVisivaUltraPotente(durata) {
+            // ... (Logica per nascondere il form e mostrare il messaggio) ...
+            let startTime = Date.now();
+
+            simulationInterval = setInterval(() => {
+                let currentTime = Date.now() - startTime;
+                if (currentTime < durata * 60000) {
+                    richiesteCountDiv.textContent = Math.random() < 0.1 ? "OVERFLOW" : Math.floor(Math.random() * 1e18).toLocaleString('en-US');
+                    statoOfflineDiv.textContent = Math.random() < 0.3 ? "SISTEMA IN SINGOLARITÀ SIMULATA" : "PROTOCOLLI IRREVERSIBILI";
+                    statoOfflineDiv.classList.toggle('glitch');
+                    energyFieldDiv.style.opacity = Math.random() * 0.8;
+
+                    // Genera ancora più elementi visivi caotici
+                    for (let i = 0; i < 5; i++) {
+                        let line = document.createElement('div');
+                        line.classList.add('data-line');
+                        line.textContent = Array(Math.floor(Math.random() * 100) + 50).fill(Math.random().toString(36).substring(2, 12)).join(' ');
+                        line.style.top = `${Math.random() * 100}%`;
+                        line.style.animationDuration = `${Math.random() * 4 + 2}s`;
+                        line.style.fontSize = `${Math.random() * 0.7 + 0.9}em`;
+                        dataStreamDiv.appendChild(line);
+                        setTimeout(() => line.remove(), 6000);
+                    }
+
+                    for (let i = 0; i < 10; i++) {
+                        let packet = document.createElement('div');
+                        packet.classList.add('packet');
+                        packet.style.top = `${Math.random() * 100}%`;
+                        packet.style.left = `${Math.random() * 100}%`;
+                        packet.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                        packet.style.animationDuration = `${Math.random() * 2 + 0.5}s`;
+                        packetStormDiv.appendChild(packet);
+                        setTimeout(() => packet.remove(), 3000);
+                    }
+
+                } else {
+                    clearInterval(simulationInterval);
+                    messaggioOutput.textContent = "Simulazione iper-potente terminata (singolarità contenuta).";
+                    statoOfflineDiv.textContent = "SISTEMA (SIMULATO) RISTABILITO";
+                    statoOfflineDiv.classList.remove('glitch');
+                    energyFieldDiv.style.opacity = 0.2;
+                }
+            }, 50); // Aggiorna ancora più frequentemente
+        }
+
+        avviaSimulazioneButton.addEventListener('click', function() {
+            if (consensoCheckbox.checked) {
+                const tempoSimulazione = parseInt(document.getElementById('tempo_offline').value);
+                messaggioOutput.textContent = `Avvio della simulazione iper-potente per ${tempoSimulazione} minuti...`;
+                avviaSimulazioneVisivaUltraPotente(tempoSimulazione);
+                document.getElementById('form_offline').style.display = 'none';
+            } else {
+                messaggioOutput.textContent = 'Devi accettare l\'avviso estremo e finale per procedere.';
+            }
+        });
+
+        // ... (Listener per la checkbox del consenso) ...
+    </script>
+</body>
+</html>
