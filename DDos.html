@@ -3,81 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIMULATORE OFFLINE ULTRA-POTENTE (PURAMENTE VISIVO)</title>
+    <title>SIMULATORE OFFLINE IPER-POTENTE (PURAMENTE VISIVO)</title>
     <style>
-        /* ... Stili base ... */
-
-        #richieste_count {
-            /* ... Stili esistenti ... */
-            font-size: 5em;
-            text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff, 0 0 80px #ff00ff;
-            animation: glitch 0.1s infinite alternate, flicker 0.05s infinite, overflow 0.5s infinite alternate; /* Nuova animazione */
-        }
-        @keyframes overflow {
-            50% { transform: scale(1.1); }
-        }
-
-        #stato_offline {
-            /* ... Stili esistenti ... */
-            font-size: 2.5em;
-            text-shadow: 0 0 10px #ff4500, 0 0 20px #ff4500;
+        body {
+            font-family: monospace;
+            background-color: #000;
+            color: #00ff00;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow: hidden;
         }
 
-        .data-stream {
-            /* ... Stili esistenti ... */
-            animation: dataFlow 3s linear infinite; /* Più veloce */
+        .container {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 5px;
+            border: 1px solid #00ff00;
+            text-align: center;
+            margin-bottom: 30px;
+            z-index: 10;
         }
 
-        .packet {
-            /* ... Stili esistenti ... */
-            animation: packetSwarm linear infinite; /* Nuovo nome */
-        }
-        @keyframes packetSwarm { /* Movimento ancora più caotico */
-            0% { transform: translate(calc(200vw * (random()) - 100vw), calc(200vh * (random()) - 100vh)); opacity: 0.2; }
-            50% { opacity: 0.8; }
-            100% { transform: translate(calc(200vw * (random()) - 100vw), calc(200vh * (random()) - 100vh)); opacity: 0.2; }
+        #consenso {
+            border: 1px solid #00ff00;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
         }
 
-        .energy-field {
+        #form_offline label,
+        #form_offline select,
+        #form_offline button {
+            margin-bottom: 15px;
+            display: block;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            background-color: #222;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            font-family: monospace;
+        }
+
+        #visualizzazione {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #mainframe {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(ellipse at center, rgba(0, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
-            animation: pulse 2s infinite alternate;
-            opacity: 0.6;
-        }
-        @keyframes pulse {
-            100% { opacity: 0.8; transform: scale(1.05); }
+            background-color: #000;
         }
 
-        .error-message {
+        #overlay-text {
             position: absolute;
-            top: 10%;
-            left: 10%;
-            font-size: 1em;
-            color: #ff0000;
-            animation: scrollErrors 5s linear infinite;
-            opacity: 0.7;
-        }
-        @keyframes scrollErrors {
-            0% { transform: translateY(200%); opacity: 0; }
-            20% { opacity: 0.7; }
-            80% { opacity: 0.7; }
-            100% { transform: translateY(-200%); opacity: 0; }
+            top: 20px;
+            left: 20px;
+            z-index: 20;
+            color: #00ff00;
         }
 
-        /* ... Altri stili per indicatori inventati ... */
+        #richieste_count {
+            font-size: 4em;
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+        }
 
+        #stato_offline {
+            font-size: 2em;
+            color: #ff4500;
+            text-shadow: 0 0 5px #ff4500, 0 0 10px #ff4500;
+            margin-top: 10px;
+        }
+
+        .glitch {
+            animation: glitch 0.1s infinite alternate;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(2px, -2px); }
+            100% { transform: translate(-2px, 2px); }
+        }
     </style>
-    </head>
+</head>
 <body>
     <div class="container">
         <h1>SIMULATORE OFFLINE ULTRA-POTENTE (PURAMENTE VISIVO)</h1>
         <div id="consenso">
             <h2>AVVISO ESTREMO E FINALE</h2>
-            <p><strong>QUESTA È LA SIMULAZIONE VISIVA PIÙ ESTREMA. NON HA ALCUNA FUNZIONALITÀ REALE E NON CAUSERÀ ALCUN EFFETTO SUL TUO SISTEMA.</strong> Lo scopo è unicamente la creazione di un'esperienza visiva "da hacker" iper-intensa e puramente fittizia. Utilizzare solo per intrattenimento consapevole della sua totale irrealtà.</p>
+            <p><strong>QUESTA È UNA SIMULAZIONE PURAMENTE VISIVA ED ESTETICA. NON HA ALCUNA FUNZIONALITÀ REALE E NON CAUSERÀ ALCUN EFFETTO SUL TUO SISTEMA.</strong> Lo scopo è unicamente l'intrattenimento e la creazione di un'esperienza visiva "da hacker" iper-intensa e puramente fittizia. Utilizzare con consapevolezza della sua totale irrealtà.</p>
             <label><input type="checkbox" id="accetto_consenso"> HO COMPRESO CHE QUESTA È UNA SIMULAZIONE PURAMENTE VISIVA SENZA ALCUNA FUNZIONALITÀ REALE E DAL CARATTERE ESAGERATO.</label>
         </div>
         <div id="form_offline" style="display:none;">
@@ -91,83 +118,189 @@
         </div>
     </div>
 
-    <div id="richieste_count" class="glitch">∞</div>
-    <div class="energy-field"></div>
-    <div class="scan-line"></div>
-    <canvas id="grafico"></canvas>
-    <div id="stato_offline" class="glitch">SISTEMA IN SINGOLARITÀ SIMULATA</div>
-    <div class="data-stream" id="dataStream"></div>
-    <div id="packetStorm"></div>
-    <div class="error-message">ERRORE: CORE DUMP IN CORSO</div>
-    <div class="error-message" style="top: 30%; left: 50%; animation-delay: 1s;">ECCEZIONE NON GESTITA</div>
-    <div class="error-message" style="top: 70%; left: 20%; animation-delay: 2s;">MEMORIA ESAURITA (SIMULATO)</div>
+    <div id="visualizzazione">
+        <canvas id="mainframe"></canvas>
+        <div id="overlay-text">
+            <div id="richieste_count" class="glitch">∞</div>
+            <div id="stato_offline" class="glitch">SISTEMA IN SINGOLARITÀ SIMULATA</div>
+        </div>
+    </div>
 
     <script>
-        // ... (JavaScript per consenso e form) ...
+        const consensoCheckbox = document.getElementById('accetto_consenso');
+        const formOffline = document.getElementById('form_offline');
+        const avviaSimulazioneButton = document.getElementById('avvia_simulazione');
+        const messaggioOutput = document.getElementById('messaggio');
+        const visualizzazioneDiv = document.getElementById('visualizzazione');
+        const mainframeCanvas = document.getElementById('mainframe');
+        const mainframeCtx = mainframeCanvas.getContext('2d');
         const richiesteCountDiv = document.getElementById('richieste_count');
         const statoOfflineDiv = document.getElementById('stato_offline');
-        const dataStreamDiv = document.getElementById('dataStream');
-        const packetStormDiv = document.getElementById('packetStorm');
-        const energyFieldDiv = document.querySelector('.energy-field');
-        let simulationInterval;
 
-        function avviaSimulazioneVisivaUltraPotente(durata) {
-            // ... (Logica per nascondere il form e mostrare il messaggio) ...
-            let startTime = Date.now();
+        let animationInterval;
+        const particles = [];
+        const lines = [];
+        const errors = [];
+        let frameCount = 0;
+        const maxParticles = 750; // Aumentato per maggiore "potenza" visiva
+        const maxLines = 300;     // Aumentato
+        const maxErrors = 75;      // Aumentato
 
-            simulationInterval = setInterval(() => {
-                let currentTime = Date.now() - startTime;
-                if (currentTime < durata * 60000) {
-                    richiesteCountDiv.textContent = Math.random() < 0.1 ? "OVERFLOW" : Math.floor(Math.random() * 1e18).toLocaleString('en-US');
-                    statoOfflineDiv.textContent = Math.random() < 0.3 ? "SISTEMA IN SINGOLARITÀ SIMULATA" : "PROTOCOLLI IRREVERSIBILI";
-                    statoOfflineDiv.classList.toggle('glitch');
-                    energyFieldDiv.style.opacity = Math.random() * 0.8;
-
-                    // Genera ancora più elementi visivi caotici
-                    for (let i = 0; i < 5; i++) {
-                        let line = document.createElement('div');
-                        line.classList.add('data-line');
-                        line.textContent = Array(Math.floor(Math.random() * 100) + 50).fill(Math.random().toString(36).substring(2, 12)).join(' ');
-                        line.style.top = `${Math.random() * 100}%`;
-                        line.style.animationDuration = `${Math.random() * 4 + 2}s`;
-                        line.style.fontSize = `${Math.random() * 0.7 + 0.9}em`;
-                        dataStreamDiv.appendChild(line);
-                        setTimeout(() => line.remove(), 6000);
-                    }
-
-                    for (let i = 0; i < 10; i++) {
-                        let packet = document.createElement('div');
-                        packet.classList.add('packet');
-                        packet.style.top = `${Math.random() * 100}%`;
-                        packet.style.left = `${Math.random() * 100}%`;
-                        packet.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                        packet.style.animationDuration = `${Math.random() * 2 + 0.5}s`;
-                        packetStormDiv.appendChild(packet);
-                        setTimeout(() => packet.remove(), 3000);
-                    }
-
-                } else {
-                    clearInterval(simulationInterval);
-                    messaggioOutput.textContent = "Simulazione iper-potente terminata (singolarità contenuta).";
-                    statoOfflineDiv.textContent = "SISTEMA (SIMULATO) RISTABILITO";
-                    statoOfflineDiv.classList.remove('glitch');
-                    energyFieldDiv.style.opacity = 0.2;
-                }
-            }, 50); // Aggiorna ancora più frequentemente
+        function resizeCanvas() {
+            mainframeCanvas.width = window.innerWidth;
+            mainframeCanvas.height = window.innerHeight;
         }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * mainframeCanvas.width;
+                this.y = Math.random() * mainframeCanvas.height;
+                this.vx = (Math.random() - 0.5) * 3; // Velocità leggermente aumentata
+                this.vy = (Math.random() - 0.5) * 3;
+                this.size = Math.random() * 4 + 1; // Dimensione leggermente aumentata
+                this.color = `rgba(0, ${Math.random() * 255}, 0, ${Math.random() * 0.6 + 0.4})`; // Opacità leggermente aumentata
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > mainframeCanvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > mainframeCanvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                mainframeCtx.fillStyle = this.color;
+                mainframeCtx.fillRect(this.x, this.y, this.size, this.size);
+            }
+        }
+
+        class DataLine {
+            constructor() {
+                this.x = Math.random() * mainframeCanvas.width;
+                this.y = Math.random() * mainframeCanvas.height;
+                this.length = Math.random() * 70 + 30; // Lunghezza aumentata
+                this.speed = Math.random() * 3 + 1;   // Velocità aumentata
+                this.opacity = Math.random() * 0.6 + 0.4; // Opacità aumentata
+            }
+
+            update() {
+                this.x += this.speed;
+                if (this.x > mainframeCanvas.width + this.length) this.x = -this.length;
+            }
+
+            draw() {
+                mainframeCtx.strokeStyle = `rgba(0, 255, 0, ${this.opacity})`;
+                mainframeCtx.lineWidth = 1.5; // Spessore leggermente aumentato
+                mainframeCtx.beginPath();
+                mainframeCtx.moveTo(this.x, this.y);
+                mainframeCtx.lineTo(this.x + this.length, this.y);
+                mainframeCtx.stroke();
+            }
+        }
+
+        class ErrorMessage {
+            constructor() {
+                this.text = `ERROR: ${Math.random().toString(36).substring(2, 15).toUpperCase()}`;
+                this.x = Math.random() * mainframeCanvas.width;
+                this.y = -20; // Iniziano fuori dallo schermo
+                this.speedY = Math.random() * 2 + 0.5; // Velocità aumentata
+                this.opacity = 1;
+                this.fadeSpeed = 0.02; // Svaniscono più velocemente
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.opacity -= this.fadeSpeed;
+                if (this.opacity < 0 || this.y > mainframeCanvas.height + 20) this.reset();
+            }
+
+            draw() {
+                mainframeCtx.fillStyle = `rgba(255, 0, 0, ${this.opacity})`;
+                mainframeCtx.font = '14px monospace'; // Font leggermente più grande
+                mainframeCtx.fillText(this.text, this.x, this.y);
+            }
+
+            reset() {
+                this.text = `ERROR: ${Math.random().toString(36).substring(2, 15).toUpperCase()}`;
+                this.x = Math.random() * mainframeCanvas.width;
+                this.y = -20;
+                this.speedY = Math.random() * 2 + 0.5;
+                this.opacity = 1;
+            }
+        }
+
+        function animate() {
+            mainframeCtx.clearRect(0, 0, mainframeCanvas.width, mainframeCanvas.height);
+
+            for (const particle of particles) {
+                particle.update();
+                particle.draw();
+            }
+
+            for (const line of lines) {
+                line.update();
+                line.draw();
+            }
+
+            for (const error of errors) {
+                error.update();
+                error.draw();
+            }
+
+            if (frameCount % 15 === 0) { // Aggiornamento del testo più frequente
+                richiesteCountDiv.textContent = Math.floor(Math.random() * 1e19).toLocaleString('en-US'); // Conteggio ancora più alto
+                statoOfflineDiv.textContent = Math.random() < 0.3 ? "SISTEMA IN COLLASSO CRITICO" : "FLUSSO DATI INSTABILE"; // Testo più drammatico
+                statoOfflineDiv.classList.toggle('glitch');
+            }
+            frameCount++;
+
+            animationInterval = requestAnimationFrame(animate);
+        }
+
+        function startSimulation(durationMinutes) {
+            resizeCanvas();
+            particles.length = maxParticles;
+            for (let i = 0; i < particles.length; i++) {
+                particles.push(new Particle());
+            }
+
+            lines.length = maxLines;
+            for (let i = 0; i < lines.length; i++) {
+                lines.push(new DataLine());
+            }
+
+            errors.length = maxErrors;
+            for (let i = 0; i < errors.length; i++) {
+                errors.push(new ErrorMessage());
+            }
+
+            animate();
+
+            setTimeout(() => {
+                cancelAnimationFrame(animationInterval);
+                messaggioOutput.textContent = "Simulazione iper-potente terminata (singolarità contenuta).";
+                statoOfflineDiv.textContent = "SISTEMA (SIMULATO) RISTABILITO";
+                statoOfflineDiv.classList.remove('glitch');
+            }, durationMinutes * 60000);
+        }
+
+        consensoCheckbox.addEventListener('change', function() {
+            formOffline.style.display = this.checked ? 'block' : 'none';
+        });
 
         avviaSimulazioneButton.addEventListener('click', function() {
             if (consensoCheckbox.checked) {
                 const tempoSimulazione = parseInt(document.getElementById('tempo_offline').value);
                 messaggioOutput.textContent = `Avvio della simulazione iper-potente per ${tempoSimulazione} minuti...`;
-                avviaSimulazioneVisivaUltraPotente(tempoSimulazione);
-                document.getElementById('form_offline').style.display = 'none';
+                document.querySelector('.container').style.display = 'none';
+                visualizzazioneDiv.style.display = 'flex';
+                startSimulation(tempoSimulazione);
             } else {
                 messaggioOutput.textContent = 'Devi accettare l\'avviso estremo e finale per procedere.';
             }
         });
 
-        // ... (Listener per la checkbox del consenso) ...
+        window.addEventListener('resize', resizeCanvas);
     </script>
 </body>
 </html>
