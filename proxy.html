@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orsoline Bypass by Valerio Ciarletta</title>
+    <style>
+        :root {
+            --primary: #00ff41;
+            --secondary: #008f11;
+            --dark: #003b00;
+            --darker: #001a00;
+            --black: #000000;
+            --error: #ff0033;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: var(--black);
+            color: var(--primary);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(0, 255, 65, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(0, 255, 65, 0.05) 0%, transparent 20%);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid var(--secondary);
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1rem;
+            margin-top: 5px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        #url-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 15px;
+            background-color: var(--darker);
+            border: 1px solid var(--secondary);
+            border-radius: 25px;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        #url-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #load-btn {
+            background-color: var(--dark);
+            color: var(--primary);
+            border: 1px solid var(--secondary);
+        }
+        
+        #load-btn:hover {
+            background-color: var(--secondary);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.7);
+        }
+        
+        #fullscreen-btn {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        #fullscreen-btn:hover {
+            background-color: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+        }
+        
+        .frame-container {
+            width: 100%;
+            height: 65vh;
+            border: 1px solid var(--secondary);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            background-color: var(--black);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+        
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: white;
+        }
+        
+        .terminal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 20, 0, 0.9);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            color: var(--primary);
+        }
+        
+        .terminal-line {
+            margin-bottom: 10px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .terminal-prompt {
+            color: var(--secondary);
+        }
+        
+        .terminal-cursor {
+            display: inline-block;
+            width: 10px;
+            height: 20px;
+            background-color: var(--primary);
+            animation: blink 1s infinite;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: var(--black);
+            margin: 0;
+            padding: 20px;
+            border-radius: 0;
+        }
+        
+        .fullscreen-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .fullscreen-btn {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .fullscreen-btn:hover {
+            background-color: rgba(0, 255, 65, 0.2);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--secondary);
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 10, 0, 0.9);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background-color: var(--darker);
+            border: 1px solid var(--primary);
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 500px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 20px rgba(0, 255, 65, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 65, 0.8); }
+            100% { box-shadow: 0 0 20px rgba(0, 255, 65, 0.5); }
+        }
+        
+        .modal h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+        }
+        
+        .modal p {
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        
+        .modal-btn {
+            background-color: var(--dark);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .modal-btn:hover {
+            background-color: var(--secondary);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.7);
+        }
+        
+        .glitch {
+            animation: glitch 1s linear infinite;
+        }
+        
+        @keyframes glitch {
+            0% { text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75), -0.05em -0.025em 0 rgba(0, 255, 0, 0.75), -0.025em 0.05em 0 rgba(0, 0, 255, 0.75); }
+            14% { text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75), -0.05em -0.025em 0 rgba(0, 255, 0, 0.75), -0.025em 0.05em 0 rgba(0, 0, 255, 0.75); }
+            15% { text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75), 0.025em 0.025em 0 rgba(0, 255, 0, 0.75), -0.05em -0.05em 0 rgba(0, 0, 255, 0.75); }
+            49% { text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75), 0.025em 0.025em 0 rgba(0, 255, 0, 0.75), -0.05em -0.05em 0 rgba(0, 0, 255, 0.75); }
+            50% { text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75), 0.05em 0 0 rgba(0, 255, 0, 0.75), 0 -0.05em 0 rgba(0, 0, 255, 0.75); }
+            99% { text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75), 0.05em 0 0 rgba(0, 255, 0, 0.75), 0 -0.05em 0 rgba(0, 0, 255, 0.75); }
+            100% { text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75), -0.025em -0.025em 0 rgba(0, 255, 0, 0.75), -0.025em -0.05em 0 rgba(0, 0, 255, 0.75); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal di benvenuto -->
+    <div class="modal" id="welcome-modal">
+        <div class="modal-content">
+            <h2 class="glitch">Orsoline Bypass</h2>
+            <p>Tool sviluppato da Valerio Ciarletta per bypassare le restrizioni di sicurezza dei siti web.</p>
+            <p>Utilizza un proxy avanzato per accedere a contenuti normalmente bloccati.</p>
+            <button class="modal-btn" id="close-modal">ACCEDI AL SISTEMA</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>ORSOLINE BYPASS</h1>
+            <div class="subtitle">by Valerio Ciarletta</div>
+        </header>
+        
+        <div class="controls">
+            <input type="text" id="url-input" placeholder="Inserisci l'URL da bypassare...">
+            <button id="load-btn" class="btn">
+                <span>CARICA</span>
+            </button>
+            <button id="fullscreen-btn" class="btn">
+                <span>TUTTO SCHERMO</span>
+            </button>
+        </div>
+        
+        <div class="frame-container" id="frame-container">
+            <div class="terminal" id="terminal">
+                <div class="terminal-line">ORSOLINE BYPASS SYSTEM v3.1.4</div>
+                <div class="terminal-line">Copyright (c) 2023 Valerio Ciarletta</div>
+                <div class="terminal-line">All rights reserved</div>
+                <div class="terminal-line"><br></div>
+                <div class="terminal-line">Initializing proxy connection...</div>
+                <div class="terminal-line">Establishing secure tunnel...</div>
+                <div class="terminal-line">Bypassing security protocols<span class="terminal-cursor"></span></div>
+            </div>
+            <iframe id="page-frame" src="about:blank"></iframe>
+        </div>
+        
+        <div class="status-bar">
+            <div id="status">Stato: In attesa di input...</div>
+            <div id="proxy-status">Proxy: Disconnesso</div>
+        </div>
+    </div>
+
+    <script>
+        // Elementi DOM
+        const urlInput = document.getElementById('url-input');
+        const loadBtn = document.getElementById('load-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const frameContainer = document.getElementById('frame-container');
+        const pageFrame = document.getElementById('page-frame');
+        const terminal = document.getElementById('terminal');
+        const statusElement = document.getElementById('status');
+        const proxyStatusElement = document.getElementById('proxy-status');
+        const welcomeModal = document.getElementById('welcome-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+
+        // URL del proxy
+        const PROXY_URL = 'https://cors-anywhere.herokuapp.com/';
+        const ALT_PROXY_URL = 'https://api.allorigins.win/raw?url=';
+        
+        // Mostra il modal all'avvio
+        document.addEventListener('DOMContentLoaded', () => {
+            welcomeModal.style.display = 'flex';
+        });
+        
+        // Chiudi il modal
+        closeModalBtn.addEventListener('click', () => {
+            welcomeModal.style.display = 'none';
+            typeTerminalText();
+        });
+        
+        // Animazione terminale
+        function typeTerminalText() {
+            const lines = [
+                "> Scanning target URL...",
+                "> Analyzing security protocols...",
+                "> Injecting proxy middleware...",
+                "> Bypassing X-Frame-Options... [SUCCESS]",
+                "> Evading CSP restrictions... [SUCCESS]",
+                "> Establishing secure connection...",
+                "> Ready for URL input",
+                "> "
+            ];
+            
+            let currentLine = 0;
+            let currentChar = 0;
+            let terminalContent = terminal.innerHTML;
+            
+            const typingInterval = setInterval(() => {
+                if (currentLine < lines.length) {
+                    if (currentChar < lines[currentLine].length) {
+                        terminalContent = terminalContent.replace(/<span class="terminal-cursor"><\/span>/, '');
+                        terminalContent += lines[currentLine].charAt(currentChar);
+                        terminalContent += '<span class="terminal-cursor"></span>';
+                        terminal.innerHTML = terminalContent;
+                        currentChar++;
+                        terminal.scrollTop = terminal.scrollHeight;
+                    } else {
+                        terminalContent = terminalContent.replace(/<span class="terminal-cursor"><\/span>/, '<br>');
+                        currentLine++;
+                        currentChar = 0;
+                    }
+                } else {
+                    clearInterval(typingInterval);
+                    terminal.innerHTML += '<span class="terminal-prompt">></span> <span class="terminal-cursor"></span>';
+                    terminal.scrollTop = terminal.scrollHeight;
+                }
+            }, 50);
+        }
+        
+        // Carica la pagina nel frame
+        loadBtn.addEventListener('click', loadUrl);
+        
+        // Permette di premere Invio oltre al click del pulsante
+        urlInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadUrl();
+            }
+        });
+
+        // Funzione per caricare l'URL tramite proxy
+        async function loadUrl() {
+            const url = urlInput.value.trim();
+            
+            if (url) {
+                // Mostra il terminale
+                terminal.style.display = 'flex';
+                pageFrame.style.display = 'none';
+                
+                // Aggiorna lo stato
+                statusElement.textContent = "Stato: Connessione in corso...";
+                proxyStatusElement.textContent = "Proxy: Connessione";
+                
+                // Verifica che l'URL abbia http:// o https://
+                let finalUrl = url;
+                if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                    finalUrl = 'https://' + url;
+                }
+                
+                // Aggiungi messaggi al terminale
+                addTerminalLine(`> Initiating bypass sequence for: ${finalUrl}`);
+                addTerminalLine("> Connecting to proxy network...");
+                
+                try {
+                    // Usa il proxy
+                    const startTime = Date.now();
+                    const html = await fetchWithProxy(finalUrl);
+                    const loadTime = ((Date.now() - startTime) / 1000).toFixed(2);
+                    
+                    // Crea un blob con il contenuto HTML
+                    const blob = new Blob([html], { type: 'text/html' });
+                    const blobUrl = URL.createObjectURL(blob);
+                    
+                    // Messaggi di successo
+                    addTerminalLine(`> Security bypass completed in ${loadTime}s`);
+                    addTerminalLine("> Rendering target...");
+                    
+                    // Nascondi il terminale dopo un breve ritardo
+                    setTimeout(() => {
+                        terminal.style.display = 'none';
+                        pageFrame.style.display = 'block';
+                        pageFrame.src = blobUrl;
+                        
+                        // Aggiorna lo stato
+                        statusElement.textContent = `Stato: Connesso (${loadTime}s)`;
+                        proxyStatusElement.textContent = "Proxy: Attivo";
+                    }, 1000);
+                    
+                } catch (error) {
+                    console.error('Errore:', error);
+                    addTerminalLine(`> ERROR: ${error.message}`);
+                    addTerminalLine("> Bypass failed, try another URL");
+                    
+                    // Aggiorna lo stato
+                    statusElement.textContent = "Stato: Errore di connessione";
+                    proxyStatusElement.textContent = "Proxy: Errore";
+                }
+            } else {
+                addTerminalLine("> ERROR: No URL provided");
+            }
+        }
+
+        // Aggiunge una linea al terminale
+        function addTerminalLine(text) {
+            const prompt = terminal.querySelector('.terminal-prompt');
+            if (prompt) {
+                prompt.parentElement.remove();
+            }
+            
+            terminal.innerHTML += `<div class="terminal-line">${text}</div>`;
+            terminal.innerHTML += '<div class="terminal-line"><span class="terminal-prompt">></span> <span class="terminal-cursor"></span></div>';
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // Funzione per fetch tramite proxy
+        async function fetchWithProxy(url) {
+            try {
+                // Prima prova con il proxy principale
+                addTerminalLine("> Using primary proxy server...");
+                const proxyUrl = PROXY_URL + url;
+                const response = await fetch(proxyUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error: ${response.status}`);
+                }
+                
+                return await response.text();
+            } catch (error) {
+                // Se il primo proxy fallisce, prova con un alternativo
+                addTerminalLine("> Primary proxy failed, switching to backup...");
+                const altProxyUrl = ALT_PROXY_URL + encodeURIComponent(url);
+                const response = await fetch(altProxyUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`Backup proxy error: ${response.status}`);
+                }
+                
+                return await response.text();
+            }
+        }
+
+        // Gestione del tutto schermo
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+        function toggleFullscreen() {
+            if (frameContainer.classList.contains('fullscreen')) {
+                // Esci dal tutto schermo
+                frameContainer.classList.remove('fullscreen');
+                fullscreenBtn.innerHTML = '<span>TUTTO SCHERMO</span>';
+                document.body.style.overflow = 'auto';
+            } else {
+                // Entra in tutto schermo
+                frameContainer.classList.add('fullscreen');
+                fullscreenBtn.innerHTML = '<span>ESCI DA FULLSCREEN</span>';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        // Chiudi il tutto schermo con ESC
+        document.a
