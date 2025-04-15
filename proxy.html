@@ -5,7 +5,287 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Orsoline Bypass by Valerio Ciarletta</title>
     <style>
-        /* ... (stili rimangono invariati) */
+        /* Mantenuto lo stesso stile CSS del file originale */
+        :root {
+            --primary: #405DE6;
+            --secondary: #5B51D8;
+            --accent: #833AB4;
+            --pink: #C13584;
+            --red: #E1306C;
+            --orange: #FD1D1D;
+            --yellow: #F56040;
+            --gradient: linear-gradient(45deg, var(--primary), var(--accent), var(--pink), var(--red), var(--orange), var(--yellow));
+            --text: #262626;
+            --light-gray: #f5f5f5;
+            --border: #dbdbdb;
+            --vip-gold: #FFD700;
+            --vip-dark: #D4AF37;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: var(--light-gray);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+        header {
+            text-align: center;
+            padding: 30px 0 20px;
+            margin-bottom: 20px;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 600;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+        .credit {
+            color: #8e8e8e;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .credit a {
+            color: var(--pink);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .vip-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(to right, var(--vip-gold), var(--vip-dark));
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 6px 15px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+        .vip-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .vip-content {
+            background-color: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .vip-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+        }
+        .vip-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--vip-dark);
+        }
+        .vip-features {
+            margin-bottom: 25px;
+        }
+        .vip-feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .vip-icon {
+            color: var(--vip-gold);
+            margin-right: 10px;
+            font-size: 18px;
+        }
+        .vip-signup {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, var(--vip-gold), var(--vip-dark));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .card {
+            background-color: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        #url-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: var(--light-gray);
+        }
+        #url-input:focus {
+            outline: none;
+            border-color: #a8a8a8;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        #load-btn {
+            background-color: var(--primary);
+            color: white;
+        }
+        #load-btn:hover {
+            background-color: var(--secondary);
+        }
+        #fullscreen-btn {
+            background-color: white;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        #fullscreen-btn:hover {
+            background-color: var(--light-gray);
+        }
+        .frame-container {
+            width: 100%;
+            height: 400px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            background-color: white;
+        }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .terminal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            color: var(--text);
+            font-size: 14px;
+        }
+        .terminal-line {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+        .terminal-prompt {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #8e8e8e;
+        }
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+            background: white;
+            margin: 0;
+            padding: 0;
+            border-radius: 0;
+        }
+        .fullscreen-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+        }
+        .fullscreen-btn {
+            background-color: rgba(0,0,0,0.3);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            backdrop-filter: blur(5px);
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            .card {
+                padding: 15px;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+        }
     </style>
 </head>
 <body>
@@ -52,7 +332,7 @@
             </div>
             <div class="frame-container" id="frame-container">
                 <div class="terminal" id="terminal">
-                    <div class="terminal-line">Orsoline Bypass - Versione 3.1.4</div>
+                    <div class="terminal-line">Orsoline Bypass - Versione 3.1.5</div>
                     <div class="terminal-line">Preparando la connessione proxy...</div>
                     <div class="terminal-line">Bypass delle restrizioni in corso<span class="terminal-prompt">...</span></div>
                 </div>
@@ -77,9 +357,16 @@
         const vipBtn = document.getElementById('vipBtn');
         const vipModal = document.getElementById('vipModal');
         const vipClose = document.getElementById('vipClose');
-        // NUOVI URL DEL PROXY
-        const PROXY_URL = 'https://api.allorigins.win/raw?url='; // Nuovo proxy principale
-        const ALT_PROXY_URL = 'https://cors-anywhere.glitch.me/'; // Nuovo proxy alternativo
+
+        // Lista dei server proxy open source
+        const PROXY_SERVERS = [
+            'https://api.codetabs.com/v1/proxy/?url=',
+            'https://api.allorigins.win/raw?url=',
+            'https://thingproxy.freeboard.io/fetch/',
+            'https://cors-proxy.htmldriven.com/?url='
+        ];
+        let currentProxyIndex = 0;
+
         // Gestione VIP Modal
         vipBtn.addEventListener('click', () => {
             vipModal.style.display = 'flex';
@@ -92,6 +379,7 @@
                 vipModal.style.display = 'none';
             }
         });
+
         // Animazione terminale
         function animateTerminal() {
             const lines = [
@@ -115,16 +403,18 @@
                 }
             }, 500);
         }
+
         // Avvia animazione all'avvio
         document.addEventListener('DOMContentLoaded', animateTerminal);
+
         // Carica la pagina nel frame
         loadBtn.addEventListener('click', loadUrl);
-        // Permette di premere Invio oltre al click del pulsante
         urlInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 loadUrl();
             }
         });
+
         // Funzione per caricare l'URL tramite proxy
         async function loadUrl() {
             const url = urlInput.value.trim();
@@ -176,50 +466,55 @@
                 terminal.scrollTop = terminal.scrollHeight;
             }
         }
-        // Funzione per fetch tramite proxy
+
+        // Funzione per fetch tramite proxy con failover automatico
         async function fetchWithProxy(url) {
-            try {
-                // Prima prova con il proxy principale
-                terminal.innerHTML += `<div class="terminal-line">> Connessione al proxy primario...</div>`;
+            let html = null;
+            let attempts = 0;
+            while (attempts < PROXY_SERVERS.length) {
+                const proxyUrl = PROXY_SERVERS[currentProxyIndex] + encodeURIComponent(url);
+                terminal.innerHTML += `<div class="terminal-line">> Tentativo con server proxy: ${currentProxyIndex + 1}</div>`;
                 terminal.scrollTop = terminal.scrollHeight;
-                const proxyUrl = PROXY_URL + encodeURIComponent(url);
-                const response = await fetch(proxyUrl, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
+                try {
+                    const response = await fetch(proxyUrl, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    if (response.ok) {
+                        html = await response.text();
+                        break; // Esce dal ciclo se la richiesta ha successo
+                    } else {
+                        throw new Error(`Errore HTTP: ${response.status}`);
                     }
-                });
-                if (!response.ok) {
-                    throw new Error(`Errore HTTP: ${response.status}`);
+                } catch (error) {
+                    console.warn(`Server proxy ${currentProxyIndex + 1} non disponibile`);
+                    terminal.innerHTML += `<div class="terminal-line">> Server proxy ${currentProxyIndex + 1} non disponibile</div>`;
+                    terminal.scrollTop = terminal.scrollHeight;
+                    // Passa al prossimo server proxy
+                    currentProxyIndex = (currentProxyIndex + 1) % PROXY_SERVERS.length;
+                    attempts++;
                 }
-                return await response.text();
-            } catch (error) {
-                // Se il primo proxy fallisce, prova con un alternativo
-                terminal.innerHTML += `<div class="terminal-line">> Proxy primario non disponibile, tentativo con backup...</div>`;
-                terminal.scrollTop = terminal.scrollHeight;
-                const altProxyUrl = ALT_PROXY_URL + encodeURIComponent(url);
-                const response = await fetch(altProxyUrl);
-                if (!response.ok) {
-                    throw new Error(`Errore proxy alternativo: ${response.status}`);
-                }
-                return await response.text();
             }
+            if (!html) {
+                throw new Error('Tutti i server proxy hanno fallito');
+            }
+            return html;
         }
+
         // Gestione del tutto schermo
         fullscreenBtn.addEventListener('click', toggleFullscreen);
         function toggleFullscreen() {
             if (frameContainer.classList.contains('fullscreen')) {
-                // Esci dal tutto schermo
                 frameContainer.classList.remove('fullscreen');
                 fullscreenBtn.textContent = 'Schermo intero';
                 document.body.style.overflow = 'auto';
             } else {
-                // Entra in tutto schermo
                 frameContainer.classList.add('fullscreen');
                 fullscreenBtn.textContent = 'Esci da schermo intero';
                 document.body.style.overflow = 'hidden';
             }
         }
-        // Chiudi il tutto schermo con ESC
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape' && frameContainer.classList.contains('fullscreen')) {
                 toggleFullscreen();
