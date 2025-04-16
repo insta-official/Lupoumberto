@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xbox Cloud Proxy Ultra</title>
+    <style>
+        :root {
+            --primary-color: #00ff88;
+            --secondary-color: #0066ff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #000;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 90%;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.3);
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 35px rgba(0, 255, 136, 0.6);
+        }
+
+        .proxy-frame {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none;
+            z-index: 1000;
+        }
+
+        .status-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: var(--primary-color);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+            text-align: center;
+            max-width: 90%;
+            display: none;
+            z-index: 2000;
+        }
+
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1500;
+        }
+
+        @keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Xbox Cloud Ultra Proxy</h1>
+        <button class="btn" id="startBtn">AVVIA NOW</button>
+        <p style="color: #666; margin-top: 20px;">Creato da Valerio Ciarletta</p>
+    </div>
+
+    <div class="loader" id="loader"></div>
+    <div class="status-box" id="statusBox"></div>
+    <iframe class="proxy-frame" id="proxyFrame" allowfullscreen></iframe>
+
+    <script>
+        const PROXY_LIST = [
+            {
+                url: 'https://unblockit.plus/',
+                method: 'iframe',
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36'
+                }
+            },
+            {
+                url: 'https://corrosion.pro/',
+                method: 'redirect'
+            },
+            {
+                url: 'https://unblocker.ultraviolet-api.xyz/',
+                method: 'advanced'
+            }
+        ];
+
+        let currentProxyIndex = 0;
+
+        async function testProxy(proxy) {
+            try {
+                const test = await fetch(proxy.url);
+                return test.ok;
+            } catch {
+                return false;
+            }
+        }
+
+        async function activateProxy() {
+            const btn = document.getElementById('startBtn');
+            btn.disabled = true;
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('statusBox').style.display = 'block';
+
+            while(currentProxyIndex < PROXY_LIST.length) {
+                const proxy = PROXY_LIST[currentProxyIndex];
+                document.getElementById('statusBox').innerHTML = `
+                    <h3>Connessione al Proxy ${currentProxyIndex + 1}...</h3>
+                    <p>${proxy.url}</p>
+                    <div style="margin-top:15px;font-size:0.8em;color:#888">
+                        Metodo: ${proxy.method.toUpperCase()}
+                    </div>
+                `;
+
+                if(await testProxy(proxy)) {
+                    document.getElementById('statusBox').style.display = 'none';
+                    document.getElementById('loader').style.display = 'none';
+                    
+                    switch(proxy.method) {
+                        case 'iframe':
+                            document.getElementById('proxyFrame').src = 
+                                `${proxy.url}https://www.xbox.com/it-it/play?rand=${Math.random()}`;
+                            document.getElementById('proxyFrame').style.display = 'block';
+                            break;
+                            
+                        case 'redirect':
+                            window.location.href = `${proxy.url}https://www.xbox.com/it-it/play`;
+                            break;
+                            
+                        case 'advanced':
+                            window.open(`${proxy.url}https://www.xbox.com/it-it/play`, '_blank');
+                            break;
+                    }
+                    return;
+                }
+                
+                currentProxyIndex++;
+                await new Promise(r => setTimeout(r, 1500));
+            }
+
+            // Se tutti i proxy falliscono
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('statusBox').innerHTML = `
+                <h3 style="color: #ff4444">⚠️ Errore Critico</h3>
+                <p>Tutti i proxy sono offline</p>
+                <div style="margin-top:20px">
+                    <button class="btn" onclick="location.reload()">Riprova</button>
+                    <p style="margin-top:15px;font-size:0.9em">O prova con:</p>
+                    <a href="https://www.xbox.com/it-it/play" 
+                       target="_blank" 
+                       style="color: var(--primary-color); text-decoration: none">
+                        Collegamento diretto (VPN consigliato)
+                    </a>
+                </div>
+            `;
+        }
+
+        document.getElementById('startBtn').addEventListener('click', activateProxy);
+    </script>
+</body>
+</html>
