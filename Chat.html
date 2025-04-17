@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Privata a 2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --error-color: #f72585;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: var(--dark-color);
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--box-shadow);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .section:hover {
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background-color: var(--accent-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #3a86ff;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus, textarea:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        }
+        
+        #chat-messages {
+            height: 350px;
+            overflow-y: auto;
+            border: 2px solid #e9ecef;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            max-width: 80%;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+            word-break: break-word;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .my-message {
+            background-color: var(--primary-color);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .other-message {
+            background-color: white;
+            border: 1px solid #e9ecef;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+        
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            display: block;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .chat-info {
+            background-color: var(--light-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .code-display {
+            font-family: monospace;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #message-input {
+            flex-grow: 1;
+            resize: none;
+            min-height: 60px;
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            background-color: #fee2e2;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .copy-btn {
+            background-color: var(--accent-color);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        
+        .copy-btn:hover {
+            background-color: #3a86ff;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fas fa-comments"></i> Chat Privata a 2</h1>
+        
+        <div id="error-message" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> <span id="error-text"></span>
+        </div>
+        
+        <div id="start-section" class="section">
+            <h2><i class="fas fa-plus-circle"></i> Inizia una nuova chat</h2>
+            <p>Genera un codice univoco e condividilo con la persona con cui vuoi chattare.</p>
+            <button id="generate-code"><i class="fas fa-key"></i> Genera Codice</button>
+            <div id="generated-code-container" class="hidden">
+                <p>Il tuo codice:</p>
+                <div class="code-display">
+                    <span id="generated-code"></span>
+                    <button id="copy-code" class="copy-btn" title="Copia codice"><i class="far fa-copy"></i></button>
+                </div>
+                <p>Condividi questo codice con l'altra persona.</p>
+            </div>
+        </div>
+        
+        <div id="join-section" class="section">
+            <h2><i class="fas fa-user-plus"></i> Unisciti a una chat esistente</h2>
+            <p>Inserisci il codice ricevuto per connetterti alla chat.</p>
+            <div class="input-group">
+                <input type="text" id="join-code" placeholder="Inserisci il codice (6 caratteri)" maxlength="6">
+                <button id="join-chat"><i class="fas fa-sign-in-alt"></i> Unisciti</button>
+            </div>
+        </div>
+        
+        <div id="chat-section" class="section hidden">
+            <div class="chat-header">
+                <h2><i class="fas fa-comment-dots"></i> Chat in corso</h2>
+                <div class="chat-info">Codice: <span id="current-code"></span></div>
+            </div>
+            
+            <div id="chat-messages"></div>
+            
+            <div class="input-group">
+                <textarea id="message-input" placeholder="Scrivi il tuo messaggio qui..." rows="3"></textarea>
+                <button id="send-message"><i class="fas fa-paper-plane"></i> Invia</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="notification" class="notification">
+        <i class="fas fa-check-circle"></i> <span id="notification-text"></span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurazione
+            const SERVER_URL = 'https://67cb65973395520e6af537e3.mockapi.io/api/v3/messages';
+            
+            // Elementi DOM
+            const generateCodeBtn = document.getElementById('generate-code');
+            const joinChatBtn = document.getElementById('join-chat');
+            const sendMessageBtn = document.getElementById('send-message');
+            const copyCodeBtn = document.getElementById('copy-code');
+            const generatedCodeContainer = document.getElementById('generated-code-container');
+            const generatedCodeDisplay = document.getElementById('generated-code');
+            const joinCodeInput = document.getElementById('join-code');
+            const chatSection = document.getElementById('chat-section');
+            const chatMessages = document.getElementById('chat-messages');
+            const messageInput = document.getElementById('message-input');
+            const currentCodeSpan = document.getElementById('current-code');
+            const errorMessage = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            // Variabili di stato
+            let chatCode = '';
+            let checkInterval;
+            let userId = generateUserId();
+            let lastMessageId = 0;
+
+            // Genera ID utente univoco
+            function generateUserId() {
+                return 'user-' + Math.random().toString(36).substr(2, 9);
+            }
+
+            // Genera codice chat casuale
+            function generateRandomCode() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let result = '';
+                for (let i = 0; i < 6; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            }
+
+            // Mostra errore
+            function showError(message) {
+                errorText.textContent = message;
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            }
+
+            // Mostra notifica
+            function showNotification(message) {
+                notificationText.textContent = message;
+                notification.style.display = 'block';
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 3000);
+            }
+
+            // Invia dati al server
+            async function sendToServer(data) {
+                try {
+                    const response = await fetch(SERVER_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            ...data,
+                            userId: userId,
+                            chatCode: chatCode,
+                            timestamp: new Date().toISOString()
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Errore nella risposta del server');
+                    }
+                    
+                    return await response.json();
+                } catch (error) {
+                    console.error('Errore:', error);
+                    showError('Errore di connessione al server');
+                    throw error;
+                }
+            }
+
+            // Recupera messaggi dal server
+            async function getMessages() {
+                try {
+                    const response = await fetch(`${SERVER_URL}?chatCode=${chatCode}`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Errore nel recupero messaggi');
+                    }
+                    
+                    const messages = await response.json();
+                    
+                    // Filtra solo i nuovi messaggi
+                    const newMessages = messages.filter(msg => msg.id > lastMessageId);
+                    
+                    if (newMessages.length > 0) {
+                        lastMessageId = Math.max(...newMessages.map(msg => msg.id));
+                        newMessages.forEach(msg => {
+                            displayMessage(msg.text, msg.userId === userId, new Date(msg.timestamp));
+                        });
+                    }
+                } catch (error) {
+                    console.error('Errore nel recupero messaggi:', error);
+                }
+            }
+
+            // Mostra messaggio nella chat
+            function displayMessage(text, isMyMessage, timestamp = new Date()) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                messageDiv.classList.add(isMyMessage ? 'my-message' : 'other-message');
+                
+                const timeSpan = document.createElement('span');
+                timeSpan.classList.add('message-time');
+                timeSpan.textContent = formatTime(timestamp);
+                
+                messageDiv.textContent = text;
+                messageDiv.appendChild(timeSpan);
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Formatta l'ora
+            function formatTime(date) {
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            // Genera nuovo codice
+            generateCodeBtn.addEventListener('click', async function() {
+                try {
+                    chatCode = generateRandomCode();
+                    generatedCodeDisplay.textContent = chatCode;
+                    generatedCodeContainer.classList.remove('hidden');
+                    
+                    // Entra in chat
+                    currentCodeSpan.textContent = chatCode;
+                    document.getElementById('start-section').classList.add('hidden');
+                    document.getElementById('join-section').classList.add('hidden');
+                    chatSection.classList.remove('hidden');
+                    
+                    // Inizia a controllare i messaggi
+                    checkInterval = setInterval(getMessages, 2000);
+                    getMessages();
+                    
+                    showNotification('Chat creata con successo!');
+                } catch (error) {
+                    console.error('Errore creazione chat:', error);
+                    showError('Errore nella creazione della chat');
+                }
+            });
+
+            // Copia il codice
+            copyCodeBtn.addEventListener('click', function() {
+                navigator.clipboard.writeText(chatCode).then(function() {
+                    showNotification('Codice copiato negli appunti!');
+                }, function() {
+                    showError('Errore durante la copia del codice');
+                });
+            });
+
+            // Unisciti a chat esistente
+            joinChatBtn.addEventListener('click', async function() {
+                try {
+                    chatCode = joinCodeInput.value.trim().toUpperCase();
+                    if (chatCode.length !== 6) {
+                        throw new Error('Il codice deve essere di 6 caratteri');
+                    }
+                    
+                    // Entra in chat
+                    currentCodeSpan.textContent = chatCode;
+                    document.getElementById('start-section').classList.add('hidden');
+                    document.getElementById('join-section').classList.add('hidden');
+                    chatSection.classList.remove('hidden');
+                    
+                    // Inizia a controllare i messaggi
+                    checkInterval = setInterval(getMessages, 2000);
+                    getMessages();
+                    
+                    showNotification('Connesso alla chat con successo!');
+                } catch (error) {
+                    console.error('Errore unione chat:', error);
+                    showError(error.message);
+                }
+            });
+
+            // Invia messaggio
+            sendMessageBtn.addEventListener('click', async function() {
+                const message = messageInput.value.trim();
+                if (message) {
+                    try {
+                        await sendToServer({
+                            text: message
+                        });
+                        
+                        displayMessage(message, true);
+                        messageInput.value = '';
+                    } catch (error) {
+                        console.error('Errore invio messaggio:', error);
+                        showError('Errore nell\'invio del messaggio');
+                    }
+                }
+            });
+
+            // Invio messaggio con Enter
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessageBtn.click();
+                }
+            });
+
+            // Auto-uppercase per il codice
+            joinCodeInput.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
+    </script>
+</body>
+</html>
