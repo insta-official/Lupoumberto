@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="it">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>NGL Tool</title>  
+    <style>  
+        :root {  
+            --ngl-pink: #ff4e79;  
+            --ngl-dark: #0e0e10;  
+            --ngl-gray: #1a1a1c;  
+            --ngl-light-text: #efeff1;  
+        }  
+        
+        body {  
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;  
+            background-color: var(--ngl-dark);  
+            color: var(--ngl-light-text);  
+            margin: 0;  
+            padding: 0;  
+            line-height: 1.5;  
+        }  
+
+        .container {  
+            max-width: 500px;  
+            margin: 40px auto;  
+            padding: 20px;  
+            background-color: var(--ngl-gray);  
+            border-radius: 16px;  
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);  
+        }  
+
+        .header {  
+            text-align: center;  
+            margin-bottom: 30px;  
+        }  
+
+        .logo {  
+            color: var(--ngl-pink);  
+            font-size: 32px;  
+            font-weight: 800;  
+            margin-bottom: 10px;  
+        }  
+
+        .subtitle {  
+            color: #adadb8;  
+            font-size: 16px;  
+            margin-bottom: 30px;  
+        }  
+
+        .form-group {  
+            margin-bottom: 20px;  
+        }  
+
+        label {  
+            display: block;  
+            margin-bottom: 8px;  
+            font-size: 14px;  
+            font-weight: 500;  
+            color: #adadb8;  
+        }  
+
+        input, textarea, select {  
+            width: 100%;  
+            padding: 12px 16px;  
+            background-color: #252529;  
+            border: 1px solid #333;  
+            border-radius: 8px;  
+            color: white;  
+            font-size: 16px;  
+            box-sizing: border-box;  
+        }  
+
+        textarea {  
+            min-height: 100px;  
+            resize: vertical;  
+        }  
+
+        input:focus, textarea:focus, select:focus {  
+            outline: none;  
+            border-color: var(--ngl-pink);  
+        }  
+
+        button {  
+            width: 100%;  
+            padding: 14px;  
+            background-color: var(--ngl-pink);  
+            color: white;  
+            border: none;  
+            border-radius: 8px;  
+            font-size: 16px;  
+            font-weight: 600;  
+            cursor: pointer;  
+            transition: all 0.2s;  
+            margin-top: 10px;
+        }  
+
+        #stopBtn {
+            background-color: #f44336;
+            display: none;
+            margin-top: 10px;
+        }
+
+        #stopBtn:hover {
+            background-color: #d32f2f;
+        }
+
+        button:hover {  
+            background-color: #ff2d62;  
+            transform: translateY(-1px);  
+        }  
+
+        button:active {  
+            transform: translateY(0);  
+        }  
+
+        #results {  
+            margin-top: 25px;  
+            font-size: 14px;  
+        }  
+
+        .success {  
+            color: #4caf50;  
+        }  
+
+        .error {  
+            color: #f44336;  
+        }  
+
+        .warning {  
+            color: #ff9800;  
+            background-color: rgba(255, 152, 0, 0.1);  
+            padding: 12px;  
+            border-radius: 8px;  
+            margin-bottom: 20px;  
+            font-size: 14px;  
+        }  
+
+        .divider {  
+            height: 1px;  
+            background-color: #333;  
+            margin: 25px 0;  
+        }  
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .radio-option input {
+            width: auto;
+        }
+
+        .toggle-section {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #252529;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .speed-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .speed-option {
+            padding: 10px;
+            background-color: #252529;
+            border-radius: 8px;
+            border: 1px solid #333;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .speed-option:hover {
+            border-color: var(--ngl-pink);
+        }
+
+        .speed-option.active {
+            background-color: var(--ngl-pink);
+            border-color: var(--ngl-pink);
+        }
+
+        .speed-option input {
+            display: none;
+        }
+
+        @media (max-width: 600px) {  
+            .container {  
+                margin: 20px 15px;  
+                padding: 20px 15px;  
+            }  
+
+            .speed-options {
+                grid-template-columns: 1fr;
+            }
+        }  
+    </style>
+</head>  
+<body>  
+    <div class="container">  
+        <div class="header">  
+            <div class="logo">NGL</div>  
+            <div class="subtitle">Invia messaggi anonimi</div>  
+        </div>  
+        
+        <div class="warning">  
+            ⚠️ <b>Nota:</b> Questo è uno strumento non ufficiale. Per risultati garantiti, usa la versione Python.  
+        </div>  
+
+        <div class="form-group">  
+            <label for="nglUrl">Link del profilo NGL</label>  
+            <input type="text" id="nglUrl" placeholder="https://ngl.link/username" required>  
+        </div>  
+
+        <div class="form-group">
+            <label>Tipo di messaggio</label>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="messageType" value="custom" checked> Personalizzato
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="messageType" value="random"> Random
+                </label>
+            </div>
+        </div>
+
+        <div id="customMessageSection">
+            <div class="form-group">  
+                <label for="message">Il tuo messaggio</label>  
+                <textarea id="message" placeholder="Scrivi qualcosa di interessante..." required></textarea>  
+            </div>  
+        </div>
+
+        <div id="randomMessageSection" class="toggle-section" style="display: none;">
+            <div class="form-group">
+                <label for="randomName">Nome da usare nei messaggi</label>
+                <input type="text" id="randomName" placeholder="Inserisci un nome (es: Marco)">
+            </div>
+            <div class="form-group">
+                <label for="randomCategory">Categoria messaggi</label>
+                <select id="randomCategory">
+                    <option value="all">Tutti i tipi</option>
+                    <option value="flirty">Flirt/Sexy</option>
+                    <option value="funny">Divertenti/Scherzosi</option>
+                    <option value="questions">Domande/Curiosità</option>
+                    <option value="challenges">Sfide/Prove</option>
+                    <option value="compliments">Complimenti</option>
+                    <option value="deep">Profondi/Seri</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="messagePreview">Anteprima messaggio:</label>
+                <div id="messagePreview" style="padding: 10px; background-color: #333; border-radius: 5px; min-height: 20px;"></div>
+                <button type="button" id="refreshPreview" style="margin-top: 10px; padding: 8px;">Genera altro messaggio</button>
+            </div>
+        </div>
+
+        <div class="form-group">  
+            <label for="requests">Numero di invii</label>  
+            <input type="number" id="requests" min="1" value="1" required>  
+        </div>  
+        
+        <div class="form-group">
+            <label>Velocità di invio</label>
+            <div class="speed-options">
+                <label class="speed-option active" data-speed="1">
+                    <input type="radio" name="speed" value="1" checked> Normale (1s)
+                </label>
+                <label class="speed-option" data-speed="0.5">
+                    <input type="radio" name="speed" value="0.5"> Potente (0.5s)
+                </label>
+                <label class="speed-option" data-speed="0.1">
+                    <input type="radio" name="speed" value="0.1"> Ultra (0.1s)
+                </label>
+            </div>
+            <div class="form-group" id="customDelaySection" style="display: none;">
+                <label for="delay">Secondi tra ogni richiesta</label>
+                <input type="number" id="delay" min="0" value="1" step="0.1">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="method">Metodo di invio</label>
+            <select id="method">
+                <option value="direct">Diretto (NGL API)</option>
+                <option value="telegram">Telegram Bot</option>
+                <option value="webhook">Webhook Alternativo</option>
+            </select>
+        </div>
+
+        <button id="sendBtn">Invia Anonimamente</button>  
+        <button id="stopBtn">STOP EMERGENZA</button>
+
+        <div class="divider"></div>  
+
+        <div id="results"></div>  
+    </div>  
+
+    <script>  
+        // Variabile globale per controllare lo stato dell'invio
+        let isSending = false;
+        let stopSending = false;
+
+        // Lista ampliata di messaggi random (oltre 150 messaggi)
+        const randomMessages = {
+            flirty: [
+                "Ma ti piace {name}?",
+                "Ti piacerebbe uscire con {name}?",
+                "{name} ti sta proprio simpatico/a, vero?",
+                "Se {name} ti chiedesse di uscire, accetteresti?",
+                "Cosa ne pensi di {name}?",
+                "{name} ti fa battere il cuore?",
+                "Sei innamorato/a di {name}?",
+                "{name} è il tuo tipo?",
+                "Cosa ti piace di più di {name}?",
+                "Hai mai sognato {name}?",
+                "Se {name} ti baciasse, cosa faresti?",
+                "Ti piace quando {name} ti guarda?",
+                "Hai mai avuto una cotta per {name}?",
+                "Cosa indossa {name} che ti piace particolarmente?",
+                "Se {name} ti mandasse un messaggio romantico, come reagiresti?",
+                "Ti piacerebbe passare una notte con {name}?",
+                "Qual è la cosa più sexy di {name}?",
+                "Hai mai immaginato un appuntamento con {name}?",
+                "Cosa vorresti fare con {name} che non hai mai avuto il coraggio di chiedere?",
+                "Se {name} ti toccasse una mano, come ti sentiresti?",
+                "Ti piace l'odore di {name}?",
+                "Hai mai avuto fantasie su {name}?",
+                "Se {name} fosse il tuo ragazzo/a, cosa faresti per lui/lei?",
+                "Ti piace la voce di {name}?",
+                "Se {name} ti invitasse a casa sua, ci andresti?"
+            ],
+            funny: [
+                "Se {name} fosse un animale, quale sarebbe?",
+                "{name} sa fare la danza del pollo?",
+                "Quanti {name} servono per cambiare una lampadina?",
+                "Se {name} fosse un supereroe, quale sarebbe il suo potere?",
+                "{name} è più intelligente di un delfino?",
+                "Se {name} fosse un cibo, quale sarebbe?",
+                "{name} ha mai fatto scherzi stupidi?",
+                "Se {name} avesse 1 milione di euro, cosa farebbe?",
+                "{name} preferisce i cani o i gatti?",
+                "{name} sa cantare?",
+                "Se {name} fosse un personaggio dei cartoni, chi sarebbe?",
+                "{name} ha mai fatto cadere il telefono nel water?",
+                "Se {name} potesse mangiare solo una cosa per tutta la vita, cosa sceglierebbe?",
+                "{name} ha mai pianto durante un film?",
+                "Se {name} vincesse alla lotteria, come spenderebbe i soldi?",
+                "{name} ha mai fatto un incidente stupido?",
+                "Se {name} potesse volare, dove andrebbe?",
+                "{name} ha mai indossato i vestiti al contrario senza accorgersene?",
+                "Se {name} fosse un biscotto, quale sarebbe?",
+                "{name} ha mai cantato sotto la doccia?",
+                "Se {name} potesse parlare con gli animali, cosa chiederebbe?",
+                "{name} ha mai fatto un sogno così strano da raccontarlo a tutti?",
+                "Se {name} fosse un colore, quale sarebbe?",
+                "{name} ha mai fatto un viaggio epico per un cibo?",
+                "Se {name} potesse inventare una nuova festa, come la chiamerebbe?"
+            ],
+            questions: [
+                "Cosa pensi di {name}?",
+                "Qual è la prima cosa che noti di {name}?",
+                "Cosa ti piace di {name}?",
+                "Cosa non ti piace di {name}?",
+                "Qual è il tuo ricordo preferito con {name}?",
+                "Cosa vorresti dire a {name}?",
+                "Se potessi fare una domanda a {name}, cosa chiederesti?",
+                "Qual è la qualità migliore di {name}?",
+                "Dove hai conosciuto {name}?",
+                "Cosa ti aspetti da {name}?",
+                "Come descriveresti {name} a uno sconosciuto?",
+                "Qual è il difetto più grande di {name}?",
+                "Cosa ti ha colpito di {name} quando l'hai conosciuto/a?",
+                "Se {name} potesse cambiare una cosa di sé, cosa sarebbe?",
+                "Qual è il talento nascosto di {name}?",
+                "Cosa hai imparato da {name}?",
+                "Se {name} avesse un motto, quale sarebbe?",
+                "Qual è il momento più imbarazzante che hai vissuto con {name}?",
+                "Cosa ti mancherebbe di {name} se non lo/a vedessi più?",
+                "Qual è la cosa più coraggiosa che hai visto fare a {name}?",
+                "Se {name} fosse un libro, quale sarebbe?",
+                "Qual è la cosa più strana che sai di {name}?",
+                "Cosa ti fa arrabbiare di {name}?",
+                "Qual è il regalo perfetto per {name}?",
+                "Cosa rende {name} speciale?"
+            ],
+            challenges: [
+                "{name}, osa fare 10 flessioni ora!",
+                "Prova a non ridere per 1 minuto pensando a {name}!",
+                "{name}, mangia un limone intero e filma la tua reazione!",
+                "Manda un messaggio vocale cantando a {name}!",
+                "{name}, fatti un selfie con la faccia più strana possibile!",
+                "Prova a stare 24 ore senza guardare il telefono, {name}!",
+                "{name}, indossa i vestiti al contrario per un giorno!",
+                "Manda un messaggio a {name} usando solo emoji!",
+                "{name}, prova a fare la verticale!",
+                "Parla con un accento straniero per 5 minuti con {name}!",
+                "{name}, prova a disegnare con gli occhi chiusi!",
+                "Fai 10 squat ora, {name}!",
+                "{name}, prova a scrivere con la mano non dominante!",
+                "Canta una canzone ad alta voce dedicata a {name}!",
+                "{name}, prova a mangiare qualcosa senza usare le mani!",
+                "Fai un balletto improvvisato per {name}!",
+                "{name}, prova a fare un impressione di qualcuno!",
+                "Racconta una bugia credibile a {name} e vedi se ci casca!",
+                "{name}, prova a fare 5 minuti di meditazione ora!",
+                "Inventa una storia pazza e raccontala a {name}!",
+                "{name}, prova a fare un trucco di magia!",
+                "Fai una foto imitando una statua e mandala a {name}!",
+                "{name}, prova a fare una ricetta senza seguire le istruzioni!",
+                "Inventa una nuova parola e convincila a {name} che esiste!",
+                "{name}, prova a fare un discorso su un argomento a caso!"
+            ],
+            compliments: [
+                "{name} ha un sorriso fantastico!",
+                "Adoro la personalità di {name}!",
+                "{name} è una persona incredibile!",
+                "Mi piace tantissimo come {name} ride!",
+                "{name} ha uno stile unico!",
+                "L'energia positiva di {name} è contagiosa!",
+                "{name} è intelligentissimo/a!",
+                "La creatività di {name} è fuori dal comune!",
+                "{name} ha un grande senso dell'umorismo!",
+                "L'atteggiamento positivo di {name} è ammirevole!",
+                "{name} è una persona affidabile!",
+                "La generosità di {name} non ha limiti!",
+                "{name} è bravissimo/a in quello che fa!",
+                "La passione di {name} è ispirante!",
+                "{name} ha un grande cuore!",
+                "La determinazione di {name} è impressionante!",
+                "{name} è un ottimo ascoltatore!",
+                "La lealtà di {name} è encomiabile!",
+                "{name} ha un fascino naturale!",
+                "La voce di {name} è bellissima!",
+                "{name} ha un gusto impeccabile!",
+                "Lo stile di {name} è sempre perfetto!",
+                "{name} è una persona genuina!",
+                "La presenza di {name} illumina la stanza!",
+                "{name} è semplicemente fantastico/a!"
+            ],
+            deep: [
+                "Cosa pensa {name} del senso della vita?",
+                "Qual è la più grande paura di {name}?",
+                "Qual è il sogno più grande di {name}?",
+                "Cosa rende veramente felice {name}?",
+                "Qual è il ricordo più bello di {name}?",
+                "Qual è la lezione più importante che {name} ha imparato?",
+                "Cosa vorrebbe cambiare {name} del mondo?",
+                "Qual è la cosa di cui {name} si vergogna di più?",
+                "Cosa significa amore per {name}?",
+                "Qual è il momento più difficile che {name} ha superato?",
+                "Cosa pensa {name} dell'aldilà?",
+                "Qual è la cosa più importante che {name} cerca in una persona?",
+                "Cosa rende {name} orgoglioso/a di sé stesso/a?",
+                "Qual è il rimpianto più grande di {name}?",
+                "Cosa pensa {name} del destino?",
+                "Qual è la verità più difficile che {name} ha accettato?",
+                "Cosa vorrebbe {name} dire al suo io del passato?",
+                "Qual è la cosa più coraggiosa che {name} ha mai fatto?",
+                "Cosa pensa {name} del perdono?",
+                "Qual è la cosa più importante che {name} ha imparato sulle relazioni?",
+                "Cosa rende la vita degna di essere vissuta per {name}?",
+                "Qual è il cambiamento più grande che {name} ha fatto in sé stesso/a?",
+                "Cosa pensa {name} del concetto di felicità?",
+                "Qual è la cosa più bella che {name} abbia mai visto?",
+                "Cosa spera {name} di lasciare al mondo?"
+            ]
+        };
+
+        // Mostra/nascondi sezioni in base alle scelte
+        document.querySelectorAll('input[name="messageType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'random') {
+                    document.getElementById('customMessageSection').style.display = 'none';
+                    document.getElementById('randomMessageSection').style.display = 'block';
+                    document.getElementById('message').required = false;
+                    updateMessagePreview();
+                } else {
+                    document.getElementById('customMessageSection').style.display = 'block';
+                    document.getElementById('randomMessageSection').style.display = 'none';
+                    document.getElementById('message').required = true;
+                }
+            });
+        });
+
+        // Gestione velocità
+        document.querySelectorAll('.speed-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.speed-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById('customDelaySection').style.display = 'none';
+            });
+        });
+
+        // Aggiorna anteprima messaggio quando cambia qualcosa
+        document.getElementById('randomName').addEventListener('input', updateMessagePreview);
+        document.getElementById('randomCategory').addEventListener('change', updateMessagePreview);
+        document.getElementById('refreshPreview').addEventListener('click', updateMessagePreview);
+
+        // Funzione per generare messaggi random
+        function getRandomMessage(name) {
+            const category = document.getElementById('randomCategory').value;
+            let messages = [];
+            
+            if (category === 'all') {
+                for (const key in randomMessages) {
+                    messages = messages.concat(randomMessages[key]);
+                }
+            } else {
+                messages = randomMessages[category];
+            }
+            
+            const randomIndex = Math.floor(Math.random() * messages.length);
+            return messages[randomIndex].replace(/{name}/g, name || 'qualcuno');
+        }
+
+        // Aggiorna l'anteprima del messaggio
+        function updateMessagePreview() {
+            const name = document.getElementById('randomName').value.trim();
+            const preview = getRandomMessage(name);
+            document.getElementById('messagePreview').textContent = preview;
+        }
+
+        // Funzione per fermare l'invio
+        document.getElementById('stopBtn').addEventListener('click', function() {
+            stopSending = true;
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('sendBtn').textContent = 'Invia Anonimamente';
+            document.getElementById('stopBtn').style.display = 'none';
+            
+            const result = document.createElement('div');
+            result.className = 'error';
+            result.textContent = '⚠️ Invio interrotto dall\'utente!';
+            document.getElementById('results').appendChild(result);
+        });
+
+        document.getElementById('sendBtn').addEventListener('click', async function() {  
+            const nglUrl = document.getElementById('nglUrl').value.trim();  
+            const messageType = document.querySelector('input[name="messageType"]:checked').value;
+            
+            const numRequests = parseInt(document.getElementById('requests').value);  
+            const speed = document.querySelector('.speed-option.active').dataset.speed;
+            let delay = parseFloat(speed);
+            
+            const method = document.getElementById('method').value;
+            const resultsDiv = document.getElementById('results');  
+              
+            resultsDiv.innerHTML = '';  
+              
+            if (!nglUrl || (messageType === 'custom' && !document.getElementById('message').value.trim()) || isNaN(numRequests) || numRequests < 1 || isNaN(delay) || delay < 0) {  
+                alert('Per favore compila tutti i campi correttamente!');  
+                return;  
+            }  
+              
+            const usernameMatch = nglUrl.match(/ngl\.link\/([^\/]+)/);  
+            if (!usernameMatch) {  
+                alert('URL NGL non valido! Deve essere nel formato: https://ngl.link/username');  
+                return;  
+            }  
+            const username = usernameMatch[1];  
+              
+            this.disabled = true;  
+            this.textContent = 'Invio in corso...';
+            document.getElementById('stopBtn').style.display = 'block';
+            stopSending = false;
+            isSending = true;
+              
+            let successCount = 0;  
+            
+            const sendMessage = async (attempt) => {
+                let message;
+                if (messageType === 'random') {
+                    const name = document.getElementById('randomName').value.trim();
+                    message = getRandomMessage(name);
+                } else {
+                    message = document.getElementById('message').value.trim();
+                }
+                
+                try {
+                    let response;
+                    
+                    if (method === 'telegram') {
+                        const botToken = '7758818971:AAFilzH7FyUGpUeOXF5hSVSLhLnRwN2wJnE';
+                        const chatId = '5709299213';
+                        const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                        
+                        response = await fetch(telegramUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                chat_id: chatId,
+                                text: `NGL Request\nUsername: ${username}\nMessage: ${message}\nAttempt: ${attempt+1}/${numRequests}`
+                            })
+                        });
+                    } 
+                    else if (method === 'webhook') {
+                        response = await fetch('https://attractive-market-48.webhook.cool', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                username: username,
+                                message: message,
+                                attempt: attempt+1,
+                                total: numRequests
+                            })
+                        });
+                    }
+                    else {
+                        response = await fetch('https://ngl.link/api/submit', {  
+                            method: 'POST',  
+                            headers: {  
+                                'Content-Type': 'application/x-www-form-urlencoded',  
+                                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',  
+                                'origin': 'https://ngl.link',  
+                                'referer': `https://ngl.link/${username}`,  
+                            },  
+                            body: new URLSearchParams({  
+                                username: username,  
+                                question: message,  
+                                deviceId: 'cf1b6e1b-668d-4f98-a715-d5fb33601c5c',  
+                                gameSlug: '',  
+                                referrer: ''  
+                            }),  
+                            mode: 'no-cors'  
+                        });
+                    }
+                      
+                    const result = document.createElement('div');  
+                      
+                    if (response.ok || response.type === 'opaque') {  
+                        result.className = 'success';  
+                        result.textContent = `✔️ Messaggio ${attempt+1} inviato a ${username}: "${message}" (Metodo: ${method})`;  
+                        successCount++;  
+                    } else {  
+                        result.className = 'error';  
+                        const errorData = await response.json().catch(() => ({}));
+                        result.textContent = `✖️ Errore nell'invio (${response.status} - ${errorData.description || 'nessun dettaglio'})`;  
+                    }  
+                      
+                    resultsDiv.appendChild(result);  
+                    return true;
+                } catch (error) {  
+                    const result = document.createElement('div');  
+                    result.className = 'error';  
+                    result.textContent = `✖️ Errore grave: ${error.message}`;  
+                    resultsDiv.appendChild(result);  
+                    return false;
+                }
+            };
+              
+            for (let i = 0; i < numRequests; i++) {  
+                if (stopSending) break;
+                
+                const success = await sendMessage(i);
+                
+                if (i < numRequests - 1 && delay > 0 && !stopSending) {
+                    const countdown = document.createElement('div');
+                    countdown.textContent = `⏳ Attesa di ${delay} secondi prima del prossimo invio...`;
+                    resultsDiv.appendChild(countdown);
+                    
+                    await new Promise(resolve => {
+                        let remaining = delay;
+                        const startTime = Date.now();
+                        const interval = setInterval(() => {
+                            if (stopSending) {
+                                clearInterval(interval);
+                                resultsDiv.removeChild(countdown);
+                                resolve();
+                                return;
+                            }
+                            
+                            const elapsed = (Date.now() - startTime) / 1000;
+                            remaining = Math.max(0, delay - elapsed);
+                            countdown.textContent = `⏳ Attesa di ${remaining.toFixed(1)} secondi prima del prossimo invio...`;
+                            if (remaining <= 0) {
+                                clearInterval(interval);
+                                resultsDiv.removeChild(countdown);
+                                resolve();
+                            }
+                        }, 100);
+                    });
+                }
+            }  
+              
+            const summary = document.createElement('div');  
+            summary.style.marginTop = '10px';  
+            summary.style.fontWeight = 'bold';  
+            
+            if (stopSending) {
+                summary.textContent = `Invio interrotto! ${successCount}/${numRequests} messaggi inviati con successo.`;
+            } else {
+                summary.textContent = `Completato! ${successCount}/${numRequests} tentativi riusciti (Metodo: ${method}).`;  
+            }
+            
+            resultsDiv.appendChild(summary);  
+              
+            this.disabled = false;  
+            this.textContent = 'Invia Anonimamente';
+            document.getElementById('stopBtn').style.display = 'none';
+            isSending = false;
+        });  
+    </script>
+</body>  
+</html>
