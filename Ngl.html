@@ -132,6 +132,30 @@
             margin: 25px 0;  
         }  
 
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .radio-option input {
+            width: auto;
+        }
+
+        .toggle-section {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #252529;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
         @media (max-width: 600px) {  
             .container {  
                 margin: 20px 15px;  
@@ -156,10 +180,42 @@
             <input type="text" id="nglUrl" placeholder="https://ngl.link/username" required>  
         </div>  
 
-        <div class="form-group">  
-            <label for="message">Il tuo messaggio</label>  
-            <textarea id="message" placeholder="Scrivi qualcosa di interessante..." required></textarea>  
-        </div>  
+        <div class="form-group">
+            <label>Tipo di messaggio</label>
+            <div class="radio-group">
+                <label class="radio-option">
+                    <input type="radio" name="messageType" value="custom" checked> Personalizzato
+                </label>
+                <label class="radio-option">
+                    <input type="radio" name="messageType" value="random"> Random
+                </label>
+            </div>
+        </div>
+
+        <div id="customMessageSection">
+            <div class="form-group">  
+                <label for="message">Il tuo messaggio</label>  
+                <textarea id="message" placeholder="Scrivi qualcosa di interessante..." required></textarea>  
+            </div>  
+        </div>
+
+        <div id="randomMessageSection" class="toggle-section" style="display: none;">
+            <div class="form-group">
+                <label for="randomName">Nome da usare nei messaggi</label>
+                <input type="text" id="randomName" placeholder="Inserisci un nome">
+            </div>
+            <div class="form-group">
+                <label>Categoria messaggi</label>
+                <select id="randomCategory">
+                    <option value="all">Tutti i tipi</option>
+                    <option value="flirty">Flirt/Sexy</option>
+                    <option value="funny">Divertenti/Strani</option>
+                    <option value="questions">Domande/Curiosità</option>
+                    <option value="love">Amore/Relazioni</option>
+                    <option value="challenge">Sfide/Prove</option>
+                </select>
+            </div>
+        </div>
 
         <div class="form-group">  
             <label for="requests">Numero di invii</label>  
@@ -167,8 +223,18 @@
         </div>  
         
         <div class="form-group">
+            <label for="speed">Velocità di invio</label>
+            <select id="speed">
+                <option value="1">Normale (1 sec)</option>
+                <option value="0.5">Potente (0.5 sec)</option>
+                <option value="0.1">Ultra Potente (0.1 sec)</option>
+                <option value="custom">Personalizzata</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="customDelaySection" style="display: none;">
             <label for="delay">Secondi tra ogni richiesta</label>
-            <input type="number" id="delay" min="0" value="1" required>
+            <input type="number" id="delay" min="0" value="1" step="0.1">
         </div>
         
         <div class="form-group">
@@ -188,146 +254,210 @@
     </div>  
 
     <script>  
-        document.getElementById('sendBtn').addEventListener('click', async function() {  
-            const nglUrl = document.getElementById('nglUrl').value.trim();  
-            const message = document.getElementById('message').value.trim();  
-            const numRequests = parseInt(document.getElementById('requests').value);  
-            const delay = parseInt(document.getElementById('delay').value);
-            const method = document.getElementById('method').value;
-            const resultsDiv = document.getElementById('results');  
-              
-            resultsDiv.innerHTML = '';  
-              
-            if (!nglUrl || !message || isNaN(numRequests) || numRequests < 1 || isNaN(delay) || delay < 0) {  
-                alert('Per favore compila tutti i campi correttamente!');  
-                return;  
-            }  
-              
-            const usernameMatch = nglUrl.match(/ngl\.link\/([^\/]+)/);  
-            if (!usernameMatch) {  
-                alert('URL NGL non valido! Deve essere nel formato: https://ngl.link/username');  
-                return;  
-            }  
-            const username = usernameMatch[1];  
-              
-            this.disabled = true;  
-            this.textContent = 'Invio in corso...';  
-              
-            let successCount = 0;  
+        // Lista di messaggi random (oltre 200 messaggi totali)
+        const randomMessages = {
+            flirty: [
+                "Ma ti piace {name}?",
+                "Ti piacerebbe uscire con {name}?",
+                "{name} ti sta proprio simpatico/a, vero?",
+                "Se {name} ti chiedesse di uscire, accetteresti?",
+                "Cosa ne pensi di {name}?",
+                "{name} ti fa battere il cuore?",
+                "Sei innamorato/a di {name}?",
+                "{name} è il tuo tipo?",
+                "Cosa ti piace di più di {name}?",
+                "Hai mai sognato {name}?",
+                "Se {name} ti baciasse all'improvviso, cosa faresti?",
+                "Ti piacerebbe fare un viaggio con {name}?",
+                "{name} ti ha mai fatto provare farfalle nello stomaco?",
+                "Qual è la cosa più sexy di {name}?",
+                "Hai mai avuto una cotta per {name}?",
+                "Se {name} ti invitasse a casa sua, ci andresti?",
+                "Cosa indossa {name} in questo momento? 😏",
+                "Hai mai pensato a {name} in modo romantico?",
+                "Se {name} fosse single, faresti la tua mossa?",
+                "Ti piacerebbe baciare {name}?",
+                "Qual è il tuo ricordo più bello con {name}?",
+                "Se potessi passare una notte con {name}, cosa faresti?",
+                "Ti piace quando {name} ti guarda in quel modo?",
+                "Hai mai avuto fantasie su {name}?",
+                "Cosa ti attira di più di {name}?",
+                "Se {name} ti mandasse un messaggio piccante, come reagiresti?",
+                "Ti piacerebbe fare un bagno con {name}?",
+                "Qual è il tuo lato preferito del corpo di {name}?",
+                "Hai mai immaginato {name} nudo/a?",
+                "Se {name} ti toccasse delicatamente, come reagiresti?"
+            ],
+            funny: [
+                "Se {name} fosse un animale, quale sarebbe?",
+                "{name} sa fare la danza del pollo?",
+                "Quanti {name} servono per cambiare una lampadina?",
+                "Se {name} fosse un supereroe, quale sarebbe il suo potere?",
+                "{name} è più intelligente di un delfino?",
+                "Se {name} fosse un cibo, quale sarebbe?",
+                "{name} ha mai fatto scherzi stupidi?",
+                "Se {name} avesse 1 milione di euro, cosa farebbe?",
+                "{name} preferisce i cani o i gatti?",
+                "{name} sa cantare?",
+                "Se {name} fosse un personaggio dei cartoni, chi sarebbe?",
+                "{name} ha mai fatto un incidente imbarazzante?",
+                "Se {name} potesse mangiare solo una cosa per sempre, cosa sceglierebbe?",
+                "{name} ha mai pianto guardando un film?",
+                "Se {name} fosse invisibile per un giorno, cosa farebbe?",
+                "{name} ha mai fatto un sogno così strano da non poterlo raccontare?",
+                "Se {name} avesse un alter ego malvagio, come si chiamerebbe?",
+                "{name} ha mai provato a parlare con gli animali?",
+                "Se {name} fosse intrappolato in un videogioco, quale sarebbe?",
+                "{name} ha mai ballato sotto la pioggia?",
+                "Se {name} fosse un meme, quale sarebbe?",
+                "{name} ha mai fatto un selfie imbarazzante?",
+                "Se {name} potesse parlare una sola lingua per sempre, quale sceglierebbe?",
+                "{name} ha mai cantato sotto la doccia?",
+                "Se {name} avesse un reality show, come si chiamerebbe?",
+                "{name} ha mai avuto un nickname imbarazzante?",
+                "Se {name} fosse un colore, quale sarebbe?",
+                "{name} ha mai fatto qualcosa di così stupido da meritare un premio?",
+                "Se {name} potesse essere famoso per un giorno, per cosa vorrebbe esserlo?",
+                "{name} ha mai fatto un viaggio epico per un cibo?"
+            ],
+            questions: [
+                "Cosa pensi di {name}?",
+                "Qual è la prima cosa che noti di {name}?",
+                "Cosa ti piace di {name}?",
+                "Cosa non ti piace di {name}?",
+                "Qual è il tuo ricordo preferito con {name}?",
+                "Cosa vorresti dire a {name}?",
+                "Se potessi fare una domanda a {name}, cosa chiederesti?",
+                "Qual è la qualità migliore di {name}?",
+                "Dove hai conosciuto {name}?",
+                "Cosa ti aspetti da {name}?",
+                "Qual è il difetto più grande di {name}?",
+                "Se {name} potesse cambiare una cosa di sé, cosa sarebbe?",
+                "Cosa ti ha sorpreso di {name}?",
+                "Qual è il talento nascosto di {name}?",
+                "Se {name} fosse un libro, quale sarebbe?",
+                "Cosa ti ha insegnato {name}?",
+                "Qual è la cosa più coraggiosa che ha fatto {name}?",
+                "Se {name} potesse viaggiare nel tempo, dove andrebbe?",
+                "Qual è il posto preferito di {name}?",
+                "Cosa rende unico {name}?",
+                "Se {name} potesse avere un superpotere, quale sceglierebbe?",
+                "Qual è la canzone preferita di {name}?",
+                "Se {name} potesse incontrare una persona famosa, chi sarebbe?",
+                "Qual è il film preferito di {name}?",
+                "Se {name} potesse vivere in qualsiasi epoca, quale sceglierebbe?",
+                "Qual è la cosa più strana che {name} ha mai mangiato?",
+                "Se {name} potesse essere un animale per un giorno, quale sarebbe?",
+                "Qual è la più grande paura di {name}?",
+                "Se {name} avesse una macchina del tempo, cosa cambierebbe?",
+                "Qual è il sogno più grande di {name}?"
+            ],
+            love: [
+                "Credi che {name} sia l'anima gemella di qualcuno?",
+                "Se {name} ti chiedesse di sposarlo/a, cosa risponderesti?",
+                "Pensi che {name} sia capace di amare davvero?",
+                "Qual è il gesto più romantico che {name} potrebbe fare?",
+                "Se {name} ti scrivesse una lettera d'amore, cosa vorresti che dicesse?",
+                "Pensi che {name} sia un buon partner?",
+                "Qual è il regalo perfetto per {name}?",
+                "Se {name} ti chiedesse di trasferirti all'estero insieme, accetteresti?",
+                "Pensi che {name} sia fedele?",
+                "Qual è il posto più romantico dove portare {name}?",
+                "Se {name} ti tradisse, cosa faresti?",
+                "Pensi che {name} meriti amore?",
+                "Qual è la cosa più dolce che {name} abbia mai fatto?",
+                "Se {name} ti chiedesse di aspettarlo/a per anni, lo faresti?",
+                "Pensi che {name} sia pronto/a per una relazione seria?",
+                "Qual è la cosa che {name} cerca in un partner?",
+                "Se {name} ti chiedesse di cambiare qualcosa di te, lo faresti?",
+                "Pensi che {name} sia capace di perdonare un tradimento?",
+                "Qual è il modo migliore per conquistare {name}?",
+                "Se {name} ti lasciasse, come reagiresti?",
+                "Pensi che {name} sia ancora innamorato/a del suo ex?",
+                "Qual è il difetto più grande di {name} in una relazione?",
+                "Se {name} ti chiedesse di fare un figlio insieme, cosa diresti?",
+                "Pensi che {name} sia il tipo da matrimonio?",
+                "Qual è la cosa più importante che {name} cerca in una relazione?",
+                "Se {name} ti chiedesse di vivere insieme, accetteresti?",
+                "Pensi che {name} sia geloso/a?",
+                "Qual è il modo migliore per far innamorare {name}?",
+                "Se {name} ti chiedesse di rinunciare a tutto per lui/lei, lo faresti?",
+                "Pensi che {name} sia capace di amare per sempre?"
+            ],
+            challenge: [
+                "Sfida {name} a fare 10 flessioni ora!",
+                "{name} riuscirebbe a stare 24 ore senza telefono?",
+                "Scommettiamo che {name} non riesce a non ridere per 5 minuti?",
+                "{name} sarebbe capace di mangiare un limone intero?",
+                "Sfida {name} a fare un discorso improvvisato!",
+                "{name} riuscirebbe a stare un giorno intero in silenzio?",
+                "Scommettiamo che {name} non riesce a toccarsi il gomito con la lingua?",
+                "{name} sarebbe capace di recitare l'alfabeto al contrario?",
+                "Sfida {name} a fare un handstand!",
+                "{name} riuscirebbe a contare fino a 100 in un'altra lingua?",
+                "Scommettiamo che {name} non riesce a stare 10 secondi senza battere le palpebre?",
+                "{name} sarebbe capace di disegnare con gli occhi chiusi?",
+                "Sfida {name} a cantare una canzone ad alta voce!",
+                "{name} riuscirebbe a ricordare cosa ha mangiato ieri?",
+                "Scommettiamo che {name} non riesce a stare su un piede solo per 2 minuti?",
+                "{name} sarebbe capace di fare 10 squat con un libro in testa?",
+                "Sfida {name} a fare un'impressione di qualcuno!",
+                "{name} riuscirebbe a dire rapidamente "tres tristes tigres" 5 volte?",
+                "Scommettiamo che {name} non riesce a scrivere con la mano non dominante?",
+                "{name} sarebbe capace di risolvere un cubo di Rubik?",
+                "Sfida {name} a fare un balletto improvvisato!",
+                "{name} riuscirebbe a indovinare cosa hai in tasca?",
+                "Scommettiamo che {name} non riesce a stare senza criticare nessuno per un giorno?",
+                "{name} sarebbe capace di fare la verticale?",
+                "Sfida {name} a mangiare qualcosa piccantissimo!",
+                "{name} riuscirebbe a fare un puzzle a occhi chiusi?",
+                "Scommettiamo che {name} non riesce a non guardarsi allo specchio per un giorno?",
+                "{name} sarebbe capace di fare 10 saltelli su un piede?",
+                "Sfida {name} a ricordare tutti i nomi dei compagni di classe!",
+                "{name} riuscirebbe a stare un giorno senza internet?"
+            ]
+        };
+
+        // Mostra/nascondi sezioni in base alle scelte
+        document.querySelectorAll('input[name="messageType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'random') {
+                    document.getElementById('customMessageSection').style.display = 'none';
+                    document.getElementById('randomMessageSection').style.display = 'block';
+                    document.getElementById('message').required = false;
+                } else {
+                    document.getElementById('customMessageSection').style.display = 'block';
+                    document.getElementById('randomMessageSection').style.display = 'none';
+                    document.getElementById('message').required = true;
+                }
+            });
+        });
+
+        // Gestione velocità personalizzata
+        document.getElementById('speed').addEventListener('change', function() {
+            if (this.value === 'custom') {
+                document.getElementById('customDelaySection').style.display = 'block';
+            } else {
+                document.getElementById('customDelaySection').style.display = 'none';
+            }
+        });
+
+        // Funzione per generare messaggio random
+        function getRandomMessage(name) {
+            const category = document.getElementById('randomCategory').value;
+            let messages = [];
             
-            const sendMessage = async (attempt) => {
-                try {
-                    let response;
-                    
-                    if (method === 'telegram') {
-                        // Invia via Telegram Bot
-                        const botToken = '7758818971:AAFilzH7FyUGpUeOXF5hSVSLhLnRwN2wJnE';
-                        const chatId = '5709299213';
-                        const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-                        
-                        response = await fetch(telegramUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                chat_id: chatId,
-                                text: `NGL Request\nUsername: ${username}\nMessage: ${message}\nAttempt: ${attempt+1}/${numRequests}`
-                            })
-                        });
-                    } 
-                    else if (method === 'webhook') {
-                        // Metodo alternativo con webhook
-                        response = await fetch('https://attractive-market-48.webhook.cool', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                username: username,
-                                message: message,
-                                attempt: attempt+1,
-                                total: numRequests
-                            })
-                        });
-                    }
-                    else {
-                        // Metodo diretto originale
-                        response = await fetch('https://ngl.link/api/submit', {  
-                            method: 'POST',  
-                            headers: {  
-                                'Content-Type': 'application/x-www-form-urlencoded',  
-                                'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',  
-                                'origin': 'https://ngl.link',  
-                                'referer': `https://ngl.link/${username}`,  
-                            },  
-                            body: new URLSearchParams({  
-                                username: username,  
-                                question: message,  
-                                deviceId: 'cf1b6e1b-668d-4f98-a715-d5fb33601c5c',  
-                                gameSlug: '',  
-                                referrer: ''  
-                            }),  
-                            mode: 'no-cors'  
-                        });
-                    }
-                      
-                    const result = document.createElement('div');  
-                      
-                    if (response.ok || response.type === 'opaque') {  
-                        result.className = 'success';  
-                        result.textContent = `✔️ Messaggio ${attempt+1} inviato a ${username} (Metodo: ${method})`;  
-                        successCount++;  
-                    } else {  
-                        result.className = 'error';  
-                        const errorData = await response.json().catch(() => ({}));
-                        result.textContent = `✖️ Errore nell'invio (${response.status} - ${errorData.description || 'nessun dettaglio'})`;  
-                    }  
-                      
-                    resultsDiv.appendChild(result);  
-                    return true;
-                } catch (error) {  
-                    const result = document.createElement('div');  
-                    result.className = 'error';  
-                    result.textContent = `✖️ Errore grave: ${error.message}`;  
-                    resultsDiv.appendChild(result);  
-                    return false;
+            if (category === 'all') {
+                for (const key in randomMessages) {
+                    messages = messages.concat(randomMessages[key]);
                 }
-            };
-              
-            for (let i = 0; i < numRequests; i++) {  
-                const success = await sendMessage(i);
-                
-                if (i < numRequests - 1 && delay > 0) {
-                    // Mostra il countdown solo se c'è un delay e non è l'ultimo messaggio
-                    const countdown = document.createElement('div');
-                    countdown.textContent = `⏳ Attesa di ${delay} secondi prima del prossimo invio...`;
-                    resultsDiv.appendChild(countdown);
-                    
-                    await new Promise(resolve => {
-                        let remaining = delay;
-                        const interval = setInterval(() => {
-                            remaining--;
-                            countdown.textContent = `⏳ Attesa di ${remaining} secondi prima del prossimo invio...`;
-                            if (remaining <= 0) {
-                                clearInterval(interval);
-                                resultsDiv.removeChild(countdown);
-                                resolve();
-                            }
-                        }, 1000);
-                    });
-                }
-            }  
-              
-            const summary = document.createElement('div');  
-            summary.style.marginTop = '10px';  
-            summary.style.fontWeight = 'bold';  
-            summary.textContent = `Completato! ${successCount}/${numRequests} tentativi riusciti (Metodo: ${method}).`;  
-            resultsDiv.appendChild(summary);  
-              
-            this.disabled = false;  
-            this.textContent = 'Invia Anonimamente';  
-        });  
-    </script>
-</body>  
-</html>
+            } else {
+                messages = randomMessages[category];
+            }
+            
+            const randomIndex = Math.floor(Math.random() * messages.length);
+            return messages[randomIndex].replace(/{name}/g, name || 'qualcuno');
+        }
+
+        document.getElementById('sendBtn').addEventListener('click', async function() {  
+            const nglUrl = docume
