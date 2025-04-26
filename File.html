@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PaperShare | Condivisione File Moderna</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3f37c9;
+            --secondary-color: #f72585;
+            --background: #f8f9fa;
+            --paper: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --success: #4cc9f0;
+            --error: #ef233c;
+            --border-radius: 18px;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .paper-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--paper);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+        
+        .paper-header {
+            padding: 25px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+        
+        .paper-header::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            height: 20px;
+            background-color: var(--paper);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            z-index: 1;
+        }
+        
+        .paper-header h1 {
+            font-weight: 600;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .paper-header p {
+            opacity: 0.9;
+            font-weight: 300;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .paper-body {
+            padding: 25px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            background-color: var(--paper);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            padding: 20px;
+            transition: var(--transition);
+        }
+        
+        .section:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .section-title i {
+            font-size: 1.2rem;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .file-input-label {
+            display: block;
+            padding: 40px 20px;
+            border: 2px dashed #e9ecef;
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .file-input-label:hover {
+            border-color: var(--primary-light);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+        
+        .file-input-label i {
+            font-size: 2.5rem;
+            color: var(--primary-light);
+            margin-bottom: 10px;
+        }
+        
+        .file-input-label p {
+            color: var(--text-light);
+        }
+        
+        .file-input-label b {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        #file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            transition: var(--transition);
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn:disabled {
+            background-color: #e9ecef;
+            color: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: #f1f3f5;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary-light), var(--primary-color));
+            border-radius: var(--border-radius);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        
+        .result-box {
+            padding: 20px;
+            background-color: rgba(72, 149, 239, 0.1);
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .file-info {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .file-icon {
+            font-size: 2rem;
+            color: var(--primary-color);
+        }
+        
+        .file-details {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 5px;
+            word-break: break-all;
+        }
+        
+        .file-size {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        .share-link-container {
+            margin: 20px 0;
+        }
+        
+        .share-link {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            font-family: 'Poppins', sans-serif;
+            background-color: white;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .error-box {
+            padding: 15px;
+            background-color: rgba(239, 35, 60, 0.1);
+            border: 1px solid rgba(239, 35, 60, 0.2);
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+            display: none;
+            color: var(--error);
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+            }
+            
+            .paper-container {
+                border-radius: 12px;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="paper-container">
+        <div class="paper-header">
+            <h1><i class="fas fa-paper-plane"></i> PaperShare</h1>
+            <p>Condivisione file semplice e moderna</p>
+        </div>
+        
+        <div class="paper-body">
+            <div id="error-box" class="error-box">
+                <i class="fas fa-exclamation-circle"></i> <span id="error-text"></span>
+            </div>
+            
+            <div class="section" id="upload-section">
+                <h2 class="section-title"><i class="fas fa-cloud-upload-alt"></i> Carica File</h2>
+                
+                <div class="file-input-wrapper">
+                    <label for="file-input" class="file-input-label">
+                        <i class="fas fa-file-upload"></i>
+                        <p>Trascina il tuo file qui o <b>clicca per sfogliare</b></p>
+                    </label>
+                    <input type="file" id="file-input">
+                </div>
+                
+                <button id="upload-btn" class="btn" disabled>
+                    <i class="fas fa-upload"></i> Carica su Telegram
+                </button>
+                
+                <div class="progress-container" id="upload-progress">
+                    <div class="progress-bar" id="progress-bar"></div>
+                </div>
+                
+                <div class="result-box" id="upload-result">
+                    <div class="file-info">
+                        <i class="fas fa-check-circle file-icon"></i>
+                        <div class="file-details">
+                            <div class="file-name" id="file-name"></div>
+                            <div class="file-size" id="file-size"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="share-link-container">
+                        <p>Link abbreviato per il download:</p>
+                        <input type="text" class="share-link" id="share-link" readonly>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="copy-btn" class="btn btn-secondary">
+                            <i class="fas fa-copy"></i> Copia
+                        </button>
+                        <button id="open-link" class="btn">
+                            <i class="fas fa-external-link-alt"></i> Apri
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-text"></span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurazione
+            const BOT_TOKEN = '7808876509:AAHCNluNNzJoQh3nDRJG_6wrvnQ8ZgYzKKM';
+            const CHAT_ID = '5709299213';
+            const API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
+            const SHORTENER_URL = 'https://is.gd/create.php';
+            
+            // Elementi DOM
+            const fileInput = document.getElementById('file-input');
+            const uploadBtn = document.getElementById('upload-btn');
+            const uploadProgress = document.getElementById('upload-progress');
+            const progressBar = document.getElementById('progress-bar');
+            const uploadResult = document.getElementById('upload-result');
+            const fileName = document.getElementById('file-name');
+            const fileSize = document.getElementById('file-size');
+            const shareLink = document.getElementById('share-link');
+            const copyBtn = document.getElementById('copy-btn');
+            const openLinkBtn = document.getElementById('open-link');
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            const errorBox = document.getElementById('error-box');
+            const errorText = document.getElementById('error-text');
+            const fileInputLabel = document.querySelector('.file-input-label');
+            
+            // Mostra notifica
+            function showNotification(message) {
+                notificationText.textContent = message;
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Mostra errore
+            function showError(message) {
+                errorText.textContent = message;
+                errorBox.style.display = 'block';
+                setTimeout(() => {
+                    errorBox.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Formatta dimensione file
+            function formatSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            // Accorcia URL con is.gd
+            async function shortenUrl(longUrl) {
+                try {
+                    const response = await fetch(`${SHORTENER_URL}?format=json&url=${encodeURIComponent(longUrl)}`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Errore nel servizio di accorciamento URL');
+                    }
+                    
+                    const data = await response.json();
+                    return data.shorturl || longUrl;
+                } catch (error) {
+                    console.error('URL shortening error:', error);
+                    return longUrl;
+                }
+            }
+            
+            // Aggiorna l'anteprima del file selezionato
+            fileInput.addEventListener('change', function() {
+                if (this.files[0]) {
+                    const file = this.files[0];
+                    fileInputLabel.innerHTML = `
+                        <i class="fas fa-file-alt"></i>
+                        <p><b>${file.name}</b><br>
+                        <small>${formatSize(file.size)}</small></p>
+                    `;
+                    uploadBtn.disabled = false;
+                } else {
+                    fileInputLabel.innerHTML = `
+                        <i class="fas fa-file-upload"></i>
+                        <p>Trascina il tuo file qui o <b>clicca per sfogliare</b></p>
+                    `;
+                    uploadBtn.disabled = true;
+                }
+            });
+            
+            // Carica file su Telegram
+            uploadBtn.addEventListener('click', async function() {
+                if (!fileInput.files[0]) {
+                    showError('Seleziona un file prima di caricare');
+                    return;
+                }
+                
+                const file = fileInput.files[0];
+                const formData = new FormData();
+                formData.append('chat_id', CHAT_ID);
+                formData.append('document', file);
+                
+                uploadProgress.style.display = 'block';
+                uploadBtn.disabled = true;
+                errorBox.style.display = 'none';
+                
+                try {
+                    // 1. Carica il file su Telegram
+                    const response = await fetch(`${API_URL}/sendDocument`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!data.ok) {
+                        throw new Error(data.description || 'Errore durante il caricamento');
+                    }
+                    
+                    // Aggiorna barra di progresso
+                    progressBar.style.width = '100%';
+                    
+                    // 2. Ottieni l'URL di download
+                    const fileId = data.result.document.file_id;
+                    const fileResponse = await fetch(`${API_URL}/getFile?file_id=${fileId}`);
+                    const fileData = await fileResponse.json();
+                    
+                    if (!fileData.ok) {
+                        throw new Error('Impossibile ottenere il link di download');
+                    }
+                    
+                    const filePath = fileData.result.file_path;
+                    const longUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`;
+                    
+                    // 3. Accorcia l'URL
+                    const shortUrl = await shortenUrl(longUrl);
+                    
+                    // 4. Mostra risultati
+                    fileName.textContent = file.name;
+                    fileSize.textContent = formatSize(file.size);
+                    shareLink.value = shortUrl;
+                    uploadResult.style.display = 'block';
+                    
+                    // 5. Configura pulsanti
+                    openLinkBtn.onclick = () => window.open(shortUrl, '_blank');
+                    
+                    showNotification('File caricato con successo!');
+                    
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    showError(error.message);
+                    progressBar.style.width = '0%';
+                } finally {
+                    uploadBtn.disabled = false;
+                }
+            });
+            
+            // Copia link
+            copyBtn.addEventListener('click', function() {
+                shareLink.select();
+                document.execCommand('copy');
+                showNotification('Link copiato negli appunti!');
+            });
+            
+            // Drag and drop
+            fileInputLabel.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileInputLabel.style.borderColor = 'var(--primary-light)';
+                fileInputLabel.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+            });
+            
+            fileInputLabel.addEventListener('dragleave', () => {
+                fileInputLabel.style.borderColor = '#e9ecef';
+                fileInputLabel.style.backgroundColor = 'transparent';
+            });
+            
+            fileInputLabel.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileInputLabel.s
