@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Password Generator & Checker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --light: #f8fafc;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --dark-gray: #334155;
+            --card-bg: #ffffff;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: var(--dark);
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .alert i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+        
+        .alert-warning {
+            background-color: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            color: var(--danger);
+        }
+        
+        .alert-info {
+            background-color: rgba(16, 185, 129, 0.1);
+            border-left: 4px solid var(--success);
+            color: var(--success);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background-color: var(--light);
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+            background-color: white;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+        
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-block {
+            display: flex;
+            width: 100%;
+        }
+        
+        .btn-secondary {
+            background: var(--gray);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--dark-gray);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .password-container {
+            margin-top: 30px;
+        }
+        
+        .password-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .password-output {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+            font-family: 'Fira Code', 'Courier New', monospace;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+        
+        .password-item {
+            margin-bottom: 8px;
+            padding: 8px 10px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .password-item:last-child {
+            border-bottom: none;
+        }
+        
+        .password-item .actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .password-item .actions button {
+            background: none;
+            border: none;
+            color: var(--gray);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+        
+        .password-item .actions button:hover {
+            color: var(--primary);
+        }
+        
+        .stats {
+            background: var(--light);
+            padding: 18px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .stats div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+        }
+        
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .password-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .leaked-passwords {
+            margin-top: 30px;
+        }
+        
+        .leaked-item {
+            background: #fff1f1;
+            border-left: 4px solid var(--danger);
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-radius: 0 6px 6px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .leaked-item .add-btn {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.2s;
+        }
+        
+        .leaked-item .add-btn:hover {
+            background: #dc2626;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+        
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #cbd5e1;
+        }
+        
+        .empty-state p {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Advanced Password Generator & Checker</h1>
+            <p class="subtitle">Generate strong password combinations and check if your credentials have been compromised in data breaches</p>
+        </header>
+        
+        <div class="tab-container">
+            <div class="tab active" data-tab="generator">Password Generator</div>
+            <div class="tab" data-tab="checker">Password Checker</div>
+        </div>
+        
+        <div class="tab-content active" id="generator">
+            <div class="card">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Warning:</strong> This will generate thousands of password combinations. Make sure to save your existing passwords.txt file if you have one.
+                    </div>
+                </div>
+                
+                <form id="passwordForm">
+                    <div class="grid">
+                        <div class="form-group">
+                            <label for="firstName"><i class="fas fa-user"></i> First Name</label>
+                            <input type="text" id="firstName" required placeholder="John">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lastName"><i class="fas fa-user"></i> Last Name</label>
+                            <input type="text" id="lastName" required placeholder="Doe">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="surname"><i class="fas fa-signature"></i> Surname/Nickname</label>
+                            <input type="text" id="surname" required placeholder="Johnny">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="age"><i class="fas fa-birthday-cake"></i> Age</label>
+                            <input type="number" id="age" required min="1" max="120" placeholder="30">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="birthday"><i class="fas fa-calendar-alt"></i> Birthday (DDMMYYYY)</label>
+                            <input type="text" id="birthday" required pattern="\d{8}" title="Please enter 8 digits (DDMMYYYY)" placeholder="01011990">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="nationality"><i class="fas fa-globe"></i> Nationality</label>
+                            <input type="text" id="nationality" required placeholder="American">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="birthPlace"><i class="fas fa-map-marker-alt"></i> Birth Place</label>
+                            <input type="text" id="birthPlace" required placeholder="New York">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-block">
+                            <i class="fas fa-key"></i> Generate Passwords
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Generating passwords...</p>
+                </div>
+                
+                <div class="password-container" id="passwordContainer" style="display: none;">
+                    <div class="password-header">
+                        <h2><i class="fas fa-lock"></i> Generated Passwords</h2>
+                        <div>
+                            <button class="btn btn-secondary" id="downloadBtn">
+                                <i class="fas fa-download"></i> Download passwords.txt
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <div>
+                            <strong>Tip:</strong> Scroll through the passwords or click the button above to download them all. Click the <i class="fas fa-plus"></i> icon to add individual passwords to your list.
+                        </div>
+                    </div>
+                    
+                    <div class="password-output" id="passwordOutput"></div>
+                    
+                    <div class="stats" id="stats">
+                        <div>
+                            <i class="fas fa-key"></i>
+                            <span><strong>Total passwords generated:</strong> <span id="passwordCount">0</span></span>
+                        </div>
+                        <div>
+                            <i class="fas fa-clock"></i>
+                            <span id="generationTime">Generated in 0.00s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="checker">
+            <div class="card">
+                <div class="alert alert-info">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <strong>Password Checker:</strong> Enter an email address to check if any associated passwords have been compromised in known data breaches.
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="emailCheck"><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" id="emailCheck" required placeholder="user@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" class="btn btn-block" id="checkEmailBtn">
+                        <i class="fas fa-search"></i> Check for Leaked Passwords
+                    </button>
+                </div>
+                
+                <div class="loading" id="checkLoading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Checking for leaked passwords...</p>
+                </div>
+                
+                <div class="leaked-passwords" id="leakedResults" style="display: none;">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Compromised Passwords Found</h3>
+                    <p>The following passwords associated with this email have been found in data breaches:</p>
+                    
+                    <div id="leakedList"></div>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <button type="button" class="btn btn-danger" id="addAllBtn" style="display: none;">
+                            <i class="fas fa-plus-circle"></i> Add All to Password List
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="empty-state" id="noLeaks" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    <h3>No Compromised Passwords Found</h3>
+                    <p>No passwords associated with this email were found in known data breaches. This is a good sign, but always use strong, unique passwords for each account.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // Password Generator Form
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('passwordContainer').style.display = 'none';
+            
+            // Get form values
+            const FN = document.getElementById('firstName').value.trim().toLowerCase();
+            const LN = document.getElementById('lastName').value.trim().toLowerCase();
+            const SN = document.getElementById('surname').value.trim().toLowerCase();
+            const AG = document.getElementById('age').value.trim();
+            const BI = document.getElementById('birthday').value.trim();
+            const NA = document.getElementById('nationality').value.trim().toLowerCase();
+            const WB = document.getElementById('birthPlace').value.trim().toLowerCase();
+            
+            // Validate birthday length
+            if (BI.length !== 8 || !/^\d+$/.test(BI)) {
+                alert('Please enter a valid birthday in DDMMYYYY format (8 digits)');
+                document.getElementById('loading').style.display = 'none';
+                return;
+            }
+            
+            // Start timer
+            const startTime = performance.now();
+            
+            // Generate passwords after a small delay to show loading
+            setTimeout(() => {
+                const passwords = generatePasswords(FN, LN, SN, AG, BI, NA, WB);
+                
+                // Calculate generation time
+                const endTime = performance.now();
+                const generationTime = (endTime - startTime) / 1000;
+                document.getElementById('generationTime').textContent = `Generated in ${generationTime.toFixed(2)}s`;
+                
+                displayPasswords(passwords);
+                
+                // Hide loading indicator
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('passwordContainer').style.display = 'block';
+            }, 100);
+        });
+        
+        // Download button
+        document.getElementById('downloadBtn').addEventListener('click', function() {
+            const passwords = Array.from(document.querySelectorAll('#passwordOutput .password-item')).map(el => el.textContent.split('Add')[0].trim());
+            const blob = new Blob([passwords.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'passwords.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        // Check for leaked passwords
+        document.getElementById('checkEmailBtn').addEventListener('click', function() {
+            const email = document.getElementById('emailCheck').value.trim();
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('checkLoading').style.display = 'block';
+            document.getElementById('leakedResults').style.display = 'none';
+            document.getElementById('noLeaks').style.display = 'none';
+            
+            // Simulate API call (in a real app, you would call an actual breach API)
+            setTimeout(() => {
+                // This is a simulation - in reality you would call an API like HaveIBeenPwned
+                const leakedPasswords = simulateBreachCheck(email);
+                
+                document.getElementById('checkLoading').style.display = 'none';
+                
+                if (leakedPasswords.length > 0) {
+                    displayLeakedPasswords(leakedPasswords);
+                    document.getElementById('leakedResults').style.display = 'block';
+                    document.getElementById('addAllBtn').style.display = 'block';
+                } else {
+                    document.getElementById('noLeaks').style.display = 'block';
+                }
+            }, 1500);
+        });
+        
+        // Add all leaked passwords to generator
+        document.getElementById('addAllBtn').addEventListener('click', function() {
+            const leakedItems = document.querySelectorAll('#leakedList .leaked-item');
+            const passwords = Array.from(leakedItems).map(item => item.textContent.split('Add')[0].trim());
+            
+            // Add to password list
+            const passwordOutput = document.getElementById('passwordOutput');
+            passwords.forEach(password => {
+                if (!passwordOutput.textContent.includes(password)) {
+                    addPasswordToOutput(password);
+                }
+            });
+            
+            // Update count
+            updatePasswordCount();
+            
+            // Switch to generator tab
+            document.querySelector('.tab[data-tab="generator"]').click();
+        });
+        
+        function simulateBreachCheck(email) {
+            // This is a simulation - in a real app you would call an actual API
+            const commonPasswords = {
+                'test@example.com': ['password123', 'test123', 'welcome1'],
+                'user@example.com': ['qwerty', '123456', 'letmein'],
+                'admin@example.com': ['admin', 'password', '12345678']
+            };
+            
+            // If email is in our simulated database, return those passwords
+            if (commonPasswords[email.toLowerCase()]) {
+                return commonPasswords[email.toLowerCase()];
+            }
+            
+            // 30% chance to return some common passwords even for unknown emails
+            if (Math.random() < 0.3) {
+                const common = [
+                    'password', '123456', '12345678', 'qwerty', 'abc123', 
+                    'monkey', 'letmein', 'dragon', '111111', 'baseball'
+                ];
+                return [common[Math.floor(Math.random() * common.length)]];
+            }
+            
+            return [];
+        }
+        
+        function displayLeakedPasswords(passwords) {
+            const leakedList = document.getElementById('leakedList');
+            leakedList.innerHTML = '';
+            
+            passwords.forEach(password => {
+                const div = document.createElement('div');
+                div.className = 'leaked-item';
+                div.innerHTML = `
+                    <span>${password}</span>
+                    <button class="add-btn" data-password="${password}">
+                        <i class="fas fa-plus"></i> Add to List
+                    </button>
+                `;
+                leakedList.appendChild(div);
+            });
+            
+            // Add event listeners to add buttons
+            document.querySelectorAll('#leakedList .add-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const password = this.dataset.password;
+                    addPasswordToOutput(password);
+                    
+                    // Show confirmation
+                    this.innerHTML = '<i class="fas fa-check"></i> Added';
+                    this.style.background = 'var(--success)';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-plus"></i> Add to List';
+                        this.style.background = 'var(--danger)';
+                    }, 1000);
+                });
+            });
+        }
+        
+        function addPasswordToOutput(password) {
+            const passwordOutput = document.getElementById('passwordOutput');
+            
+            // Check if password already exists
+            const existing = Array.from(passwordOutput.querySelectorAll('.password-item')).some(
+                item => item.textContent.split('Add')[0].trim() === password
+            );
+            
+            if (!existing) {
+                const div = document.createElement('div');
+                div.className = 'password-item';
+                div.innerHTML = `
+                    <span>${password}</span>
+                    <div class="actions">
+                        <button class="copy-btn" title="Copy to clipboard"><i class="fas fa-copy"></i></button>
+                        <button class="remove-btn" title="Remove from list"><i class="fas fa-times"></i></button>
+                    </div>
+                `;
+                passwordOutput.appendChild(div);
+                
+                // Add event listeners
+                div.querySelector('.copy-btn').addEventListener('click', function() {
+                    navigator.clipboard.writeText(password);
+                    this.innerHTML = '<i class="fas fa-check"></i>';
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-copy"></i>';
+                    }, 1000);
+                });
+                
+                div.querySelector('.remove-btn').addEventListener('click', function() {
+                    div.remove();
+                    updatePasswordCount();
+                });
+                
+                return true;
+            }
+            return false;
+        }
+        
+        function generatePasswords(FN, LN, SN, AG, BI, NA, WB) {
+            const passwords = [];
+            const BI4 = BI.substring(0, 4);
+            const BI4_2 = BI.substring(4, 8);
+            
+            // Single words
+            passwords.push(FN, LN, SN, AG, BI, NA, WB);
+            
+            // Two-word combinations (all permutations)
+            [FN, LN, SN, AG, BI, NA, WB].forEach(word1 => {
+                [FN, LN, SN, AG, BI, NA, WB].forEach(word2 => {
+                    passwords.push(word1 + word2);
+                });
+            });
+            
+            // Three-word combinations (all permutations)
+            [FN, LN, SN, AG, BI, NA, WB].forEach(word1 => {
+                [FN, LN, SN, AG, BI, NA, WB].forEach(word2 => {
+                    [FN, LN, SN, AG, BI, NA, WB].forEach(word3 => {
+                        passwords.push(word1 + word2 + word3);
+                    });
+                });
+            });
+            
+            // Four-word combinations (selected permutations)
+            [FN, LN, SN, AG].forEach(word1 => {
+                [FN, LN, SN, AG].forEach(word2 => {
+                    [FN, LN, SN, AG].forEach(word3 => {
+                        [FN, LN, SN, AG].forEach(word4 => {
+                            passwords.push(word1 + word2 + word3 + word4);
+                        });
+                    });
+                });
+            });
+            
+            // Birthday parts combinations
+            [BI4, BI4_2].forEach(bdPart => {
+                // With single words
+                [FN, LN, SN, AG, NA, WB].forEach(word => {
+                    passwords.push(word + bdPart);
+                    passwords.push(bdPart + word);
+                });
+                
+                // With two-word combinations
+                [FN, LN, SN, AG].forEach(word1 => {
+                    [FN, LN, SN, AG].forEach(word2 => {
+                        passwords.push(word1 + word2 + bdPart);
+                        passwords.push(word1 + bdPart + word2);
+                        passwords.push(bdPart + word1 + word2);
+                    });
+                });
+            });
+            
+            // Special patterns
+            passwords.push(
+                FN.charAt(0) + LN,
+                LN.charAt(0) + FN,
+                FN + AG,
+                LN + AG,
+                SN + AG,
+                FN + BI4,
+                LN + BI4,
+                SN + BI4,
+                FN + BI4_2,
+                LN + BI4_2,
+                SN + BI4_2,
+                FN + LN.charAt(0) + AG,
+                LN + FN.charAt(0) + AG,
+                FN.slice(0, 3) + LN.slice(0, 3),
+                LN.slice(0, 3) + FN.slice(0, 3),
+                FN + WB,
+                LN + WB,
+                SN + WB,
+                FN + NA,
+                LN + NA,
+                SN + NA
+            );
+            
+            // Add common number suffixes
+            const commonNumbers = ['123', '1234', '12345', '111', '222', '333', '1', '2', '3', '69', '420', '007', '100', '200'];
+            [FN, LN, SN, FN + LN, FN + SN, LN + SN].forEach(base => {
+                commonNumbers.forEach(num => {
+                    passwords.push(base + num);
+                });
+            });
+            
+            // Add common prefixes
+            const commonPrefixes = ['x', 'xx', '!', '@', '#', '$', '&', '*'];
+            [FN, LN, SN, AG, BI4, BI4_2].forEach(base => {
+                commonPrefixes.forEach(prefix => {
+                    passwords.push(prefix + base);
+                });
+            });
+            
+            // Add common suffixes
+            const commonSuffixes = ['!', '@', '#', '$', '&', '*', '?', '!!'];
+            [FN, LN, SN, AG, BI4, BI4_2].forEach(base => {
+                commonSuffixes.forEach(suffix => {
+                    passwords.push(base + suffix);
+                });
+            });
+            
+            // Add common patterns with special characters
+            passwords.push(
+                FN + '_' + LN,
+                FN + '.' + LN,
+                FN + '-' + LN,
+                FN + '_' + AG,
+                FN + '.' + AG,
+                FN + '-' + AG,
+                LN + '_' + AG,
+                LN + '.' + AG,
+                LN + '-' + AG,
+                SN + '_' + AG,
+                SN + '.' + AG,
+                SN + '-' + AG
+            );
+            
+            // Add uppercase variations
+            [FN, LN, SN].forEach(word => {
+                passwords.push(word.charAt(0).toUpperCase() + word.slice(1));
+                passwords.push(word.toUpperCase());
+            });
+            
+            // Add reversed versions
+            [FN, LN, SN].forEach(word => {
+                passwords.push(word.split('').reverse().join(''));
+            });
+            
+            // Add leet speak variations
+            const leetMap = {
+                'a': '4',
+                'e': '3',
+                'i': '1',
+                'o': '0',
+                's': '5',
+                't': '7'
+            };
+            
+            [FN, LN, SN].forEach(word => {
+                let leet = '';
+                for (let char of word) {
+                    leet += leetMap[char.toLowerCase()] || char;
+                }
+                if (leet !== word) passwords.push(leet);
+            });
+            
+            // Remove duplicates
+            const uniquePasswords = [...new Set(passwords)];
+            
+            return uniquePasswords;
+        }
+        
+        function displayPasswords(passwords) {
+            const output = document.getElementById('passwordOutput');
+            
+            // Clear previous output
+            output.innerHTML = '';
+            
+            // Add passwords to output
+            passwords.forEach(password => {
+                addPasswordToOutput(password);
+            });
+            
+            // Update count
+            updatePasswordCount();
+            
+            // Enable download button
+            document.getElementById('downloadBtn').disabled = false;
+        }
+        
+        function updatePasswordCount() {
+            const count = document.querySelectorAll('#passwordOutput .password-item').length;
+            document.getElementById('passwordCount').textContent = count;
+        }
+    </script>
+</body>
+</html>
