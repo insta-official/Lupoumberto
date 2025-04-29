@@ -24,22 +24,12 @@
             padding: 20px;
             background-color: #f0f2f5;
             color: var(--dark-color);
-            transition: all 0.3s ease;
-        }
-        body.dark-mode {
-            background-color: #121212;
-            color: white;
         }
         .container {
             background-color: white;
             border-radius: var(--border-radius);
             padding: 30px;
             box-shadow: var(--box-shadow);
-            transition: all 0.3s ease;
-        }
-        body.dark-mode .container {
-            background-color: #1e1e1e;
-            color: white;
         }
         h1 {
             color: var(--primary-color);
@@ -55,9 +45,8 @@
             background-color: white;
             transition: all 0.3s ease;
         }
-        body.dark-mode .section {
-            background-color: #2c2c2c;
-            border-color: #3c3c3c;
+        .section:hover {
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
         }
         button {
             background-color: var(--primary-color);
@@ -98,12 +87,6 @@
             font-family: 'Poppins', sans-serif;
             transition: all 0.3s ease;
         }
-        body.dark-mode input,
-        body.dark-mode textarea {
-            background-color: #3c3c3c;
-            color: white;
-            border-color: #4c4c4c;
-        }
         input:focus, textarea:focus {
             border-color: var(--accent-color);
             outline: none;
@@ -117,11 +100,6 @@
             margin-bottom: 15px;
             background-color: var(--light-color);
             border-radius: var(--border-radius);
-            transition: all 0.3s ease;
-        }
-        body.dark-mode #chat-messages {
-            background-color: #2c2c2c;
-            border-color: #3c3c3c;
         }
         .message {
             margin-bottom: 15px;
@@ -131,6 +109,10 @@
             position: relative;
             animation: fadeIn 0.3s ease;
             word-break: break-word;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .my-message {
             background-color: var(--primary-color);
@@ -144,16 +126,12 @@
             margin-right: auto;
             border-bottom-left-radius: 5px;
         }
-        body.dark-mode .my-message {
-            background-color: #4caf50;
-        }
-        body.dark-mode .other-message {
-            background-color: #3c3c3c;
-            border-color: #4c4c4c;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .message-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            display: block;
+            margin-top: 5px;
+            text-align: right;
         }
         .hidden {
             display: none;
@@ -170,9 +148,6 @@
             border-radius: 20px;
             font-size: 0.9rem;
         }
-        body.dark-mode .chat-info {
-            background-color: #2c2c2c;
-        }
         .code-display {
             font-family: monospace;
             font-size: 1.2rem;
@@ -184,9 +159,6 @@
             padding: 10px;
             background-color: var(--light-color);
             border-radius: var(--border-radius);
-        }
-        body.dark-mode .code-display {
-            background-color: #2c2c2c;
         }
         .input-group {
             display: flex;
@@ -205,9 +177,6 @@
             margin-bottom: 15px;
             display: none;
         }
-        body.dark-mode .error-message {
-            background-color: #b71c1c;
-        }
         .notification {
             position: fixed;
             top: 20px;
@@ -220,8 +189,52 @@
             z-index: 1000;
             display: none;
         }
+        .copy-btn {
+            background-color: var(--accent-color);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            margin-left: 10px;
+        }
+        .copy-btn:hover {
+            background-color: #3a86ff;
+        }
+        /* Modalità Notte */
+        body.dark-mode {
+            background-color: #121212;
+            color: white;
+        }
+        body.dark-mode .container {
+            background-color: #1e1e1e;
+            color: white;
+        }
+        body.dark-mode .section {
+            background-color: #2c2c2c;
+            border-color: #3c3c3c;
+        }
+        body.dark-mode input,
+        body.dark-mode textarea {
+            background-color: #3c3c3c;
+            color: white;
+            border-color: #4c4c4c;
+        }
+        body.dark-mode .message.my-message {
+            background-color: #4caf50;
+        }
+        body.dark-mode .message.other-message {
+            background-color: #3c3c3c;
+            border-color: #4c4c4c;
+        }
+        body.dark-mode .chat-header {
+            background-color: #1e1e1e;
+        }
+        body.dark-mode .code-display {
+            background-color: #2c2c2c;
+        }
         body.dark-mode .notification {
             background-color: #1b5e20;
+        }
+        body.dark-mode .error-message {
+            background-color: #b71c1c;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -241,6 +254,9 @@
                 <div class="code-display">
                     <span id="generated-code"></span>
                     <button id="copy-code" class="copy-btn" title="Copia codice"><i class="far fa-copy"></i></button>
+                    <button id="download-qrcode" class="btn-secondary" style="margin-left: 10px;">
+                        <i class="fas fa-qrcode"></i> Scarica QR Code
+                    </button>
                 </div>
                 <p>Condividi questo codice con l'altra persona.</p>
             </div>
@@ -274,13 +290,23 @@
     <div id="notification" class="notification">
         <i class="fas fa-check-circle"></i> <span id="notification-text"></span>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const SERVER_URL = 'https://67cb65973395520e6af537e3.mockapi.io/api/v3/messages';
+            let chatCode = '';
+            let checkInterval;
+            let userId = generateUserId();
+            let lastMessageId = 0;
+            let deleteRequestSent = false;
+            let isDarkMode = false;
+
+            // Elementi DOM
             const generateCodeBtn = document.getElementById('generate-code');
             const joinChatBtn = document.getElementById('join-chat');
             const sendMessageBtn = document.getElementById('send-message');
             const copyCodeBtn = document.getElementById('copy-code');
+            const downloadQRCodeBtn = document.getElementById('download-qrcode');
             const clearChatBtn = document.getElementById('clear-chat');
             const toggleThemeBtn = document.getElementById('toggle-theme');
             const generatedCodeContainer = document.getElementById('generated-code-container');
@@ -295,13 +321,7 @@
             const notification = document.getElementById('notification');
             const notificationText = document.getElementById('notification-text');
 
-            let chatCode = '';
-            let checkInterval;
-            let userId = generateUserId();
-            let lastMessageId = 0;
-            let deleteRequestSent = false;
-            let isDarkMode = false;
-
+            // Funzioni di utilità
             function generateUserId() {
                 return 'user-' + Math.random().toString(36).substr(2, 9);
             }
@@ -378,6 +398,7 @@
                 return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
 
+            // Gestione eventi
             generateCodeBtn.addEventListener('click', async () => {
                 try {
                     chatCode = generateRandomCode();
@@ -400,6 +421,25 @@
                 navigator.clipboard.writeText(chatCode)
                     .then(() => showNotification('Codice copiato negli appunti!'))
                     .catch(() => showError('Errore durante la copia del codice'));
+            });
+
+            downloadQRCodeBtn.addEventListener('click', () => {
+                const qr = qrcode(0, 'L');
+                qr.addData(chatCode);
+                qr.make();
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 256;
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                img.src = qr.createDataURL(4);
+                img.onload = () => {
+                    ctx.drawImage(img, 0, 0, 256, 256);
+                    const link = document.createElement('a');
+                    link.href = canvas.toDataURL('image/png');
+                    link.download = 'chat_qrcode.png';
+                    link.click();
+                };
             });
 
             joinChatBtn.addEventListener('click', async () => {
@@ -439,6 +479,8 @@
                         await sendToServer({ action: 'request_delete' });
                         deleteRequestSent = true;
                         showNotification('Richiesta di eliminazione inviata. In attesa di conferma...');
+                    } else {
+                        showError('Hai già inviato una richiesta di eliminazione.');
                     }
                 } catch (error) {
                     console.error('Errore durante la richiesta di eliminazione:', error);
@@ -449,17 +491,39 @@
             toggleThemeBtn.addEventListener('click', () => {
                 isDarkMode = !isDarkMode;
                 document.body.classList.toggle('dark-mode', isDarkMode);
+                toggleThemeBtn.textContent = isDarkMode ? 'Attiva Modalità Giorno' : 'Attiva Modalità Notte';
                 toggleThemeBtn.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i> Attiva Modalità Giorno' : '<i class="fas fa-moon"></i> Attiva Modalità Notte';
             });
 
-            setInterval(async () => {
+            messageInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessageBtn.click();
+                }
+            });
+
+            joinCodeInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.toUpperCase();
+            });
+
+            async function handleDeleteRequests() {
                 try {
                     const response = await fetch(`${SERVER_URL}?chatCode=${chatCode}`);
                     if (!response.ok) throw new Error('Errore nel recupero delle richieste');
                     const messages = await response.json();
+
                     const deleteRequest = messages.find(msg => msg.action === 'request_delete');
-                    if (deleteRequest && confirm('L\'altro utente vuole eliminare la chat. Confermi?')) {
-                        await sendToServer({ action: 'confirm_delete' });
+                    if (deleteRequest && !deleteConfirmedByOtherUser) {
+                        if (confirm('L\'altro utente vuole eliminare la chat. Confermi?')) {
+                            await sendToServer({ action: 'confirm_delete' });
+                            deleteConfirmedByOtherUser = true;
+                            showNotification('Chat eliminata con successo!');
+                            chatMessages.innerHTML = '';
+                        }
+                    }
+
+                    const confirmDelete = messages.find(msg => msg.action === 'confirm_delete');
+                    if (confirmDelete) {
                         chatMessages.innerHTML = '';
                         clearInterval(checkInterval);
                         showNotification('Chat eliminata con successo!');
@@ -467,7 +531,9 @@
                 } catch (error) {
                     console.error('Errore nella gestione delle richieste di eliminazione:', error);
                 }
-            }, 5000);
+            }
+
+            setInterval(handleDeleteRequests, 5000);
         });
     </script>
 </body>
