@@ -16,20 +16,26 @@
             --error-color: #f72585;
             --border-radius: 12px;
             --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --night-bg: #121212;
+            --night-text: #ffffff;
+            --day-bg: #ffffff;
+            --day-text: #212529;
         }
         body {
             font-family: 'Poppins', sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f0f2f5;
-            color: var(--dark-color);
+            background-color: var(--day-bg);
+            color: var(--day-text);
+            transition: all 0.3s ease;
         }
         .container {
-            background-color: white;
+            background-color: var(--day-bg);
             border-radius: var(--border-radius);
             padding: 30px;
             box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
         }
         h1 {
             color: var(--primary-color);
@@ -42,11 +48,8 @@
             padding: 20px;
             border: 1px solid #e9ecef;
             border-radius: var(--border-radius);
-            background-color: white;
+            background-color: var(--day-bg);
             transition: all 0.3s ease;
-        }
-        .section:hover {
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
         }
         button {
             background-color: var(--primary-color);
@@ -66,17 +69,6 @@
             background-color: var(--secondary-color);
             transform: translateY(-2px);
         }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-secondary {
-            background-color: var(--accent-color);
-        }
-        .btn-secondary:hover {
-            background-color: #3a86ff;
-        }
         input, textarea {
             width: 100%;
             padding: 12px 15px;
@@ -86,11 +78,6 @@
             border-radius: var(--border-radius);
             font-family: 'Poppins', sans-serif;
             transition: all 0.3s ease;
-        }
-        input:focus, textarea:focus {
-            border-color: var(--accent-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
         }
         #chat-messages {
             height: 350px;
@@ -126,115 +113,25 @@
             margin-right: auto;
             border-bottom-left-radius: 5px;
         }
-        .message-time {
-            font-size: 0.7rem;
-            opacity: 0.7;
-            display: block;
-            margin-top: 5px;
-            text-align: right;
-        }
         .hidden {
             display: none;
         }
-        .chat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+        .night-mode {
+            background-color: var(--night-bg);
+            color: var(--night-text);
         }
-        .chat-info {
-            background-color: var(--light-color);
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 0.9rem;
+        .night-mode .container,
+        .night-mode .section,
+        .night-mode #chat-messages {
+            background-color: var(--night-bg);
+            color: var(--night-text);
         }
-        .code-display {
-            font-family: monospace;
-            font-size: 1.2rem;
-            letter-spacing: 2px;
-            font-weight: bold;
-            color: var(--primary-color);
-            text-align: center;
-            margin: 15px 0;
-            padding: 10px;
-            background-color: var(--light-color);
-            border-radius: var(--border-radius);
-        }
-        .input-group {
-            display: flex;
-            gap: 10px;
-        }
-        #message-input {
-            flex-grow: 1;
-            resize: none;
-            min-height: 60px;
-        }
-        .error-message {
-            color: var(--error-color);
-            background-color: #fee2e2;
-            padding: 10px;
-            border-radius: var(--border-radius);
-            margin-bottom: 15px;
-            display: none;
-        }
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: var(--primary-color);
-            color: white;
-            padding: 15px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            z-index: 1000;
-            display: none;
-        }
-        .copy-btn {
+        .night-mode .my-message {
             background-color: var(--accent-color);
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            margin-left: 10px;
         }
-        .copy-btn:hover {
-            background-color: #3a86ff;
-        }
-        /* Modalità Notte */
-        body.dark-mode {
-            background-color: #121212;
-            color: white;
-        }
-        body.dark-mode .container {
-            background-color: #1e1e1e;
-            color: white;
-        }
-        body.dark-mode .section {
-            background-color: #2c2c2c;
-            border-color: #3c3c3c;
-        }
-        body.dark-mode input,
-        body.dark-mode textarea {
-            background-color: #3c3c3c;
-            color: white;
-            border-color: #4c4c4c;
-        }
-        body.dark-mode .message.my-message {
-            background-color: #4caf50;
-        }
-        body.dark-mode .message.other-message {
-            background-color: #3c3c3c;
-            border-color: #4c4c4c;
-        }
-        body.dark-mode .chat-header {
-            background-color: #1e1e1e;
-        }
-        body.dark-mode .code-display {
-            background-color: #2c2c2c;
-        }
-        body.dark-mode .notification {
-            background-color: #1b5e20;
-        }
-        body.dark-mode .error-message {
-            background-color: #b71c1c;
+        .night-mode .other-message {
+            background-color: #333333;
+            border-color: #444444;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -242,9 +139,9 @@
 <body>
     <div class="container">
         <h1><i class="fas fa-comments"></i> Chat Privata a 2</h1>
-        <div id="error-message" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> <span id="error-text"></span>
-        </div>
+        <button id="toggle-theme" style="margin-bottom: 20px;">
+            <i class="fas fa-moon"></i> Attiva/Disattiva Modalità Notte
+        </button>
         <div id="start-section" class="section">
             <h2><i class="fas fa-plus-circle"></i> Inizia una nuova chat</h2>
             <p>Genera un codice univoco e condividilo con la persona con cui vuoi chattare.</p>
@@ -254,9 +151,6 @@
                 <div class="code-display">
                     <span id="generated-code"></span>
                     <button id="copy-code" class="copy-btn" title="Copia codice"><i class="far fa-copy"></i></button>
-                    <button id="download-qrcode" class="btn-secondary" style="margin-left: 10px;">
-                        <i class="fas fa-qrcode"></i> Scarica QR Code
-                    </button>
                 </div>
                 <p>Condividi questo codice con l'altra persona.</p>
             </div>
@@ -282,73 +176,47 @@
             <button id="clear-chat" class="btn-secondary" style="margin-top: 10px;">
                 <i class="fas fa-trash-alt"></i> Cancella Chat
             </button>
-            <button id="toggle-theme" class="btn-secondary" style="margin-top: 10px;">
-                <i class="fas fa-moon"></i> Attiva Modalità Notte
-            </button>
         </div>
     </div>
-    <div id="notification" class="notification">
-        <i class="fas fa-check-circle"></i> <span id="notification-text"></span>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const SERVER_URL = 'https://67cb65973395520e6af537e3.mockapi.io/api/v3/messages';
+            const SERVER_URL = 'https://mockapi.io/api/v3/messages';
             let chatCode = '';
-            let checkInterval;
             let userId = generateUserId();
             let lastMessageId = 0;
-            let deleteRequestSent = false;
-            let isDarkMode = false;
+            let isNightMode = false;
 
             // Elementi DOM
+            const toggleThemeBtn = document.getElementById('toggle-theme');
             const generateCodeBtn = document.getElementById('generate-code');
             const joinChatBtn = document.getElementById('join-chat');
             const sendMessageBtn = document.getElementById('send-message');
             const copyCodeBtn = document.getElementById('copy-code');
-            const downloadQRCodeBtn = document.getElementById('download-qrcode');
             const clearChatBtn = document.getElementById('clear-chat');
-            const toggleThemeBtn = document.getElementById('toggle-theme');
-            const generatedCodeContainer = document.getElementById('generated-code-container');
             const generatedCodeDisplay = document.getElementById('generated-code');
-            const joinCodeInput = document.getElementById('join-code');
-            const chatSection = document.getElementById('chat-section');
             const chatMessages = document.getElementById('chat-messages');
             const messageInput = document.getElementById('message-input');
             const currentCodeSpan = document.getElementById('current-code');
-            const errorMessage = document.getElementById('error-message');
-            const errorText = document.getElementById('error-text');
-            const notification = document.getElementById('notification');
-            const notificationText = document.getElementById('notification-text');
+            const startSection = document.getElementById('start-section');
+            const joinSection = document.getElementById('join-section');
+            const chatSection = document.getElementById('chat-section');
 
-            // Funzioni di utilità
+            // Funzioni utili
             function generateUserId() {
                 return 'user-' + Math.random().toString(36).substr(2, 9);
             }
 
             function generateRandomCode() {
                 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-                let result = '';
-                for (let i = 0; i < 6; i++) {
-                    result += chars.charAt(Math.floor(Math.random() * chars.length));
-                }
-                return result;
+                return Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
             }
 
             function showError(message) {
-                errorText.textContent = message;
-                errorMessage.style.display = 'block';
-                setTimeout(() => {
-                    errorMessage.style.display = 'none';
-                }, 5000);
+                alert(`Errore: ${message}`);
             }
 
             function showNotification(message) {
-                notificationText.textContent = message;
-                notification.style.display = 'block';
-                setTimeout(() => {
-                    notification.style.display = 'none';
-                }, 3000);
+                alert(message);
             }
 
             async function sendToServer(data) {
@@ -363,7 +231,6 @@
                 } catch (error) {
                     console.error('Errore:', error);
                     showError('Errore di connessione al server');
-                    throw error;
                 }
             }
 
@@ -399,22 +266,23 @@
             }
 
             // Gestione eventi
+            toggleThemeBtn.addEventListener('click', () => {
+                document.body.classList.toggle('night-mode');
+                isNightMode = !isNightMode;
+                toggleThemeBtn.innerHTML = isNightMode ? '<i class="fas fa-sun"></i> Disattiva Modalità Notte' : '<i class="fas fa-moon"></i> Attiva Modalità Notte';
+            });
+
             generateCodeBtn.addEventListener('click', async () => {
-                try {
-                    chatCode = generateRandomCode();
-                    generatedCodeDisplay.textContent = chatCode;
-                    generatedCodeContainer.classList.remove('hidden');
-                    currentCodeSpan.textContent = chatCode;
-                    document.getElementById('start-section').classList.add('hidden');
-                    document.getElementById('join-section').classList.add('hidden');
-                    chatSection.classList.remove('hidden');
-                    checkInterval = setInterval(getMessages, 2000);
-                    getMessages();
-                    showNotification('Chat creata con successo!');
-                } catch (error) {
-                    console.error('Errore creazione chat:', error);
-                    showError('Errore nella creazione della chat');
-                }
+                chatCode = generateRandomCode();
+                generatedCodeDisplay.textContent = chatCode;
+                document.getElementById('generated-code-container').classList.remove('hidden');
+                currentCodeSpan.textContent = chatCode;
+                startSection.classList.add('hidden');
+                joinSection.classList.add('hidden');
+                chatSection.classList.remove('hidden');
+                setInterval(getMessages, 2000);
+                getMessages();
+                showNotification('Chat creata con successo!');
             });
 
             copyCodeBtn.addEventListener('click', () => {
@@ -423,117 +291,44 @@
                     .catch(() => showError('Errore durante la copia del codice'));
             });
 
-            downloadQRCodeBtn.addEventListener('click', () => {
-                const qr = qrcode(0, 'L');
-                qr.addData(chatCode);
-                qr.make();
-                const canvas = document.createElement('canvas');
-                canvas.width = 256;
-                canvas.height = 256;
-                const ctx = canvas.getContext('2d');
-                const img = new Image();
-                img.src = qr.createDataURL(4);
-                img.onload = () => {
-                    ctx.drawImage(img, 0, 0, 256, 256);
-                    const link = document.createElement('a');
-                    link.href = canvas.toDataURL('image/png');
-                    link.download = 'chat_qrcode.png';
-                    link.click();
-                };
-            });
-
-            joinChatBtn.addEventListener('click', async () => {
-                try {
-                    chatCode = joinCodeInput.value.trim().toUpperCase();
-                    if (!/^[A-Z0-9]{6}$/.test(chatCode)) throw new Error('Il codice deve contenere solo lettere maiuscole e numeri');
-                    currentCodeSpan.textContent = chatCode;
-                    document.getElementById('start-section').classList.add('hidden');
-                    document.getElementById('join-section').classList.add('hidden');
-                    chatSection.classList.remove('hidden');
-                    checkInterval = setInterval(getMessages, 2000);
-                    getMessages();
-                    showNotification('Connesso alla chat con successo!');
-                } catch (error) {
-                    console.error('Errore unione chat:', error);
-                    showError(error.message);
+            joinChatBtn.addEventListener('click', () => {
+                chatCode = document.getElementById('join-code').value.trim().toUpperCase();
+                if (!/^[A-Z0-9]{6}$/.test(chatCode)) {
+                    showError('Il codice deve contenere solo lettere maiuscole e numeri');
+                    return;
                 }
+                currentCodeSpan.textContent = chatCode;
+                startSection.classList.add('hidden');
+                joinSection.classList.add('hidden');
+                chatSection.classList.remove('hidden');
+                setInterval(getMessages, 2000);
+                getMessages();
+                showNotification('Connesso alla chat con successo!');
             });
 
             sendMessageBtn.addEventListener('click', async () => {
                 const message = messageInput.value.trim();
                 if (message) {
-                    try {
-                        await sendToServer({ text: message });
-                        displayMessage(message, true);
-                        messageInput.value = '';
-                    } catch (error) {
-                        console.error('Errore invio messaggio:', error);
-                        showError('Errore nell\'invio del messaggio');
-                    }
+                    await sendToServer({ text: message });
+                    displayMessage(message, true);
+                    messageInput.value = '';
                 }
             });
 
             clearChatBtn.addEventListener('click', async () => {
+                const confirmDelete = confirm('Vuoi eliminare la chat? L\'altro utente dovrà confermare.');
+                if (!confirmDelete) return;
+
                 try {
-                    if (!deleteRequestSent) {
-                        await sendToServer({ action: 'request_delete' });
-                        deleteRequestSent = true;
-                        showNotification('Richiesta di eliminazione inviata. In attesa di conferma...');
-                    } else {
-                        showError('Hai già inviato una richiesta di eliminazione.');
-                    }
+                    const response = await fetch(`${SERVER_URL}?chatCode=${chatCode}`, { method: 'DELETE' });
+                    if (!response.ok) throw new Error('Errore durante la cancellazione della chat');
+                    chatMessages.innerHTML = '';
+                    showNotification('Chat cancellata con successo!');
                 } catch (error) {
-                    console.error('Errore durante la richiesta di eliminazione:', error);
-                    showError('Errore durante la richiesta di eliminazione');
+                    console.error('Errore cancellazione chat:', error);
+                    showError('Errore durante la cancellazione della chat');
                 }
             });
-
-            toggleThemeBtn.addEventListener('click', () => {
-                isDarkMode = !isDarkMode;
-                document.body.classList.toggle('dark-mode', isDarkMode);
-                toggleThemeBtn.textContent = isDarkMode ? 'Attiva Modalità Giorno' : 'Attiva Modalità Notte';
-                toggleThemeBtn.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i> Attiva Modalità Giorno' : '<i class="fas fa-moon"></i> Attiva Modalità Notte';
-            });
-
-            messageInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessageBtn.click();
-                }
-            });
-
-            joinCodeInput.addEventListener('input', (e) => {
-                e.target.value = e.target.value.toUpperCase();
-            });
-
-            async function handleDeleteRequests() {
-                try {
-                    const response = await fetch(`${SERVER_URL}?chatCode=${chatCode}`);
-                    if (!response.ok) throw new Error('Errore nel recupero delle richieste');
-                    const messages = await response.json();
-
-                    const deleteRequest = messages.find(msg => msg.action === 'request_delete');
-                    if (deleteRequest && !deleteConfirmedByOtherUser) {
-                        if (confirm('L\'altro utente vuole eliminare la chat. Confermi?')) {
-                            await sendToServer({ action: 'confirm_delete' });
-                            deleteConfirmedByOtherUser = true;
-                            showNotification('Chat eliminata con successo!');
-                            chatMessages.innerHTML = '';
-                        }
-                    }
-
-                    const confirmDelete = messages.find(msg => msg.action === 'confirm_delete');
-                    if (confirmDelete) {
-                        chatMessages.innerHTML = '';
-                        clearInterval(checkInterval);
-                        showNotification('Chat eliminata con successo!');
-                    }
-                } catch (error) {
-                    console.error('Errore nella gestione delle richieste di eliminazione:', error);
-                }
-            }
-
-            setInterval(handleDeleteRequests, 5000);
         });
     </script>
 </body>
