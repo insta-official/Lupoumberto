@@ -17,7 +17,6 @@
             --border-radius: 12px;
             --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
-        
         body {
             font-family: 'Poppins', sans-serif;
             max-width: 800px;
@@ -25,22 +24,29 @@
             padding: 20px;
             background-color: #f0f2f5;
             color: var(--dark-color);
+            transition: all 0.3s ease;
         }
-        
+        body.dark-mode {
+            background-color: #121212;
+            color: white;
+        }
         .container {
             background-color: white;
             border-radius: var(--border-radius);
             padding: 30px;
             box-shadow: var(--box-shadow);
+            transition: all 0.3s ease;
         }
-        
+        body.dark-mode .container {
+            background-color: #1e1e1e;
+            color: white;
+        }
         h1 {
             color: var(--primary-color);
             text-align: center;
             margin-bottom: 30px;
             font-weight: 600;
         }
-        
         .section {
             margin-bottom: 25px;
             padding: 20px;
@@ -49,11 +55,10 @@
             background-color: white;
             transition: all 0.3s ease;
         }
-        
-        .section:hover {
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+        body.dark-mode .section {
+            background-color: #2c2c2c;
+            border-color: #3c3c3c;
         }
-        
         button {
             background-color: var(--primary-color);
             color: white;
@@ -68,26 +73,21 @@
             align-items: center;
             justify-content: center;
         }
-        
         button:hover {
             background-color: var(--secondary-color);
             transform: translateY(-2px);
         }
-        
         button:disabled {
             background-color: #cccccc;
             cursor: not-allowed;
             transform: none;
         }
-        
         .btn-secondary {
             background-color: var(--accent-color);
         }
-        
         .btn-secondary:hover {
             background-color: #3a86ff;
         }
-        
         input, textarea {
             width: 100%;
             padding: 12px 15px;
@@ -98,13 +98,17 @@
             font-family: 'Poppins', sans-serif;
             transition: all 0.3s ease;
         }
-        
+        body.dark-mode input,
+        body.dark-mode textarea {
+            background-color: #3c3c3c;
+            color: white;
+            border-color: #4c4c4c;
+        }
         input:focus, textarea:focus {
             border-color: var(--accent-color);
             outline: none;
             box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
         }
-        
         #chat-messages {
             height: 350px;
             overflow-y: auto;
@@ -113,8 +117,12 @@
             margin-bottom: 15px;
             background-color: var(--light-color);
             border-radius: var(--border-radius);
+            transition: all 0.3s ease;
         }
-        
+        body.dark-mode #chat-messages {
+            background-color: #2c2c2c;
+            border-color: #3c3c3c;
+        }
         .message {
             margin-bottom: 15px;
             padding: 12px 15px;
@@ -124,52 +132,47 @@
             animation: fadeIn 0.3s ease;
             word-break: break-word;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
         .my-message {
             background-color: var(--primary-color);
             color: white;
             margin-left: auto;
             border-bottom-right-radius: 5px;
         }
-        
         .other-message {
             background-color: white;
             border: 1px solid #e9ecef;
             margin-right: auto;
             border-bottom-left-radius: 5px;
         }
-        
-        .message-time {
-            font-size: 0.7rem;
-            opacity: 0.7;
-            display: block;
-            margin-top: 5px;
-            text-align: right;
+        body.dark-mode .my-message {
+            background-color: #4caf50;
         }
-        
+        body.dark-mode .other-message {
+            background-color: #3c3c3c;
+            border-color: #4c4c4c;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .hidden {
             display: none;
         }
-        
         .chat-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-        
         .chat-info {
             background-color: var(--light-color);
             padding: 8px 15px;
             border-radius: 20px;
             font-size: 0.9rem;
         }
-        
+        body.dark-mode .chat-info {
+            background-color: #2c2c2c;
+        }
         .code-display {
             font-family: monospace;
             font-size: 1.2rem;
@@ -182,18 +185,18 @@
             background-color: var(--light-color);
             border-radius: var(--border-radius);
         }
-        
+        body.dark-mode .code-display {
+            background-color: #2c2c2c;
+        }
         .input-group {
             display: flex;
             gap: 10px;
         }
-        
         #message-input {
             flex-grow: 1;
             resize: none;
             min-height: 60px;
         }
-        
         .error-message {
             color: var(--error-color);
             background-color: #fee2e2;
@@ -202,7 +205,9 @@
             margin-bottom: 15px;
             display: none;
         }
-        
+        body.dark-mode .error-message {
+            background-color: #b71c1c;
+        }
         .notification {
             position: fixed;
             top: 20px;
@@ -215,16 +220,8 @@
             z-index: 1000;
             display: none;
         }
-        
-        .copy-btn {
-            background-color: var(--accent-color);
-            padding: 5px 10px;
-            font-size: 0.8rem;
-            margin-left: 10px;
-        }
-        
-        .copy-btn:hover {
-            background-color: #3a86ff;
+        body.dark-mode .notification {
+            background-color: #1b5e20;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -232,11 +229,9 @@
 <body>
     <div class="container">
         <h1><i class="fas fa-comments"></i> Chat Privata a 2</h1>
-        
         <div id="error-message" class="error-message">
             <i class="fas fa-exclamation-circle"></i> <span id="error-text"></span>
         </div>
-        
         <div id="start-section" class="section">
             <h2><i class="fas fa-plus-circle"></i> Inizia una nuova chat</h2>
             <p>Genera un codice univoco e condividilo con la persona con cui vuoi chattare.</p>
@@ -250,7 +245,6 @@
                 <p>Condividi questo codice con l'altra persona.</p>
             </div>
         </div>
-        
         <div id="join-section" class="section">
             <h2><i class="fas fa-user-plus"></i> Unisciti a una chat esistente</h2>
             <p>Inserisci il codice ricevuto per connetterti alla chat.</p>
@@ -259,36 +253,36 @@
                 <button id="join-chat"><i class="fas fa-sign-in-alt"></i> Unisciti</button>
             </div>
         </div>
-        
         <div id="chat-section" class="section hidden">
             <div class="chat-header">
                 <h2><i class="fas fa-comment-dots"></i> Chat in corso</h2>
                 <div class="chat-info">Codice: <span id="current-code"></span></div>
             </div>
-            
             <div id="chat-messages"></div>
-            
             <div class="input-group">
                 <textarea id="message-input" placeholder="Scrivi il tuo messaggio qui..." rows="3"></textarea>
                 <button id="send-message"><i class="fas fa-paper-plane"></i> Invia</button>
             </div>
+            <button id="clear-chat" class="btn-secondary" style="margin-top: 10px;">
+                <i class="fas fa-trash-alt"></i> Cancella Chat
+            </button>
+            <button id="toggle-theme" class="btn-secondary" style="margin-top: 10px;">
+                <i class="fas fa-moon"></i> Attiva Modalità Notte
+            </button>
         </div>
     </div>
-    
     <div id="notification" class="notification">
         <i class="fas fa-check-circle"></i> <span id="notification-text"></span>
     </div>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Configurazione
             const SERVER_URL = 'https://67cb65973395520e6af537e3.mockapi.io/api/v3/messages';
-            
-            // Elementi DOM
             const generateCodeBtn = document.getElementById('generate-code');
             const joinChatBtn = document.getElementById('join-chat');
             const sendMessageBtn = document.getElementById('send-message');
             const copyCodeBtn = document.getElementById('copy-code');
+            const clearChatBtn = document.getElementById('clear-chat');
+            const toggleThemeBtn = document.getElementById('toggle-theme');
             const generatedCodeContainer = document.getElementById('generated-code-container');
             const generatedCodeDisplay = document.getElementById('generated-code');
             const joinCodeInput = document.getElementById('join-code');
@@ -300,19 +294,18 @@
             const errorText = document.getElementById('error-text');
             const notification = document.getElementById('notification');
             const notificationText = document.getElementById('notification-text');
-            
-            // Variabili di stato
+
             let chatCode = '';
             let checkInterval;
             let userId = generateUserId();
             let lastMessageId = 0;
+            let deleteRequestSent = false;
+            let isDarkMode = false;
 
-            // Genera ID utente univoco
             function generateUserId() {
                 return 'user-' + Math.random().toString(36).substr(2, 9);
             }
 
-            // Genera codice chat casuale
             function generateRandomCode() {
                 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
                 let result = '';
@@ -322,7 +315,6 @@
                 return result;
             }
 
-            // Mostra errore
             function showError(message) {
                 errorText.textContent = message;
                 errorMessage.style.display = 'block';
@@ -331,7 +323,6 @@
                 }, 5000);
             }
 
-            // Mostra notifica
             function showNotification(message) {
                 notificationText.textContent = message;
                 notification.style.display = 'block';
@@ -340,26 +331,14 @@
                 }, 3000);
             }
 
-            // Invia dati al server
             async function sendToServer(data) {
                 try {
                     const response = await fetch(SERVER_URL, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            ...data,
-                            userId: userId,
-                            chatCode: chatCode,
-                            timestamp: new Date().toISOString()
-                        })
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...data, userId, chatCode, timestamp: new Date().toISOString() })
                     });
-                    
-                    if (!response.ok) {
-                        throw new Error('Errore nella risposta del server');
-                    }
-                    
+                    if (!response.ok) throw new Error('Errore nella risposta del server');
                     return await response.json();
                 } catch (error) {
                     console.error('Errore:', error);
@@ -368,69 +347,48 @@
                 }
             }
 
-            // Recupera messaggi dal server
             async function getMessages() {
                 try {
                     const response = await fetch(`${SERVER_URL}?chatCode=${chatCode}`);
-                    
-                    if (!response.ok) {
-                        throw new Error('Errore nel recupero messaggi');
-                    }
-                    
+                    if (!response.ok) throw new Error('Errore nel recupero messaggi');
                     const messages = await response.json();
-                    
-                    // Filtra solo i nuovi messaggi
                     const newMessages = messages.filter(msg => msg.id > lastMessageId);
-                    
                     if (newMessages.length > 0) {
                         lastMessageId = Math.max(...newMessages.map(msg => msg.id));
-                        newMessages.forEach(msg => {
-                            displayMessage(msg.text, msg.userId === userId, new Date(msg.timestamp));
-                        });
+                        newMessages.forEach(msg => displayMessage(msg.text, msg.userId === userId, new Date(msg.timestamp)));
                     }
                 } catch (error) {
                     console.error('Errore nel recupero messaggi:', error);
                 }
             }
 
-            // Mostra messaggio nella chat
             function displayMessage(text, isMyMessage, timestamp = new Date()) {
                 const messageDiv = document.createElement('div');
-                messageDiv.classList.add('message');
-                messageDiv.classList.add(isMyMessage ? 'my-message' : 'other-message');
-                
+                messageDiv.classList.add('message', isMyMessage ? 'my-message' : 'other-message');
                 const timeSpan = document.createElement('span');
                 timeSpan.classList.add('message-time');
                 timeSpan.textContent = formatTime(timestamp);
-                
                 messageDiv.textContent = text;
                 messageDiv.appendChild(timeSpan);
                 chatMessages.appendChild(messageDiv);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
 
-            // Formatta l'ora
             function formatTime(date) {
                 return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             }
 
-            // Genera nuovo codice
-            generateCodeBtn.addEventListener('click', async function() {
+            generateCodeBtn.addEventListener('click', async () => {
                 try {
                     chatCode = generateRandomCode();
                     generatedCodeDisplay.textContent = chatCode;
                     generatedCodeContainer.classList.remove('hidden');
-                    
-                    // Entra in chat
                     currentCodeSpan.textContent = chatCode;
                     document.getElementById('start-section').classList.add('hidden');
                     document.getElementById('join-section').classList.add('hidden');
                     chatSection.classList.remove('hidden');
-                    
-                    // Inizia a controllare i messaggi
                     checkInterval = setInterval(getMessages, 2000);
                     getMessages();
-                    
                     showNotification('Chat creata con successo!');
                 } catch (error) {
                     console.error('Errore creazione chat:', error);
@@ -438,33 +396,22 @@
                 }
             });
 
-            // Copia il codice
-            copyCodeBtn.addEventListener('click', function() {
-                navigator.clipboard.writeText(chatCode).then(function() {
-                    showNotification('Codice copiato negli appunti!');
-                }, function() {
-                    showError('Errore durante la copia del codice');
-                });
+            copyCodeBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(chatCode)
+                    .then(() => showNotification('Codice copiato negli appunti!'))
+                    .catch(() => showError('Errore durante la copia del codice'));
             });
 
-            // Unisciti a chat esistente
-            joinChatBtn.addEventListener('click', async function() {
+            joinChatBtn.addEventListener('click', async () => {
                 try {
                     chatCode = joinCodeInput.value.trim().toUpperCase();
-                    if (chatCode.length !== 6) {
-                        throw new Error('Il codice deve essere di 6 caratteri');
-                    }
-                    
-                    // Entra in chat
+                    if (!/^[A-Z0-9]{6}$/.test(chatCode)) throw new Error('Il codice deve contenere solo lettere maiuscole e numeri');
                     currentCodeSpan.textContent = chatCode;
                     document.getElementById('start-section').classList.add('hidden');
                     document.getElementById('join-section').classList.add('hidden');
                     chatSection.classList.remove('hidden');
-                    
-                    // Inizia a controllare i messaggi
                     checkInterval = setInterval(getMessages, 2000);
                     getMessages();
-                    
                     showNotification('Connesso alla chat con successo!');
                 } catch (error) {
                     console.error('Errore unione chat:', error);
@@ -472,15 +419,11 @@
                 }
             });
 
-            // Invia messaggio
-            sendMessageBtn.addEventListener('click', async function() {
+            sendMessageBtn.addEventListener('click', async () => {
                 const message = messageInput.value.trim();
                 if (message) {
                     try {
-                        await sendToServer({
-                            text: message
-                        });
-                        
+                        await sendToServer({ text: message });
                         displayMessage(message, true);
                         messageInput.value = '';
                     } catch (error) {
@@ -490,18 +433,41 @@
                 }
             });
 
-            // Invio messaggio con Enter
-            messageInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    sendMessageBtn.click();
+            clearChatBtn.addEventListener('click', async () => {
+                try {
+                    if (!deleteRequestSent) {
+                        await sendToServer({ action: 'request_delete' });
+                        deleteRequestSent = true;
+                        showNotification('Richiesta di eliminazione inviata. In attesa di conferma...');
+                    }
+                } catch (error) {
+                    console.error('Errore durante la richiesta di eliminazione:', error);
+                    showError('Errore durante la richiesta di eliminazione');
                 }
             });
 
-            // Auto-uppercase per il codice
-            joinCodeInput.addEventListener('input', function() {
-                this.value = this.value.toUpperCase();
+            toggleThemeBtn.addEventListener('click', () => {
+                isDarkMode = !isDarkMode;
+                document.body.classList.toggle('dark-mode', isDarkMode);
+                toggleThemeBtn.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i> Attiva Modalità Giorno' : '<i class="fas fa-moon"></i> Attiva Modalità Notte';
             });
+
+            setInterval(async () => {
+                try {
+                    const response = await fetch(`${SERVER_URL}?chatCode=${chatCode}`);
+                    if (!response.ok) throw new Error('Errore nel recupero delle richieste');
+                    const messages = await response.json();
+                    const deleteRequest = messages.find(msg => msg.action === 'request_delete');
+                    if (deleteRequest && confirm('L\'altro utente vuole eliminare la chat. Confermi?')) {
+                        await sendToServer({ action: 'confirm_delete' });
+                        chatMessages.innerHTML = '';
+                        clearInterval(checkInterval);
+                        showNotification('Chat eliminata con successo!');
+                    }
+                } catch (error) {
+                    console.error('Errore nella gestione delle richieste di eliminazione:', error);
+                }
+            }, 5000);
         });
     </script>
 </body>
