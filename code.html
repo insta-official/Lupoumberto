@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Temporanea</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px; /* Aggiunge padding per schermi piccoli */
+    }
+
+    #chat-container {
+      width: 90%;
+      max-width: 600px; /* Aumentato il max-width */
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15); /* Ombra più pronunciata */
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 90vh; /* Imposta un'altezza per avere spazio per scroll */
+      max-height: 800px; /* Altezza massima */
+    }
+
+    #chat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        background: #e0e0e0; /* Sfondo leggero per l'header */
+        border-bottom: 1px solid #ccc;
+    }
+
+    #chat-header h2 {
+        font-size: 1.2em;
+        color: #333;
+    }
+
+    #profile-picture-area {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    #profile-picture-area label {
+        margin-right: 5px;
+        font-size: 0.9em;
+        color: #555;
+    }
+
+    #profile-picture-input {
+        display: none;
+    }
+
+    #profile-picture-preview {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #ccc;
+        background-color: #eee; /* Sfondo placeholder */
+        margin-left: 5px;
+        display: none; /* Nascosto di default finché non si carica l'immagine */
+    }
+
+    #messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex; /* Usa flexbox per il contenitore messaggi */
+      flex-direction: column; /* Impila i messaggi in colonna */
+    }
+
+    .message {
+      display: flex; /* Usa flexbox per layout interno messaggio */
+      align-items: flex-start; /* Allinea in alto foto profilo e contenuto */
+      margin: 10px 0;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .profile-pic {
+      width: 35px; /* Dimensioni foto profilo */
+      height: 35px;
+      border-radius: 50%; /* Forma tonda */
+      object-fit: cover; /* Assicura che l'immagine copra l'area */
+      margin-top: 5px; /* Allinea leggermente con la bolla */
+      flex-shrink: 0; /* Impedisce che la foto profilo si rimpicciolisca */
+    }
+
+    .message-content {
+      max-width: calc(80% - 45px); /* 80% meno spazio per la foto + margine */
+      padding: 10px 15px;
+      border-radius: 15px;
+      word-wrap: break-word;
+      flex-grow: 1; /* Permette al contenuto di occupare spazio */
+      position: relative; /* Necessario per le pseudo-classi */
+      min-width: 50px; /* Evita che la bolla si rimpicciolisca troppo */
+    }
+
+    /* Messaggi inviati (a destra) */
+    .message-sent {
+        flex-direction: row-reverse; /* Inverte l'ordine: contenuto a destra, foto a sinistra */
+        align-self: flex-end; /* Sposta l'intero div message a destra */
+    }
+
+    .message-sent .profile-pic {
+        margin-left: 10px; /* Spazio tra bolla e foto */
+        margin-right: 0;
+    }
+
+     .message-sent .message-content {
+        background-color: #dcf8c6; /* Colore tipico per messaggi inviati */
+        color: #333;
+     }
+
+
+    /* Messaggi ricevuti (a sinistra) */
+    .message-received {
+        flex-direction: row; /* Ordine normale: foto a sinistra, contenuto a destra */
+        align-self: flex-start; /* Sposta l'intero div message a sinistra */
+    }
+
+    .message-received .profile-pic {
+        margin-right: 10px; /* Spazio tra foto e bolla */
+        margin-left: 0;
+    }
+
+    .message-received .message-content {
+        background-color: #e0e0e0; /* Colore tipico per messaggi ricevuti */
+        color: #333;
+    }
+
+     /* Stile per immagini dentro il messaggio */
+    .message-content img {
+      max-width: 100%;
+      height: auto; /* Mantieni l'aspetto ratio */
+      border-radius: 10px;
+      display: block; /* Rimuove spazio sotto l'immagine */
+      margin-top: 5px; /* Spazio tra testo e immagine se presenti entrambi */
+    }
+
+    .message-content span { /* Stile per il testo che accompagna l'immagine */
+        display: block; /* Mostra su riga separata sopra l'immagine */
+        margin-bottom: 5px;
+    }
+
+
+    #input-container {
+      display: flex;
+      align-items: center;
+      padding: 10px 15px; /* Padding aggiornato */
+      background: #f9f9f9;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    #message-input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 20px; /* Bordi più arrotondati */
+      margin-right: 10px;
+      font-size: 14px;
+      outline: none; /* Rimuove il bordo blu/arancione al focus */
+      transition: border-color 0.2s ease;
+    }
+
+    #message-input:focus {
+        border-color: #6200ea;
+    }
+
+
+    #image-upload-label {
+      cursor: pointer;
+      font-size: 1.5em; /* Icona più grande */
+      margin-right: 10px;
+      color: #555;
+      transition: color 0.2s ease;
+    }
+
+     #image-upload-label:hover {
+        color: #6200ea;
+     }
+
+    #message-image-input { /* Rinominato per chiarezza */
+      display: none;
+    }
+
+    #send-button {
+      padding: 10px 20px; /* Padding aggiornato */
+      background: #6200ea;
+      color: white;
+      border: none;
+      border-radius: 20px; /* Bordi più arrotondati */
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s ease;
+      outline: none;
+    }
+
+    #send-button:hover {
+      background: #3700b3;
+    }
+     #send-button:active {
+        background: #1a005d;
+     }
+
+    #timer {
+      text-align: right;
+      padding: 10px 15px; /* Padding aggiornato */
+      font-size: 12px;
+      color: #666;
+      background: #fafafa;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    /* Animazioni */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <div id="chat-header">
+        <h2>Chat Temporanea</h2>
+        <div id="profile-picture-area">
+            <label for="profile-picture-input">Foto Profilo</label>
+            <input type="file" id="profile-picture-input" accept="image/*" />
+            <img id="profile-picture-preview" src="" alt="Foto Profilo" />
+        </div>
+    </div>
+    <div id="messages">
+        <!-- I messaggi verranno inseriti qui dal JavaScript -->
+    </div>
+    <div id="input-container">
+      <input type="text" id="message-input" placeholder="Scrivi un messaggio..." />
+      <label for="message-image-input" id="image-upload-label">
+        📷
+      </label>
+      <input type="file" id="message-image-input" accept="image/*" />
+      <button id="send-button">Invia</button>
+    </div>
+    <div id="timer">Tempo rimanente: <span id="countdown">24:00:00</span></div>
+  </div>
+
+  <script>
+    // API Endpoint
+    const API_URL = 'https://67cb65973395520e6af537e3.mockapi.io/api/v3/messages';
+
+    const messagesContainer = document.getElementById('messages');
+    const messageInput = document.getElementById('message-input');
+    const messageImageInput = document.getElementById('message-image-input');
+    const sendButton = document.getElementById('send-button');
+    const countdownElement = document.getElementById('countdown');
+
+    // Elementi per la foto profilo
+    const profilePictureInput = document.getElementById('profile-picture-input');
+    const profilePicturePreview = document.getElementById('profile-picture-preview');
+
+    // --- Gestione Utente (ID, Colore, Foto Profilo) ---
+
+    // Genera o recupera l'ID utente univoco (usato per distinguere i messaggi)
+    // Fallback semplice se crypto.randomUUID() non è disponibile
+    const userId = localStorage.getItem('userId') || (crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).substring(2) + Date.now().toString(36));
+    localStorage.setItem('userId', userId);
+
+    // Genera o recupera un colore casuale per l'utente (non più usato per la bolla, ma mantenuto)
+    const userColor = localStorage.getItem('userColor') || getRandomColor();
+    localStorage.setItem('userColor', userColor);
+
+    // Recupera la foto profilo salvata
+    let userProfilePicture = localStorage.getItem('userProfilePicture');
+    if (userProfilePicture) {
+        profilePicturePreview.src = userProfilePicture;
+        profilePicturePreview.style.display = 'inline-block'; // Mostra l'anteprima se c'è un'immagine
+    }
+
+    // Funzione per generare un colore casuale
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    // --- Funzioni Chat ---
+
+    // Funzione per aggiornare la chat
+    async function fetchMessages() {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+             // Logga l'errore HTTP se la risposta non è OK
+             console.error(`Errore HTTP durante il recupero messaggi! status: ${response.status}`);
+             // Puoi anche provare a leggere il corpo della risposta per più dettagli se l'API lo fornisce
+             const errorText = await response.text();
+             console.error('Corpo risposta errore:', errorText);
+             throw new Error(`Errore recupero messaggi: ${response.status}`);
+        }
+        const messages = await response.json();
+        messagesContainer.innerHTML = ''; // Resetta i messaggi
+
+        messages
+            .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)) // Ordina per data/ora se mockapi la fornisce
+            .forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'message';
+
+                // Determina se il messaggio è stato inviato dall'utente corrente
+                const isSentByUser = msg.userId === userId;
+                messageDiv.classList.add(isSentByUser ? 'message-sent' : 'message-received');
+
+                // Aggiungi la foto profilo se presente nel messaggio (o usa quella locale per l'utente corrente)
+                // NOTA: Se l'API rifiuta la foto profilo inviata, msg.profilePicture potrebbe essere vuoto anche per i tuoi messaggi.
+                // In quel caso, userProfilePicture (locale) è l'unico modo per vederla tu.
+                const profilePicSrc = msg.profilePicture || (isSentByUser ? userProfilePicture : null);
+
+                if (profilePicSrc) {
+                    const profilePicImg = document.createElement('img');
+                    profilePicImg.className = 'profile-pic';
+                    profilePicImg.src = profilePicSrc;
+                    profilePicImg.alt = 'Foto Profilo';
+                    messageDiv.appendChild(profilePicImg);
+                } else {
+                    // Aggiungi un placeholder se non c'è la foto (opzionale, per mantenere l'allineamento)
+                    // Puoi decidere di non mostrare nulla per gli utenti senza foto.
+                     const profilePicPlaceholder = document.createElement('div');
+                     profilePicPlaceholder.className = 'profile-pic'; // Usa la stessa classe per dimensioni
+                     profilePicPlaceholder.style.backgroundColor = '#ccc'; // Sfondo placeholder
+                     profilePicPlaceholder.style.borderRadius = '50%'; // Forma tonda anche placeholder
+                     profilePicPlaceholder.style.border = '1px solid #aaa';
+                     // Rimuovi il placeholder se non vuoi mostrare un box grigio per chi non ha foto
+                     messageDiv.appendChild(profilePicPlaceholder);
+                }
+
+
+                const messageContentDiv = document.createElement('div');
+                messageContentDiv.className = 'message-content';
+                // Il colore della bolla è gestito dal CSS (.message-sent, .message-received)
+
+                if (msg.image) {
+                    // Se il messaggio contiene un'immagine allegata al messaggio
+                    if (msg.text) { // Aggiungi il testo se presente insieme all'immagine
+                         const textSpan = document.createElement('span');
+                         textSpan.textContent = msg.text;
+                         messageContentDiv.appendChild(textSpan);
+                    }
+                    const img = document.createElement('img');
+                    img.src = msg.image; // L'immagine del messaggio stesso (Data URL)
+                    img.alt = 'Immagine messaggio';
+                    messageContentDiv.appendChild(img);
+
+                } else if (msg.text) {
+                    // Se il messaggio contiene solo testo
+                    messageContentDiv.textContent = msg.text;
+                }
+
+                // Evita di aggiungere messaggi vuoti se non hanno né testo né immagine del messaggio
+                if (messageContentDiv.childNodes.length > 0) {
+                     messageDiv.appendChild(messageContentDiv);
+                     messagesContainer.appendChild(messageDiv);
+                } else {
+                    // Opzionale: logga se un messaggio ricevuto è vuoto
+                    console.warn('Ricevuto un messaggio vuoto:', msg);
+                }
+
+
+            });
+
+        messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll automatico
+      } catch (error) {
+        console.error('Errore critico durante il recupero dei messaggi:', error);
+        // Opzionale: mostra un messaggio di errore all'utente nella UI
+      }
+    }
+
+    // Funzione per inviare un messaggio
+    async function sendMessage(text, messageImage = null) { // Rinominato messageImage per chiarezza
+      const newMessage = {
+        userId: userId, // Includi l'ID utente
+        color: userColor, // Includi il colore (non usato per la bolla, ma utile)
+        // Includi la foto profilo corrente (se impostata).
+        // ATTENZIONE: Questo invia la Data URL completa in OGNI messaggio.
+        // Questo è il punto che probabilmente causa l'errore "Payload Too Large" su MockAPI.io
+        profilePicture: userProfilePicture || null,
+        text: text || '', // Assicura che 'text' sia sempre una stringa
+        image: messageImage, // L'immagine allegata al messaggio (Data URL o null)
+        // mockapi.io aggiunge automaticamente un ID e createdAt
+      };
+
+      console.log('Tentativo di invio messaggio:', newMessage); // Logga l'oggetto inviato
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newMessage),
+        });
+
+        // Controlla se la risposta è HTTP OK (status 200-299)
+        if (!response.ok) {
+             // Se non è OK, leggi il corpo della risposta e logga l'errore
+             const errorText = await response.text();
+             console.error(`Errore HTTP durante l'invio! status: ${response.status}`);
+             console.error('Corpo risposta errore:', errorText);
+             // Re-lancia l'errore per essere catturato dal catch block
+             throw new Error(`Invio fallito: ${response.status} - ${errorText.substring(0, 100)}...`); // Limita lunghezza testo errore
+        }
+
+        console.log('Messaggio inviato con successo!');
+        // Aggiorna la chat dopo l'invio (aggiungi un piccolo ritardo per MockAPI.io)
+        setTimeout(fetchMessages, 200);
+
+      } catch (error) {
+        console.error('Errore critico durante l\'invio del messaggio:', error);
+        // Mostra un messaggio di errore all'utente (più dettagliato se possibile)
+        alert('Errore durante l\'invio del messaggio. Potrebbe essere dovuto a un limite di dimensione (es. foto profilo troppo grande). Dettagli nella console.');
+      }
+    }
+
+    // --- Listeners Eventi ---
+
+    // Gestione del pulsante "Invia" o Invio nel campo testo
+    sendButton.addEventListener('click', handleSendMessage);
+    messageInput.addEventListener('keypress', function(event) {
+        // Invia messaggio anche premendo Invio nel campo testo
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Evita il newline nel campo testo
+            handleSendMessage();
+        }
+    });
+
+
+    // Funzione helper per gestire l'invio (testo + immagine messaggio)
+    function handleSendMessage() {
+      const text = messageInput.value.trim();
+      const imageFile = messageImageInput.files[0]; // Immagine allegata al messaggio
+
+      if (text || imageFile) {
+        if (imageFile) {
+          // Leggi l'immagine del messaggio come Data URL
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            sendMessage(text, e.target.result); // Invia testo e immagine del messaggio
+          };
+          reader.onerror = (e) => {
+             console.error("Errore lettura file immagine messaggio:", e);
+             alert("Errore durante la lettura dell'immagine allegata. Riprova.");
+          };
+          reader.readAsDataURL(imageFile);
+        } else {
+          // Invia solo testo
+          sendMessage(text);
+        }
+
+        messageInput.value = ''; // Pulisci il campo testo
+        messageImageInput.value = ''; // Pulisci l'input file dell'immagine messaggio
+      } else {
+          console.log('Messaggio vuoto. Non inviato.');
+      }
+    }
+
+
+    // Gestione dell'upload della foto profilo
+    profilePictureInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Aggiungi una validazione semplice sulla dimensione del file
+            if (file.size > 1024 * 1024 * 2) { // Esempio: limite 2MB
+                alert('La foto profilo è troppo grande (max 2MB consigliati per evitare problemi di invio).');
+                profilePictureInput.value = ''; // Resetta l'input file
+                return; // Non procedere con la lettura
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                userProfilePicture = e.target.result; // Salva la Data URL nella variabile
+                localStorage.setItem('userProfilePicture', userProfilePicture); // Salva in localStorage
+                profilePicturePreview.src = userProfilePicture; // Mostra l'anteprima
+                profilePicturePreview.style.display = 'inline-block'; // Rendi visibile l'anteprima
+                alert('Foto profilo aggiornata! Verrà mostrata nei prossimi messaggi. ATTENZIONE: Immagini molto grandi potrebbero causare errori di invio.'); // Feedback utente con avviso
+            };
+            reader.onerror = (e) => {
+                 console.error("Errore lettura file foto profilo:", e);
+                 alert("Errore durante la lettura della foto profilo. Riprova.");
+            };
+            reader.readAsDataURL(file); // Leggi il file come Data URL
+        }
+    });
+
+
+    // --- Timer per l'autodistruzione ---
+    // Questo timer è solo client-side. Per una vera autodistruzione,
+    // un server dovrebbe eliminare i messaggi dall'API dopo 24 ore.
+
+    // Recupera il tempo rimanente da localStorage o imposta 24 ore
+    // Usa session storage invece di local storage per il timer, si resetta alla chiusura del browser
+    // O mantenilo in local storage se vuoi che persista tra sessioni
+    let timeLeft = parseInt(localStorage.getItem('chatTimeLeft') || (24 * 60 * 60).toString(), 10);
+     // Assicurati che non sia negativo o troppo grande
+     if (timeLeft < 0 || timeLeft > 24 * 60 * 60) {
+         timeLeft = 24 * 60 * 60;
+     }
+
+
+    function updateTimer() {
+      const hours = Math.floor(timeLeft / 3600);
+      const minutes = Math.floor((timeLeft % 3600) / 60);
+      const seconds = timeLeft % 60;
+
+      countdownElement.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        messagesContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">La chat si è autodistrutta.</p>';
+        // Opzionale: pulisci localStorage relativo a questa chat quando finisce il timer
+        // localStorage.removeItem('chatTimeLeft');
+        // localStorage.removeItem('userId');
+        // localStorage.removeItem('userColor');
+        // localStorage.removeItem('userProfilePicture');
+         // Impedisci nuovi invii disabilitando gli input
+        messageInput.disabled = true;
+        messageImageInput.disabled = true;
+        sendButton.disabled = true;
+        profilePictureInput.disabled = true;
+      } else {
+        timeLeft--;
+        localStorage.setItem('chatTimeLeft', timeLeft); // Salva il tempo rimanente
+      }
+    }
+
+    const timerInterval = setInterval(updateTimer, 1000);
+    updateTimer(); // Chiama subito per mostrare il tempo iniziale
+
+
+    // --- Caricamento Iniziale e Aggiornamenti Periodici ---
+
+    // Aggiorna la chat ogni 2 secondi
+    // NOTA: In un'applicazione reale, potresti usare WebSockets per aggiornamenti in tempo reale
+    // invece di fare polling continuo, che è meno efficiente.
+    setInterval(fetchMessages, 2000);
+
+    // Carica i messaggi all'avvio
+    fetchMessages();
+  </script>
+</body>
+</html>
