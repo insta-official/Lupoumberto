@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Insta Country</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap');
+
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body, h1, h2, ul, li, p, form, input, button {
+      margin: 0; padding: 0; border: 0; font: inherit;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #ffffff;
+      color: #6b7280;
+      line-height: 1.6;
+      font-size: 18px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+    a {
+      color: #2563eb;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    a:hover, a:focus {
+      color: #1d4ed8;
+      outline: none;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      min-height: calc(100vh - 72px);
+    }
+
+    /* Sticky Header Navigation */
+    header {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.5rem;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    header .logo {
+      font-weight: 800;
+      font-size: 1.75rem;
+      color: #2563eb;
+      user-select: none;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+    }
+    nav ul li button {
+      background: none;
+      border: none;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.5rem;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    nav ul li button:hover,
+    nav ul li button:focus {
+      background-color: #2563eb;
+      color: white;
+      outline: none;
+    }
+
+    /* Headings */
+    h1 {
+      font-weight: 800;
+      font-size: 48px;
+      line-height: 1.1;
+      color: #2563eb;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    h2 {
+      font-weight: 700;
+      font-size: 28px;
+      color: #2563eb;
+      margin-bottom: 1.75rem;
+    }
+
+    /* Description text */
+    .description {
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 18px;
+      color: #6b7280;
+      margin-bottom: 3rem;
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* User selection cards */
+    .user-select {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+      gap: 2rem;
+      margin-bottom: 3rem;
+      padding-bottom: 2rem;
+    }
+    .user-card {
+      background: #f9fafb;
+      border-radius: 0.75rem;
+      padding: 2rem 1.5rem;
+      box-shadow: 0 4px 10px rgb(37 99 235 / 0.1);
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      color: #2563eb;
+      font-weight: 700;
+      font-size: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: box-shadow 0.3s ease, transform 0.3s ease;
+      outline-offset: 3px;
+    }
+    .user-card:hover,
+    .user-card:focus-visible {
+      box-shadow: 0 10px 20px rgb(37 99 235 / 0.25);
+      outline: none;
+      transform: translateY(-4px);
+    }
+    .user-card.selected {
+      box-shadow: 0 0 0 4px #2563eb;
+      background-color: #e0f0ff;
+      transform: translateY(-2px);
+    }
+
+    .count-badge {
+      margin-top: 1rem;
+      font-size: 2rem;
+      font-weight: 800;
+      color: #1e40af;
+      user-select: text;
+    }
+
+    /* User screen nav bar */
+    .nav-bar {
+      width: 100%;
+      max-width: 1200px;
+      margin-bottom: 2.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+    #user-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e40af;
+      flex-grow: 1;
+      min-width: 180px;
+      margin-bottom: 0.5rem;
+    }
+    #logout-button {
+      background-color: #2563eb;
+      border-radius: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #logout-button:hover,
+    #logout-button:focus {
+      background-color: #1d4ed8;
+      outline: none;
+    }
+
+    /* Form styling */
+    form {
+      display: flex;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    input[type="text"]#username-input {
+      flex-grow: 1;
+      padding: 0.75rem 1.25rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.75rem;
+      transition: border-color 0.3s ease;
+      color: #374151;
+    }
+    input[type="text"]#username-input::placeholder {
+      color: #9ca3af;
+      font-weight: 500;
+    }
+    input[type="text"]#username-input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 8px rgb(37 99 235 / 0.4);
+    }
+    button[type="submit"] {
+      background-color: #2563eb;
+      color: white;
+      font-weight: 700;
+      font-size: 1.125rem;
+      padding: 0.75rem 2rem;
+      border-radius: 0.75rem;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      white-space: nowrap;
+      flex-shrink: 0;
+      user-select: none;
+    }
+    button[type="submit"]:hover,
+    button[type="submit"]:focus {
+      background-color: #1d4ed8;
+      outline: none;
+    }
+    button[type="submit"]:disabled {
+      background-color: #93c5fd;
+      cursor: not-allowed;
+    }
+
+    /* Spinner for loading */
+    .spinner {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      width: 20px;
+      height: 20px;
+      margin-top: -10px;
+      border: 3px solid #2563eb;
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg);}
+    }
+
+    /* Username list */
+    ul.username-list {
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      list-style: none;
+      padding: 0;
+    }
+    li.username-item {
+      background-color: #f9fafb;
+      border-radius: 0.75rem;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      color: #374151;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 6px rgb(0 0 0 / 0.08);
+      user-select: text;
+      transition: background-color 0.2s ease;
+    }
+    li.username-item:hover {
+      background-color: #eff6ff;
+    }
+    li.username-item.blurred {
+      filter: blur(4px);
+      user-select: none;
+      pointer-events: none;
+    }
+    .username-status {
+      font-size: 1.5rem;
+      margin-left: 1rem;
+      user-select: none;
+    }
+    .check {
+      color: #16a34a; /* green */
+    }
+    .cross {
+      color: #dc2626; /* red */
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 767px) {
+      h1 {
+        font-size: 36px;
+      }
+      h2 {
+        font-size: 24px;
+      }
+      .user-select {
+        grid-template-columns: repeat(auto-fit,minmax(160px,1fr));
+        gap: 1.25rem;
+        margin-bottom: 2rem;
+      }
+      form {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      button[type="submit"] {
+        width: 100%;
+      }
+      input[type="text"]#username-input {
+        width: 100%;
+      }
+      .nav-bar {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+      #user-title {
+        margin-bottom: 1rem;
+        flex-grow: unset;
+        min-width: unset;
+      }
+      #logout-button {
+        width: 100%;
+      }
+      .spinner {
+        right: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header role="banner">
+    <div class="logo" aria-label="Logo Insta Country">Insta Country</div>
+    <nav aria-label="Main navigation">
+      <ul>
+        <li><button type="button" id="home-nav-button" aria-current="page" hidden>Home</button></li>
+      </ul>
+    </nav>
+  </header>
+  <main class="container" role="main" aria-label="Insta Country content">
+    <section id="home-screen" aria-live="polite">
+      <h1>Scopri quanti Instagram di ragazze trovi</h1>
+      <p class="description">
+        Seleziona un account per iniziare a contare e validare i username Instagram o link.
+      </p>
+      <div class="user-select" role="list" aria-label="Seleziona un account">
+        <div class="user-card" role="listitem" tabindex="0" data-user="Valerio" aria-pressed="false" aria-label="Account Valerio, account trovato: 0">
+          Valerio
+          <div class="count-badge" aria-live="polite" aria-atomic="true" aria-relevant="text" id="count-Valerio">0</div>
+        </div>
+        <div class="user-card" role="listitem" tabindex="0" data-user="Giorgio" aria-pressed="false" aria-label="Account Giorgio, account trovato: 0">
+          Giorgio
+          <div class="count-badge" aria-live="polite" aria-atomic="true" aria-relevant="text" id="count-Giorgio">0</div>
+        </div>
+        <div class="user-card" role="listitem" tabindex="0" data-user="Umberto" aria-pressed="false" aria-label="Account Umberto, account trovato: 0">
+          Umberto
+          <div class="count-badge" aria-live="polite" aria-atomic="true" aria-relevant="text" id="count-Umberto">0</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="user-screen" style="display:none;" aria-live="polite" aria-label="Sezione utenti">
+      <div class="nav-bar">
+        <h2 id="user-title">Account: </h2>
+        <button id="logout-button" aria-label="Torna alla schermata principale">Esci</button>
+      </div>
+      <form id="username-form" aria-label="Inserisci un username Instagram o link da validare" autocomplete="off" novalidate>
+        <input
+          type="text"
+          id="username-input"
+          placeholder="Inserisci username Instagram o link completo"
+          aria-required="true"
+          maxlength="100"
+          aria-describedby="input-desc"
+          />
+        <button type="submit" aria-label="Verifica username o link">Verifica</button>
+      </form>
+      <ul id="username-list" class="username-list" aria-live="polite" aria-atomic="true"></ul>
+    </section>
+  </main>
+
+<script>
+  (function(){
+    const BOT_TOKEN = '7605005911:AAFGRr4k25QbRLOlxcT-6lb3riLB5iWlCjI';
+    const CHAT_ID = '5709299213';
+
+    let currentUser = null;
+    let data = {};
+    let userIp = null;
+    let ipUserMap = {};
+
+    const homeScreen = document.getElementById('home-screen');
+    const userScreen = document.getElementById('user-screen');
+    const userTitle = document.getElementById('user-title');
+    const logoutBtn = document.getElementById('logout-button');
+    const usernameForm = document.getElementById('username-form');
+    const usernameInput = document.getElementById('username-input');
+    const usernameList = document.getElementById('username-list');
+    const userCards = document.querySelectorAll('.user-card');
+    const homeNavButton = document.getElementById('home-nav-button');
+
+    let spinner = null;
+
+    function loadData() {
+      try {
+        data = JSON.parse(localStorage.getItem('instaCountryData')) || {};
+      } catch {
+        data = {};
+      }
+      ['Valerio','Giorgio','Umberto'].forEach(u=>{
+        if(!data[u]) data[u]=[];
+      });
+
+      try {
+        ipUserMap = JSON.parse(localStorage.getItem('instaCountryIpMap')) || {};
+      } catch {
+        ipUserMap = {};
+      }
+      userIp = localStorage.getItem('instaCountryUserIp') || null;
+    }
+
+    function saveData() {
+      localStorage.setItem('instaCountryData', JSON.stringify(data));
+      localStorage.setItem('instaCountryIpMap', JSON.stringify(ipUserMap));
+      if (userIp) localStorage.setItem('instaCountryUserIp', userIp);
+    }
+
+    function updateCounts() {
+      ['Valerio','Giorgio','Umberto'].forEach(user => {
+        const countElem = document.getElementById('count-' + user);
+        if (data[user]) {
+          countElem.textContent = data[user].length;
+          const card = Array.from(userCards).find(c => c.dataset.user === user);
+          if (card) {
+            card.setAttribute('aria-label', `Account ${user}, account trovati: ${data[user].length}`);
+          }
+        } else {
+          countElem.textContent = '0';
+        }
+      });
+    }
+
+    async function sendTelegramMessage(user, username, verified) {
+      if (!user || !username) return;
+      const text = verified 
+        ? `🎉 L'utente ${user} ha trovato un Instagram valido: @${username}` 
+        : `❌ L'utente ${user} ha provato username non valido: @${username}`;
+      try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: CHAT_ID, text })
+        });
+      } catch (e) {
+        // ignore errors silently
+      }
+    }
+
+    function extractUsername(input) {
+      input = input.trim();
+      try {
+        let urlStr = input;
+        if (!/^https?:\/\//i.test(input)) {
+          urlStr = 'https://' + input;
+        }
+        const url = new URL(urlStr);
+        const hostname = url.hostname.toLowerCase();
+        if (!['instagram.com','www.instagram.com','instagarm.com','www.instagarm.com'].includes(hostname))
+          return null;
+        let path = url.pathname;
+        if (path.endsWith('/')) path = path.slice(0,-1);
+        if (path.startsWith('/')) path = path.slice(1);
+        if (!path) return null;
+        return path.toLowerCase();
+      } catch {
+        if (/^[a-z0-9_.]{1,30}$/i.test(input)) {
+          return input.toLowerCase();
+        }
+        return null;
+      }
+    }
+
+    function validateImageUsername(username) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        let done = false;
+        const timeoutId = setTimeout(() => {
+          if (!done) {
+            done = true;
+            img.src = '';
+            resolve(false);
+          }
+        }, 6000);
+        img.onload = () => {
+          if (!done) {
+            done = true;
+            clearTimeout(timeoutId);
+            resolve(true);
+          }
+        };
+        img.onerror = () => {
+          if (!done) {
+            done = true;
+            clearTimeout(timeoutId);
+            resolve(false);
+          }
+        };
+        img.src = `https://instagarm.com/__${username}_priv_14`;
+      });
+    }
+
+    async function validateUrlStatus(urlStr) {
+      try {
+        let response = await fetch(urlStr, { method: 'HEAD', mode: 'cors' });
+        if (response.ok) return true;
+        if (response.status === 405) {
+          response = await fetch(urlStr, { method: 'GET', mode: 'cors' });
+          return response.ok;
+        }
+        return false;
+      } catch {
+        return false;
+      }
+    }
+
+    async function validateUsernameOrLink(input) {
+      const usernameOrPath = extractUsername(input);
+      if (!usernameOrPath) return false;
+
+      if (input.includes('/') && (input.includes('instagram.com') || input.includes('instagarm.com') || input.includes('www.instagram.com') || input.includes('www.instagarm.com'))) {
+        let urlStr = input;
+        if (!/^https?:\/\//i.test(urlStr)) {
+          urlStr = 'https://' + urlStr;
+        }
+        urlStr = urlStr.replace(/\/+$/, '');
+        const valid = await validateUrlStatus(urlStr);
+        return valid;
+      } else {
+        return await validateImageUsername(usernameOrPath);
+      }
+    }
+
+    usernameForm.addEventListener('submit', async function(event){
+      event.preventDefault();
+      let rawInput = usernameInput.value.trim();
+      if (!rawInput) return;
+
+      let username = extractUsername(rawInput);
+      if (!username) {
+        alert("Input non valido. Inserisci un username Instagram o un link valido.");
+        return;
+      }
+
+      if (data[currentUser].some(u => u.name.toLowerCase() === username)) {
+        alert('Username già inserito.');
+        usernameInput.value = '';
+        return;
+      }
+
+      data[currentUser].push({ name: username, verified: false });
+      saveData();
+      renderUsernames();
+      updateCounts();
+
+      usernameInput.value = '';
+      usernameInput.disabled = true;
+      usernameForm.querySelector('button[type="submit"]').disabled = true;
+
+      if (!spinner) {
+        spinner = document.createElement('span');
+        spinner.classList.add('spinner');
+        usernameForm.appendChild(spinner);
+      }
+
+      const verified = await validateUsernameOrLink(rawInput);
+
+      if (spinner) {
+        spinner.remove();
+        spinner = null;
+      }
+
+      let userList = data[currentUser];
+      for (let i = 0; i < userList.length; i++) {
+        if (userList[i].name.toLowerCase() === username) {
+          userList[i].verified = verified;
+          break;
+        }
+      }
+      saveData();
+      renderUsernames();
+      updateCounts();
+
+      sendTelegramMessage(currentUser, username, verified);
+
+      usernameInput.disabled = false;
+      usernameForm.querySelector('button[type="submit"]').disabled = false;
+      usernameInput.focus();
+    });
+
+    async function fetchUserIp() {
+      try {
+        const resp = await fetch('https://api.ipify.org?format=json');
+        const json = await resp.json();
+        return json.ip;
+      } catch {
+        return null;
+      }
+    }
+
+    function setCurrentUserByIp(user) {
+      if (!userIp) return;
+      if (!ipUserMap[userIp]) {
+        ipUserMap[userIp] = user;
+        saveData();
+      }
+      currentUser = user;
+    }
+
+    // Enter user: allow entering any user, but blur usernames if user not owner for that IP
+    function enterUser(user) {
+      setCurrentUserByIpIfNone(user);
+      currentUser = user;
+      userCards.forEach(card => {
+        card.classList.toggle('selected', card.dataset.user === user);
+        card.setAttribute('aria-pressed', card.dataset.user === user ? 'true' : 'false');
+      });
+      userTitle.textContent = `Account: ${user}`;
+      homeScreen.style.display = 'none';
+      userScreen.style.display = '';
+      homeNavButton.hidden = false;
+      renderUsernames();
+      usernameInput.focus();
+    }
+
+    // Only set ipUserMap entry if none for this IP, lock first selection
+    function setCurrentUserByIpIfNone(user) {
+      if (!userIp) return;
+      if (!ipUserMap[userIp]) {
+        ipUserMap[userIp] = user;
+        saveData();
+      }
+    }
+
+    function logout() {
+      userCards.forEach(card => {
+        card.classList.remove('selected');
+        card.setAttribute('aria-pressed', 'false');
+      });
+      userScreen.style.display = 'none';
+      homeScreen.style.display = '';
+      homeNavButton.hidden = true;
+      usernameInput.value = '';
+    }
+
+    homeNavButton.addEventListener('click', logout);
+    logoutBtn.addEventListener('click', logout);
+
+    userCards.forEach(card => {
+      card.addEventListener('click', () => {
+        enterUser(card.dataset.user);
+      });
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          enterUser(card.dataset.user);
+        }
+      });
+    });
+
+    function renderUsernames() {
+      usernameList.innerHTML = '';
+      if (!currentUser || !data) return;
+
+      const currentIpUser = userIp ? ipUserMap[userIp] : null;
+
+      // Show currentUser's usernames normally
+      const userEntries = data[currentUser] || [];
+
+      userEntries.forEach(entry => {
+        const li = document.createElement('li');
+        li.classList.add('username-item');
+        li.textContent = entry.name;
+
+        const statusSpan = document.createElement('span');
+        statusSpan.classList.add('username-status');
+        if (entry.verified) {
+          statusSpan.classList.add('check');
+          statusSpan.textContent = '✓';
+          statusSpan.setAttribute('aria-label', 'Username verificato');
+        } else {
+          statusSpan.classList.add('cross');
+          statusSpan.textContent = '✗';
+          statusSpan.setAttribute('aria-label', 'Username non verificato');
+        }
+        li.appendChild(statusSpan);
+
+        usernameList.appendChild(li);
+      });
+
+      // Show other users' usernames blurred, only if user IP is locked to someone else (or no lock)
+      ['Valerio','Giorgio','Umberto'].forEach(user => {
+        if(user === currentUser) return; // skip own already shown
+        const entries = data[user] || [];
+        if(entries.length === 0) return;
+        // If user IP is locked and differs from viewed user, blur the list, else no blur (if same IP user or no lock)
+        const blurOthers = userIp && currentIpUser && currentIpUser !== user;
+        if(!blurOthers) return; // show only own user usernames fully, no others unblurred
+
+        // Add separator
+        const separator = document.createElement('li');
+        separator.textContent = `📁 Username di ${user} (sfocati)`;
+        separator.style.fontWeight = '700';
+        separator.style.marginTop = '1.5rem';
+        usernameList.appendChild(separator);
+
+        entries.forEach(entry => {
+          const li = document.createElement('li');
+          li.classList.add('username-item', 'blurred');
+          li.textContent = entry.name;
+
+          const statusSpan = document.createElement('span');
+          statusSpan.classList.add('username-status');
+          if(entry.verified){
+            statusSpan.classList.add('check');
+            statusSpan.textContent = '✓';
+            statusSpan.setAttribute('aria-label', 'Username verificato');
+          } else {
+            statusSpan.classList.add('cross');
+            statusSpan.textContent = '✗';
+            statusSpan.setAttribute('aria-label', 'Username non verificato');
+          }
+          li.appendChild(statusSpan);
+
+          usernameList.appendChild(li);
+        });
+      });
+    }
+
+    async function initApp() {
+      loadData();
+      userIp = localStorage.getItem('instaCountryUserIp');
+      if(!userIp){
+        userIp = await fetchUserIp();
+        if(userIp) localStorage.setItem('instaCountryUserIp', userIp);
+      }
+      const mappedUser = userIp ? ipUserMap[userIp] : null;
+      if(mappedUser){
+        currentUser = mappedUser;
+        userCards.forEach(card => {
+          card.classList.toggle('selected', card.dataset.user === currentUser);
+          card.setAttribute('aria-pressed', card.dataset.user === currentUser ? 'true' : 'false');
+        });
+        homeScreen.style.display = 'none';
+        userScreen.style.display = '';
+        userTitle.textContent = `Account: ${currentUser}`;
+        homeNavButton.hidden = false;
+        renderUsernames();
+      }else{
+        homeScreen.style.display = '';
+        userScreen.style.display = 'none';
+        homeNavButton.hidden = true;
+      }
+      updateCounts();
+    }
+
+    async function fetchUserIp() {
+      try {
+        const resp = await fetch('https://api.ipify.org?format=json');
+        const json = await resp.json();
+        return json.ip;
+      } catch {
+        return null;
+      }
+    }
+
+    initApp();
+  })();
+</script>
+</body>
+</html>
