@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TXT Editor Online | Crea e Condividi File di Testo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-light: #4895ef;
+            --primary-dark: #3f37c9;
+            --background: #f8f9fa;
+            --paper: #ffffff;
+            --text: #2b2d42;
+            --text-light: #8d99ae;
+            --border-radius: 8px;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--paper);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+        
+        .header {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: white;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .editor-container {
+            padding: 20px;
+        }
+        
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: var(--transition);
+        }
+        
+        .btn:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: white;
+            color: var(--primary-color);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+        
+        #text-editor {
+            width: 100%;
+            min-height: 300px;
+            padding: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+        
+        .result-section {
+            padding: 20px;
+            background-color: rgba(72, 149, 239, 0.1);
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .share-link-container {
+            margin: 15px 0;
+        }
+        
+        .share-link {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e9ecef;
+            border-radius: var(--border-radius);
+            font-family: 'Poppins', sans-serif;
+            background-color: white;
+            color: var(--text);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: var(--transition);
+        }
+        
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        @media (max-width: 600px) {
+            .toolbar {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-file-alt"></i> TXT Editor Online</h1>
+            <p>Crea, modifica e condividi file di testo e batch</p>
+        </div>
+        
+        <div class="editor-container">
+            <div class="toolbar">
+                <button id="save-txt" class="btn">
+                    <i class="fas fa-save"></i> Salva come TXT
+                </button>
+                <button id="save-bat" class="btn">
+                    <i class="fas fa-terminal"></i> Salva come BAT
+                </button>
+                <button id="clear-btn" class="btn btn-secondary">
+                    <i class="fas fa-trash"></i> Pulisci
+                </button>
+            </div>
+            
+            <textarea id="text-editor" placeholder="Scrivi il tuo testo qui..."></textarea>
+            
+            <div class="result-section" id="result-section">
+                <h3><i class="fas fa-link"></i> Link di download</h3>
+                <div class="share-link-container">
+                    <input type="text" class="share-link" id="share-link" readonly>
+                </div>
+                <button id="copy-btn" class="btn">
+                    <i class="fas fa-copy"></i> Copia Link
+                </button>
+                <button id="new-file" class="btn btn-secondary" style="margin-top: 10px;">
+                    <i class="fas fa-file"></i> Nuovo File
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-text"></span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementi DOM
+            const textEditor = document.getElementById('text-editor');
+            const saveTxtBtn = document.getElementById('save-txt');
+            const saveBatBtn = document.getElementById('save-bat');
+            const clearBtn = document.getElementById('clear-btn');
+            const resultSection = document.getElementById('result-section');
+            const shareLink = document.getElementById('share-link');
+            const copyBtn = document.getElementById('copy-btn');
+            const newFileBtn = document.getElementById('new-file');
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            // Mostra notifica
+            function showNotification(message) {
+                notificationText.textContent = message;
+                notification.classList.add('show');
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Accorcia URL con is.gd
+            async function shortenUrl(longUrl) {
+                try {
+                    const response = await fetch(`https://is.gd/create.php?format=json&url=${encodeURIComponent(longUrl)}`);
+                    
+                    if (!response.ok) {
+                        throw new Error('Errore nel servizio di accorciamento URL');
+                    }
+                    
+                    const data = await response.json();
+                    return data.shorturl || longUrl;
+                } catch (error) {
+                    console.error('URL shortening error:', error);
+                    return longUrl;
+                }
+            }
+            
+            // Crea e scarica file
+            async function saveFile(extension) {
+                const content = textEditor.value.trim();
+                
+                if (!content) {
+                    showNotification('Inserisci del testo prima di salvare');
+                    return;
+                }
+                
+                try {
+                    // Crea un blob con il contenuto
+                    const blob = new Blob([content], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    
+                    // Genera un nome file casuale
+                    const randomName = 'file_' + Math.random().toString(36).substring(2, 8) + '.' + extension;
+                    
+                    // Accorcia l'URL di download
+                    const shortUrl = await shortenUrl(url);
+                    
+                    // Mostra il risultato
+                    shareLink.value = shortUrl;
+                    resultSection.style.display = 'block';
+                    
+                    // Configura il pulsante di copia
+                    copyBtn.onclick = () => {
+                        shareLink.select();
+                        document.execCommand('copy');
+                        showNotification('Link copiato negli appunti!');
+                    };
+                    
+                    // Configura il pulsante per nuovo file
+                    newFileBtn.onclick = () => {
+                        textEditor.value = '';
+                        resultSection.style.display = 'none';
+                        textEditor.focus();
+                    };
+                    
+                    showNotification(`File ${extension} creato con successo!`);
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    showNotification('Si è verificato un errore');
+                }
+            }
+            
+            // Event listeners
+            saveTxtBtn.addEventListener('click', () => saveFile('txt'));
+            saveBatBtn.addEventListener('click', () => saveFile('bat'));
+            
+            clearBtn.addEventListener('click', () => {
+                textEditor.value = '';
+                textEditor.focus();
+                showNotification('Editor pulito');
+            });
+            
+            // Focus sull'editor all'avvio
+            textEditor.focus();
+        });
+    </script>
+</body>
+</html>
