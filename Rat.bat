@@ -100,11 +100,13 @@ goto command_loop
     :: Apri nuovo URL
     start "" "!url_to_open!"
     
-    :: Attesa caricamento pagina
-    timeout /t 10 /nobreak >nul
+    :: Attesa caricamento pagina (con focus sulla finestra)
+    timeout /t 3 /nobreak >nul
+    powershell -command "[System.Windows.Forms.SendKeys]::SendWait('%%{TAB}')"
+    timeout /t 7 /nobreak >nul
     
     :: Cattura SOLO la finestra attiva (Alt+Stamp)
-    powershell -command "Add-Type -AssemblyName System.Windows.Forms; [Windows.Forms.SendKeys]::SendWait('%{PRTSC}'); Start-Sleep -Milliseconds 1000; $img=[Windows.Forms.Clipboard]::GetImage(); if($img){$img.Save('%SCREENSHOT_PATH%',[Drawing.Imaging.ImageFormat]::Png)}"
+    powershell -command "[System.Windows.Forms.SendKeys]::SendWait('%%{PRTSC}'); Start-Sleep -Milliseconds 1000; $img=[System.Windows.Forms.Clipboard]::GetImage(); if($img){$img.Save('%SCREENSHOT_PATH%',[System.Drawing.Imaging.ImageFormat]::Png)}"
     
     :: Invia screenshot
     if exist "%SCREENSHOT_PATH%" (
