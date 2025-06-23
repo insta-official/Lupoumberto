@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NGL Tool Premium</title>
+    <style>
+        :root {
+            --ngl-pink: #ff4e79;
+            --ngl-dark: #0e0e10;
+            --ngl-gray: #1a1a1c;
+            --ngl-light-text: #efeff1;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--ngl-dark);
+            color: var(--ngl-light-text);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: var(--ngl-gray);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            color: var(--ngl-pink);
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #adadb8;
+            font-size: 16px;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #adadb8;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #252529;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        #activateBtn {
+            background-color: var(--ngl-pink);
+            color: white;
+        }
+
+        #buyBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #stopBtn {
+            background-color: #f44336;
+            color: white;
+            display: none;
+        }
+
+        #sendBtn {
+            background-color: var(--ngl-pink);
+            color: white;
+        }
+
+        .activation-steps {
+            background-color: #252529;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .activation-steps ol {
+            padding-left: 20px;
+        }
+
+        .activation-steps li {
+            margin-bottom: 10px;
+        }
+
+        #mainContent {
+            display: none;
+        }
+
+        .toggle-section {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #252529;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .speed-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .speed-option {
+            padding: 10px;
+            background-color: #252529;
+            border-radius: 8px;
+            border: 1px solid #333;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .speed-option:hover {
+            border-color: var(--ngl-pink);
+        }
+
+        .speed-option.active {
+            background-color: var(--ngl-pink);
+            border-color: var(--ngl-pink);
+        }
+
+        .speed-option input {
+            display: none;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .radio-option input {
+            width: auto;
+        }
+
+        .warning {
+            color: #ff9800;
+            background-color: rgba(255, 152, 0, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #333;
+            margin: 25px 0;
+        }
+
+        #results {
+            margin-top: 25px;
+            font-size: 14px;
+        }
+
+        .success {
+            color: #4caf50;
+        }
+
+        .error {
+            color: #f44336;
+        }
+
+        #keyStatus {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+        }
+        
+        .valid-key {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: #4CAF50;
+        }
+        
+        .invalid-key {
+            background-color: rgba(244, 67, 54, 0.2);
+            color: #f44336;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px 15px;
+                padding: 20px 15px;
+            }
+
+            .speed-options {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- SEZIONE DI ATTIVAZIONE -->
+        <div id="activationSection">
+            <div class="header">
+                <div class="logo">NGL PREMIUM</div>
+                <div class="subtitle">Inserisci la Key di Attivazione</div>
+            </div>
+
+            <div class="warning">
+                ⚠️ Questo strumento richiede una Activation Key valida per ogni utilizzo
+            </div>
+
+            <div class="form-group">
+                <label for="activationKey">Activation Key</label>
+                <input type="text" id="activationKey" placeholder="Incolla qui la tua key" required>
+            </div>
+
+            <button id="activateBtn">Attiva Tool</button>
+
+            <div id="keyStatus"></div>
+
+            <div class="activation-steps">
+                <h3>Come ottenere una Key:</h3>
+                <ol>
+                    <li>Clicca su "Buy Now"</li>
+                    <li>Scrivi "new" al bot Telegram per generare una nuova key</li>
+                    <li>Incolla la key qui sopra e premi "Attiva Tool"</li>
+                </ol>
+                <p>Ogni key è valida per un solo utilizzo!</p>
+            </div>
+
+            <button id="buyBtn">Buy Now</button>
+        </div>
+
+        <!-- SEZIONE PRINCIPALE DEL TOOL -->
+        <div id="mainContent">
+            <div class="header">
+                <div class="logo">NGL TOOL</div>
+                <div class="subtitle">Tool attivato con successo</div>
+            </div>
+            
+            <div class="warning">  
+                ⚠️ <b>Nota:</b> Questo è uno strumento non ufficiale. Per risultati garantiti, usa la versione Python.  
+            </div>
+
+            <div class="form-group">  
+                <label for="nglUrl">Link del profilo NGL</label>  
+                <input type="text" id="nglUrl" placeholder="https://ngl.link/username" required>  
+            </div>
+
+            <div class="form-group">
+                <label>Tipo di messaggio</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="messageType" value="custom" checked> Personalizzato
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="messageType" value="random"> Random
+                    </label>
+                </div>
+            </div>
+
+            <div id="customMessageSection">
+                <div class="form-group">  
+                    <label for="message">Il tuo messaggio</label>  
+                    <textarea id="message" placeholder="Scrivi qualcosa di interessante..." required></textarea>  
+                </div>  
+            </div>
+
+            <div id="randomMessageSection" class="toggle-section" style="display: none;">
+                <div class="form-group">
+                    <label for="randomName">Nome da usare nei messaggi</label>
+                    <input type="text" id="randomName" placeholder="Inserisci un nome (es: Marco)">
+                </div>
+                <div class="form-group">
+                    <label for="randomCategory">Categoria messaggi</label>
+                    <select id="randomCategory">
+                        <option value="all">Tutti i tipi</option>
+                        <option value="flirty">Flirt/Sexy</option>
+                        <option value="funny">Divertenti/Scherzosi</option>
+                        <option value="questions">Domande/Curiosità</option>
+                        <option value="challenges">Sfide/Prove</option>
+                        <option value="compliments">Complimenti</option>
+                        <option value="deep">Profondi/Seri</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="messagePreview">Anteprima messaggio:</label>
+                    <div id="messagePreview" style="padding: 10px; background-color: #333; border-radius: 5px; min-height: 20px;"></div>
+                    <button type="button" id="refreshPreview" style="margin-top: 10px; padding: 8px;">Genera altro messaggio</button>
+                </div>
+            </div>
+
+            <div class="form-group">  
+                <label for="requests">Numero di invii</label>  
+                <input type="number" id="requests" min="1" value="1" required>  
+            </div>
+            
+            <div class="form-group">
+                <label>Velocità di invio</label>
+                <div class="speed-options">
+                    <label class="speed-option active" data-speed="1">
+                        <input type="radio" name="speed" value="1" checked> Normale (1s)
+                    </label>
+                    <label class="speed-option" data-speed="0.5">
+                        <input type="radio" name="speed" value="0.5"> Potente (0.5s)
+                    </label>
+                    <label class="speed-option" data-speed="0.1">
+                        <input type="radio" name="speed" value="0.1"> Ultra (0.1s)
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="method">Metodo di invio</label>
+                <select id="method">
+                    <option value="direct">Diretto (NGL API)</option>
+                    <option value="telegram">Telegram Bot</option>
+                    <option value="webhook">Webhook Alternativo</option>
+                </select>
+            </div>
+
+            <button id="sendBtn">Invia Anonimamente</button>
+            <button id="stopBtn">STOP EMERGENZA</button>
+
+            <div class="divider"></div>
+
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configurazioni
+        const BOT_TOKEN = '7711566157:AAEs2eaKEVqE5pWYLc9L4WiDIc8vS5n83hw';
+        const CHAT_ID = '5709299213';
+        const BOT_LINK = 'https://t.me/Mostro_mangia_sborra';
+        const SECRET_HASH = 'a1b2c3d4e5f6g7h8i9j0';
+        
+        // Lista di User-Agent casuali
+        const USER_AGENTS = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Safari/605.1.15',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+            'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+            'Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+            'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0'
+        ];
+
+        // Variabili globali
+        let isSending = false;
+        let stopSending = false;
+        let currentActivationKey = '';
+        let activationRequested = false;
+        let lastUpdateId = 0; // Per il polling dei messaggi Telegram
+
+        // Lista ampliata di messaggi random
+        const randomMessages = {
+            flirty: [
+                "Ma ti piace {name}?",
+                "Ti piacerebbe uscire con {name}?",
+                "{name} ti sta proprio simpatico/a, vero?",
+                "Se {name} ti chiedesse di uscire, accetteresti?",
+                "Cosa ne pensi di {name}?",
+                "{name} ti fa battere il cuore?",
+                "Sei innamorato/a di {name}?",
+                "{name} è il tuo tipo?",
+                "Cosa ti piace di più di {name}?",
+                "Hai mai sognato {name}?"
+            ],
+            funny: [
+                "Se {name} fosse un animale, quale sarebbe?",
+                "{name} sa fare la danza del pollo?",
+                "Quanti {name} servono per cambiare una lampadina?",
+                "Se {name} fosse un supereroe, quale sarebbe il suo potere?",
+                "{name} è più intelligente di un delfino?",
+                "Se {name} fosse un cibo, quale sarebbe?",
+                "{name} ha mai fatto scherzi stupidi?",
+                "Se {name} avesse 1 milione di euro, cosa farebbe?",
+                "{name} preferisce i cani o i gatti?",
+                "{name} sa cantare?"
+            ],
+            questions: [
+                "Cosa pensi di {name}?",
+                "Qual è la prima cosa che noti di {name}?",
+                "Cosa ti piace di {name}?",
+                "Cosa non ti piace di {name}?",
+                "Qual è il tuo ricordo preferito con {name}?",
+                "Cosa vorresti dire a {name}?",
+                "Se potessi fare una domanda a {name}, cosa chiederesti?",
+                "Qual è la qualità migliore di {name}?",
+                "Dove hai conosciuto {name}?",
+                "Cosa ti aspetti da {name}?"
+            ],
+            challenges: [
+                "{name}, osa fare 10 flessioni ora!",
+                "Prova a non ridere per 1 minuto pensando a {name}!",
+                "{name}, mangia un limone intero e filma la tua reazione!",
+                "Manda un messaggio vocale cantando a {name}!",
+                "{name}, fatti un selfie con la faccia più strana possibile!",
+                "Prova a stare 24 ore senza guardare il telefono, {name}!",
+                "{name}, indossa i vestiti al contrario per un giorno!",
+                "Manda un messaggio a {name} usando solo emoji!",
+                "{name}, prova a fare la verticale!",
+                "Parla con un accento straniero per 5 minuti con {name}!"
+            ],
+            compliments: [
+                "{name} ha un sorriso fantastico!",
+                "Adoro la personalità di {name}!",
+                "{name} è una persona incredibile!",
+                "Mi piace tantissimo come {name} ride!",
+                "{name} ha uno stile unico!",
+                "L'energia positiva di {name} è contagiosa!",
+                "{name} è intelligentissimo/a!",
+                "La creatività di {name} è fuori dal comune!",
+                "{name} ha un grande senso dell'umorismo!",
+                "L'atteggiamento positivo di {name} è ammirevole!"
+            ],
+            deep: [
+                "Cosa pensa {name} del senso della vita?",
+                "Qual è la più grande paura di {name}?",
+                "Qual è il sogno più grande di {name}?",
+                "Cosa rende veramente felice {name}?",
+                "Qual è il ricordo più bello di {name}?",
+                "Qual è la lezione più importante che {name} ha imparato?",
+                "Cosa vorrebbe cambiare {name} del mondo?",
+                "Qual è la cosa di cui {name} si vergogna di più?",
+                "Cosa significa amore per {name}?",
+                "Qual è il momento più difficile che {name} ha superato?"
+            ]
+        };
+
+        // Funzione per generare un User-Agent casuale
+        function getRandomUserAgent() {
+            return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+        }
+
+        // Genera una key random con hash di sicurezza
+        function generateSecureKey() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let key = '';
+            for (let i = 0; i < 16; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+                if ((i + 1) % 4 === 0 && i !== 15) key += '-';
+            }
+            
+            // Aggiungi un hash di sicurezza basato su timestamp e secret
+            const timestamp = Math.floor(Date.now() / 1000);
+            const hash = btoa(timestamp + SECRET_HASH).replace(/=/g, '');
+            return `${key}-${hash.substring(0, 6)}`;
+        }
+
+        // Verifica la chiave di attivazione
+        async function verifyKey(key) {
+            const keyStatus = document.getElementById('keyStatus');
+            keyStatus.style.display = 'block';
+            keyStatus.textContent = 'Verifica Activation Key in corso...';
+            keyStatus.className = 'valid-key';
+            
+            // Verifica l'hash di sicurezza
+            if (key && key.length > 0) {
+                currentActivationKey = key;
+                keyStatus.textContent = '✅ Activation Key valida!';
+                keyStatus.className = 'valid-key';
+                
+                // Invia conferma al bot
+                try {
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: CHAT_ID,
+                            text: `🔑 ACTIVATION KEY USATA:\n${key}\nUser Agent: ${navigator.userAgent}\nIP: ${await getIP()}`
+                        })
+                    });
+                } catch (error) {
+                    console.error('Errore invio conferma:', error);
+                }
+                
+                return true;
+            } else {
+                keyStatus.textContent = '❌ Activation Key non valida o scaduta!';
+                keyStatus.className = 'invalid-key';
+                
+                // Invia alert per key non valida
+                try {
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: CHAT_ID,
+                            text: `⚠️ TENTATIVO DI KEY NON VALIDA:\n${key}\nUser Agent: ${navigator.userAgent}\nIP: ${await getIP()}`
+                        })
+                    });
+                } catch (error) {
+                    console.error('Errore invio alert:', error);
+                }
+           
