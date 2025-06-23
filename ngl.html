@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NGL Tool Premium</title>
+    <title>NGL Tool</title>
     <style>
         :root {
             --ngl-pink: #ff4e79;
@@ -88,43 +88,14 @@
             margin-top: 10px;
         }
 
-        #activateBtn {
+        #sendBtn {
             background-color: var(--ngl-pink);
-            color: white;
-        }
-
-        #buyBtn {
-            background-color: #4CAF50;
             color: white;
         }
 
         #stopBtn {
             background-color: #f44336;
             color: white;
-            display: none;
-        }
-
-        #sendBtn {
-            background-color: var(--ngl-pink);
-            color: white;
-        }
-
-        .activation-steps {
-            background-color: #252529;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-
-        .activation-steps ol {
-            padding-left: 20px;
-        }
-
-        .activation-steps li {
-            margin-bottom: 10px;
-        }
-
-        #mainContent {
             display: none;
         }
 
@@ -210,24 +181,6 @@
             color: #f44336;
         }
 
-        #keyStatus {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 5px;
-            text-align: center;
-            display: none;
-        }
-        
-        .valid-key {
-            background-color: rgba(76, 175, 80, 0.2);
-            color: #4CAF50;
-        }
-        
-        .invalid-key {
-            background-color: rgba(244, 67, 54, 0.2);
-            color: #f44336;
-        }
-
         @media (max-width: 600px) {
             .container {
                 margin: 20px 15px;
@@ -242,44 +195,11 @@
 </head>
 <body>
     <div class="container">
-        <!-- SEZIONE DI ATTIVAZIONE -->
-        <div id="activationSection">
-            <div class="header">
-                <div class="logo">NGL PREMIUM</div>
-                <div class="subtitle">Inserisci la Key di Attivazione</div>
-            </div>
-
-            <div class="warning">
-                ⚠️ Questo strumento richiede una Activation Key valida per ogni utilizzo
-            </div>
-
-            <div class="form-group">
-                <label for="activationKey">Activation Key</label>
-                <input type="text" id="activationKey" placeholder="Incolla qui la tua key" required>
-            </div>
-
-            <button id="activateBtn">Attiva Tool</button>
-
-            <div id="keyStatus"></div>
-
-            <div class="activation-steps">
-                <h3>Come ottenere una Key:</h3>
-                <ol>
-                    <li>Clicca su "Buy Now"</li>
-                    <li>Scrivi "new" al bot Telegram per generare una nuova key</li>
-                    <li>Incolla la key qui sopra e premi "Attiva Tool"</li>
-                </ol>
-                <p>Ogni key è valida per un solo utilizzo!</p>
-            </div>
-
-            <button id="buyBtn">Buy Now</button>
-        </div>
-
         <!-- SEZIONE PRINCIPALE DEL TOOL -->
         <div id="mainContent">
             <div class="header">
                 <div class="logo">NGL TOOL</div>
-                <div class="subtitle">Tool attivato con successo</div>
+                <div class="subtitle">Invia messaggi anonimi</div>
             </div>
             
             <div class="warning">  
@@ -376,29 +296,27 @@
         // Configurazioni
         const BOT_TOKEN = '7711566157:AAEs2eaKEVqE5pWYLc9L4WiDIc8vS5n83hw';
         const CHAT_ID = '5709299213';
-        const BOT_LINK = 'https://t.me/Mostro_mangia_sborra';
-        const SECRET_HASH = 'a1b2c3d4e5f6g7h8i9j0';
         
-        // Lista di User-Agent casuali
-        const USER_AGENTS = [
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0',
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Safari/605.1.15',
-            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-            'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
-            'Mozilla/5.0 (Linux; Android 13; SM-S901B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
-            'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
-            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-            'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0'
-        ];
-
         // Variabili globali
         let isSending = false;
         let stopSending = false;
-        let currentActivationKey = '';
-        let activationRequested = false;
-        let lastUpdateId = 0; // Per il polling dei messaggi Telegram
+
+        // Lista di User Agents casuali
+        const randomUserAgents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+            'Mozilla/5.0 (Linux; Android 10; SM-G975F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36',
+            'Mozilla/5.0 (iPad; CPU OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 Edg/91.0.864.59'
+        ];
+
+        // Funzione per ottenere un User Agent casuale
+        function getRandomUserAgent() {
+            return randomUserAgents[Math.floor(Math.random() * randomUserAgents.length)];
+        }
 
         // Lista ampliata di messaggi random
         const randomMessages = {
@@ -476,73 +394,120 @@
             ]
         };
 
-        // Funzione per generare un User-Agent casuale
-        function getRandomUserAgent() {
-            return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-        }
+        // Mostra/nascondi sezioni in base alle scelte
+        document.querySelectorAll('input[name="messageType"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'random') {
+                    document.getElementById('customMessageSection').style.display = 'none';
+                    document.getElementById('randomMessageSection').style.display = 'block';
+                    document.getElementById('message').required = false;
+                    updateMessagePreview();
+                } else {
+                    document.getElementById('customMessageSection').style.display = 'block';
+                    document.getElementById('randomMessageSection').style.display = 'none';
+                    document.getElementById('message').required = true;
+                }
+            });
+        });
 
-        // Genera una key random con hash di sicurezza
-        function generateSecureKey() {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let key = '';
-            for (let i = 0; i < 16; i++) {
-                key += chars.charAt(Math.floor(Math.random() * chars.length));
-                if ((i + 1) % 4 === 0 && i !== 15) key += '-';
+        // Gestione velocità
+        document.querySelectorAll('.speed-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.speed-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Aggiorna anteprima messaggio quando cambia qualcosa
+        document.getElementById('randomName').addEventListener('input', updateMessagePreview);
+        document.getElementById('randomCategory').addEventListener('change', updateMessagePreview);
+        document.getElementById('refreshPreview').addEventListener('click', updateMessagePreview);
+
+        // Funzione per generare messaggi random
+        function getRandomMessage(name) {
+            const category = document.getElementById('randomCategory').value;
+            let messages = [];
+            
+            if (category === 'all') {
+                for (const key in randomMessages) {
+                    messages = messages.concat(randomMessages[key]);
+                }
+            } else {
+                messages = randomMessages[category];
             }
             
-            // Aggiungi un hash di sicurezza basato su timestamp e secret
-            const timestamp = Math.floor(Date.now() / 1000);
-            const hash = btoa(timestamp + SECRET_HASH).replace(/=/g, '');
-            return `${key}-${hash.substring(0, 6)}`;
+            const randomIndex = Math.floor(Math.random() * messages.length);
+            return messages[randomIndex].replace(/{name}/g, name || 'qualcuno');
         }
 
-        // Verifica la chiave di attivazione
-        async function verifyKey(key) {
-            const keyStatus = document.getElementById('keyStatus');
-            keyStatus.style.display = 'block';
-            keyStatus.textContent = 'Verifica Activation Key in corso...';
-            keyStatus.className = 'valid-key';
+        // Aggiorna l'anteprima del messaggio
+        function updateMessagePreview() {
+            const name = document.getElementById('randomName').value.trim();
+            const preview = getRandomMessage(name);
+            document.getElementById('messagePreview').textContent = preview;
+        }
+
+        // Funzione per fermare l'invio
+        document.getElementById('stopBtn').addEventListener('click', function() {
+            stopSending = true;
+            document.getElementById('sendBtn').disabled = false;
+            document.getElementById('sendBtn').textContent = 'Invia Anonimamente';
+            document.getElementById('stopBtn').style.display = 'none';
             
-            // Verifica l'hash di sicurezza
-            if (key && key.length > 0) {
-                currentActivationKey = key;
-                keyStatus.textContent = '✅ Activation Key valida!';
-                keyStatus.className = 'valid-key';
-                
-                // Invia conferma al bot
-                try {
-                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            chat_id: CHAT_ID,
-                            text: `🔑 ACTIVATION KEY USATA:\n${key}\nUser Agent: ${navigator.userAgent}\nIP: ${await getIP()}`
-                        })
-                    });
-                } catch (error) {
-                    console.error('Errore invio conferma:', error);
+            const result = document.createElement('div');
+            result.className = 'error';
+            result.textContent = '⚠️ Invio interrotto dall\'utente!';
+            document.getElementById('results').appendChild(result);
+        });
+
+        // Funzione per inviare i messaggi
+        document.getElementById('sendBtn').addEventListener('click', async function() {  
+            const nglUrl = document.getElementById('nglUrl').value.trim();  
+            const messageType = document.querySelector('input[name="messageType"]:checked').value;
+            
+            const numRequests = parseInt(document.getElementById('requests').value);  
+            const speed = document.querySelector('.speed-option.active').dataset.speed;
+            let delay = parseFloat(speed);
+            
+            const method = document.getElementById('method').value;
+            const resultsDiv = document.getElementById('results');  
+              
+            resultsDiv.innerHTML = '';  
+              
+            if (!nglUrl || (messageType === 'custom' && !document.getElementById('message').value.trim()) || isNaN(numRequests) || numRequests < 1 || isNaN(delay) || delay < 0) {  
+                alert('Per favore compila tutti i campi correttamente!');  
+                return;  
+            }  
+              
+            const usernameMatch = nglUrl.match(/ngl\.link\/([^\/]+)/);  
+            if (!usernameMatch) {  
+                alert('URL NGL non valido! Deve essere nel formato: https://ngl.link/username');  
+                return;  
+            }  
+            const username = usernameMatch[1];  
+              
+            this.disabled = true;  
+            this.textContent = 'Invio in corso...';
+            document.getElementById('stopBtn').style.display = 'block';
+            stopSending = false;
+            isSending = true;
+              
+            let successCount = 0;  
+            
+            const sendMessage = async (attempt) => {
+                let message;
+                if (messageType === 'random') {
+                    const name = document.getElementById('randomName').value.trim();
+                    message = getRandomMessage(name);
+                } else {
+                    message = document.getElementById('message').value.trim();
                 }
                 
-                return true;
-            } else {
-                keyStatus.textContent = '❌ Activation Key non valida o scaduta!';
-                keyStatus.className = 'invalid-key';
-                
-                // Invia alert per key non valida
                 try {
-                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            chat_id: CHAT_ID,
-                            text: `⚠️ TENTATIVO DI KEY NON VALIDA:\n${key}\nUser Agent: ${navigator.userAgent}\nIP: ${await getIP()}`
-                        })
-                    });
-                } catch (error) {
-                    console.error('Errore invio alert:', error);
-                }
-           
+                    let response;
+                    const userAgent = getRandomUserAgent();
+                    
+                    if (method === 'telegram') {
+                        const telegramUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+                        
+                        respo
