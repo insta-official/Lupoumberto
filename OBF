@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bypass Antivirus Charly</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-weight: 500;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #222;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        button {
+            background: #0070f3;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #0061d5;
+        }
+        #output {
+            margin-top: 20px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 13px;
+            padding: 10px;
+            background: white;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        a {
+            color: #0070f3;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Bypass Antivirus Charly</h1>
+    
+    <input type="file" id="batchFile" accept=".bat">
+    <input type="number" id="passes" min="1" max="20" placeholder="Passes (default: 1)">
+    <button onclick="obfuscate()">Obfuscate</button>
+    
+    <div id="output"></div>
+
+    <script>
+        function obfuscate() {
+            const file = document.getElementById('batchFile').files[0];
+            const passes = parseInt(document.getElementById('passes').value) || 1;
+            const output = document.getElementById('output');
+            
+            if (!file) {
+                output.textContent = "Please select a .bat file.";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                let script = e.target.result;
+                for (let i = 0; i < passes; i++) {
+                    script = obfuscateBatch(script, i === passes - 1);
+                }
+                output.innerHTML = `<a href="data:text/plain;charset=utf-8,${encodeURIComponent(script)}" download="obfuscated.bat">Download obfuscated file</a>`;
+            };
+            reader.readAsText(file);
+        }
+
+        function obfuscateBatch(script, finalPass) {
+            const chars = '@ 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const varChars = '_ÄÅÇÉÑÖÜáàâäãåçéèêëíìîïñóòôöõúùûüABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            
+            const varName = shuffleString(varChars).substring(0, 3);
+            const shuffled = shuffleString(chars);
+            
+            const charMap = [];
+            for (let i = 0; i < shuffled.length; i++) {
+                charMap.push([shuffled[i], `%${varName}:~${i},1%`]);
+            }
+            
+            let result = finalPass ? "\xFF\xFE&@cls&" : "";
+            result += `@set "${varName}=${shuffled}"\r\n`;
+            
+            let inVar = false, inLabel = false, newLine = true;
+            
+            for (const char of script) {
+                if (newLine && char === ':') inLabel = true;
+                if (char === '\n') { newLine = true; inVar = false; inLabel = false; } 
+                else newLine = false;
+                if (char === ' ') inLabel = false;
+                if (!inVar && (char === '%' || char === '!')) inVar = true;
+                else if (inVar && (char === '%' || char === '!')) inVar = inLabel = false;
+                
+                if (!inVar && !inLabel && !newLine) {
+                    const mapped = charMap.find(([c]) => c === char);
+                    result += mapped ? (Math.random() < 0.05 ? mapped[1] + `%${shuffleString(varChars).substr(3, 7)}%` : mapped[1]) : char;
+                } else {
+                    result += char;
+                }
+            }
+            return result;
+        }
+
+        function shuffleString(str) {
+            return [...str].sort(() => Math.random() - 0.5).join('');
+        }
+    </script>
+</body>
+</html>
