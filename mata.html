@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MATA Visitor Tool</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #00ff00;
+            font-family: monospace;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .box {
+            border: 1px solid #00ff00;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 0;
+        }
+        .result-box {
+            border: 1px solid #00ff00;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .result-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            text-align: center;
+            margin-bottom: 10px;
+            position: sticky;
+            top: 0;
+            background-color: #121212;
+        }
+        .result-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        input {
+            background-color: #121212;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 5px;
+            margin: 5px 0;
+            width: 100%;
+            font-family: monospace;
+        }
+        button {
+            background-color: #121212;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        button:hover {
+            background-color: #00ff00;
+            color: #121212;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .blue { color: #0000ff; }
+        .yellow { color: #ffff00; }
+        .cyan { color: #00ffff; }
+        .magenta { color: #ff00ff; }
+        .green { color: #00ff00; }
+        .red { color: #ff0000; }
+        .orange { color: #ffa500; }
+        .dark-gray { color: #333333; }
+        #progress {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <pre class="green">
+    ███╗   ███╗ █████╗ ████████╗ █████╗ 
+    ████╗ ████║██╔══██╗╚══██╔══╝██╔══██╗
+    ██╔████╔██║███████║   ██║   ███████║
+    ██║╚██╔╝██║██╔══██║   ██║   ██╔══██║
+    ██║ ╚═╝ ██║██║  ██║   ██║   ██║  ██║
+    ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+        </pre>
+    </div>
+
+    <div class="box green">
+        <div>Github   : https://github.com/wanzxploit</div>
+        <div>Instagram: https://instagram.com/wanz_xploit</div>
+        <div>YouTube  : https://youtube.com/wanzxploit</div>
+    </div>
+
+    <div class="dark-gray">
+        <label for="url">URL:</label>
+        <input type="text" id="url" placeholder="Enter target URL (include http:// or https://)">
+        
+        <label for="total">Jumlah Visitor:</label>
+        <input type="number" id="total" placeholder="Enter number of visitors" min="1" max="1000">
+        
+        <label for="concurrency">Concurrent Requests:</label>
+        <input type="number" id="concurrency" value="10" min="1" max="50">
+        
+        <button id="startBtn" onclick="startVisitor()">Start Visitor</button>
+        <button id="stopBtn" onclick="stopVisitor()" disabled>Stop</button>
+        
+        <div id="progress" class="green">Ready</div>
+    </div>
+
+    <div class="result-box green">
+        <div class="result-header">
+            <div>TIME</div>
+            <div>STATUS</div>
+            <div>DETAILS</div>
+        </div>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let isRunning = false;
+        let completedCount = 0;
+        let totalRequests = 0;
+        let startTime;
+        let activeRequests = 0;
+        let maxConcurrency = 10;
+        let queue = [];
+        
+        const userAgents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Safari/605.1.15',
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1'
+        ];
+
+        function getRandomUserAgent() {
+            return userAgents[Math.floor(Math.random() * userAgents.length)];
+        }
+
+        function formatTime(ms) {
+            const seconds = Math.floor(ms / 1000);
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function addResult(time, status, details) {
+            const resultsDiv = document.getElementById('results');
+            const resultRow = document.createElement('div');
+            resultRow.className = 'result-row';
+            
+            const statusClass = status === 'SUCCESS' ? 'green' : 'red';
+            
+            resultRow.innerHTML = `
+                <div>${time}</div>
+                <div class="${statusClass}">${status}</div>
+                <div>${details}</div>
+            `;
+            
+            resultsDiv.prepend(resultRow);
+        }
+
+        function updateProgress() {
+            const progressDiv = document.getElementById('progress');
+            const elapsed = new Date().getTime() - startTime;
+            const rps = (completedCount / (elapsed / 1000)).toFixed(2);
+            
+            progressDiv.innerHTML = `
+                Requests: ${completedCount}/${totalRequests} | 
+                Active: ${activeRequests} | 
+                Speed: ${rps} req/sec | 
+                Elapsed: ${formatTime(elapsed)}
+            `;
+        }
+
+        async function makeRequest(url) {
+            if (!isRunning) return;
+            
+            activeRequests++;
+            const requestStart = new Date().getTime();
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    mode: 'no-cors',
+                    cache: 'no-store',
+                    headers: {
+                        'User-Agent': getRandomUserAgent(),
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                        'Accept-Language': 'en-US,en;q=0.5',
+                        'Referer': 'https://www.google.com/',
+                        'DNT': '1'
+                    }
+                });
+                
+                // Even with no-cors mode, we can't read the response but the request is made
+                const elapsed = new Date().getTime() - requestStart;
+                addResult(
+                    formatTime(new Date().getTime() - startTime),
+                    'SUCCESS',
+                    `Completed in ${elapsed}ms`
+                );
+            } catch (error) {
+                addResult(
+                    formatTime(new Date().getTime() - startTime),
+                    'FAILED',
+                    error.message
+                );
+            } finally {
+                activeRequests--;
+                completedCount++;
+                updateProgress();
+                
+                // Process next in queue
+                if (queue.length > 0 && isRunning && activeRequests < maxConcurrency) {
+                    const nextUrl = queue.shift();
+                    makeRequest(nextUrl);
+                }
+                
+                // Check if all requests are done
+                if (completedCount >= totalRequests && isRunning) {
+                    stopVisitor();
+                    const progressDiv = document.getElementById('progress');
+                    const elapsed = new Date().getTime() - startTime;
+                    progressDiv.innerHTML += ` | DONE in ${formatTime(elapsed)}`;
+                }
+            }
+        }
+
+        function startVisitor() {
+            const url = document.getElementById('url').value;
+            totalRequests = parseInt(document.getElementById('total').value);
+            maxConcurrency = parseInt(document.getElementById('concurrency').value);
+            
+            if (!url || !totalRequests) {
+                alert('Please enter both URL and visitor count');
+                return;
+            }
+            
+            // Validate URL
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert('URL must start with http:// or https://');
+                return;
+            }
+            
+            isRunning = true;
+            completedCount = 0;
+            activeRequests = 0;
+            queue = [];
+            startTime = new Date().getTime();
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('progress').textContent = 'Starting...';
+            
+            // Fill the queue
+            for (let i = 0; i < totalRequests; i++) {
+                queue.push(url);
+            }
+            
+            // Start initial batch of requests
+            const initialBatch = Math.min(maxConcurrency, totalRequests);
+            for (let i = 0; i < initialBatch; i++) {
+                if (queue.length > 0) {
+                    makeRequest(queue.shift());
+                }
+            }
+        }
+
+        function stopVisitor() {
+            isRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('progress').textContent += ' - STOPPED';
+        }
+    </script>
+</body>
+</html>
