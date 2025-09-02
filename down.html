@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Control</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        button { padding: 15px 30px; font-size: 18px; margin: 10px; cursor: pointer; }
+        .shutdown { background: #ff4444; color: white; border: none; }
+        .restart { background: #44aa44; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <h1>System Control Panel</h1>
+    
+    <button class="shutdown" onclick="sendCommand('SHUTDOWN')">
+        🔴 SHUTDOWN
+    </button>
+    
+    <button class="restart" onclick="sendCommand('RESTART')">
+        🔄 RESTART
+    </button>
+
+    <script>
+        async function sendCommand(command) {
+            try {
+                const response = await fetch('https://68b36d2fc28940c9e69eddeb.mockapi.io/shutdown_commands', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        command: command,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('Command sent successfully!');
+                } else {
+                    alert('Error sending command');
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+    </script>
+</body>
+</html>
