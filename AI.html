@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stable Horde</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.5s ease;
+        }
+
+        .form-control {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 30px;
+            transition: all 0.5s ease;
+        }
+
+        .input {
+            color: #fff;
+            font-size: 1.2rem;
+            background-color: transparent;
+            width: 100%;
+            box-sizing: border-box;
+            padding-inline: 1em;
+            padding-block: 0.8em;
+            border: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .input:focus {
+            outline: none;
+            border-bottom-color: transparent;
+        }
+
+        .input-border-alt {
+            position: absolute;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, #FF6464 0%, #FFBF59 50%, #47C9FF 100%);
+            bottom: 0;
+            left: 0;
+            transition: width 0.4s cubic-bezier(0.42, 0, 0.58, 1.00);
+        }
+
+        .input:focus + .input-border-alt {
+            width: 100%;
+        }
+
+        .image-container {
+            width: 100%;
+            max-width: 512px;
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .generated-image {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid #47C9FF;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .error {
+            color: #FF6464;
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        /* Quando l'immagine è visibile, spostiamo la barra più in alto */
+        body.has-image .container {
+            padding-top: 10vh;
+        }
+
+        body.has-image .form-control {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-control">
+            <input class="input input-alt" id="questionInput" placeholder="Describe your image..." required="" type="text">
+            <span class="input-border input-border-alt"></span>
+        </div>
+
+        <div class="loading" id="loadingIndicator">
+            <div class="spinner"></div>
+        </div>
+
+        <div class="error" id="errorMessage"></div>
+
+        <div class="image-container" id="imageContainer">
+            <img class="generated-image" id="generatedImage" alt="Generated image">
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questionInput = document.getElementById('questionInput');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const imageContainer = document.getElementById('imageContainer');
+            const generatedImage = document.getElementById('generatedImage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // API configuration
+            const API_KEY = 'wOecV35Qg_xYsw1guBAqfg';
+            const API_URL = 'https://stablehorde.net/api/v2/generate/async';
+
+            questionInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    submitRequest();
+                }
+            });
+
+            // Focus sull'input al caricamento della pagina
+            questionInput.focus();
+
+            async function submitRequest() {
+                const prompt = questionInput.value.trim();
+                
+                if (!prompt) {
+                    showError('Please enter a description');
+                    return;
+                }
+
+                // Nascondi errori precedenti e immagini
+                hideError();
+                hideImage();
+                
+                // Mostra indicatore di caricamento
+                showLoading();
+
+                try {
+                    // Step 1: Submit generation request
+                    const requestData = {
+                        prompt: prompt,
+                        params: {
+                            width: 512,
+                            height: 512,
+                            steps: 20,
+                            n: 1
+                        },
+                        nsfw: false,
+                        trusted_workers: false,
+                        censor_nsfw: false,
+                        models: ["stable_diffusion"],
+                        r2: true
+                    };
+
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': API_KEY
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(`API Error: ${response.status} - ${errorData.message || 'Unknown error'}`);
+                    }
+
+                    const data = await response.json();
+                    const requestId = data.id;
+
+                    // Step 2: Poll for result
+                    const result = await pollForResult(requestId);
+                    
+                    if (result && result.generations && result.generations.length > 0) {
+                        const imageUrl = result.generations[0].img;
+                        showImage(imageUrl);
+                    } else {
+                        throw new Error('No generation found in response');
+                    }
+
+                } catch (error) {
+                    showError(`Error: ${error.message}`);
+                } finally {
+                    hideLoading();
+                }
+            }
+
+            async function pollForResult(requestId) {
+                const checkUrl = `https://stablehorde.net/api/v2/generate/check/${requestId}`;
+                const statusUrl = `https://stablehorde.net/api/v2/generate/status/${requestId}`;
+                
+                // First, check if the request is done
+                let done = false;
+                while (!done) {
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+                    
+                    const checkResponse = await fetch(checkUrl);
+                    const checkData = await checkResponse.json();
+                    
+                    if (checkData.done) {
+                        done = true;
+                    }
+                }
+                
+                // Once done, get the full status with image URL
+                const statusResponse = await fetch(statusUrl);
+                return await statusResponse.json();
+            }
+
+            function showLoading() {
+                loadingIndicator.style.display = 'block';
+            }
+
+            function hideLoading() {
+                loadingIndicator.style.display = 'none';
+            }
+
+            function showImage(imageUrl) {
+                generatedImage.src = imageUrl;
+                imageContainer.style.display = 'block';
+                document.body.classList.add('has-image');
+                
+                // Scrolla leggermente verso l'alto per mostrare meglio l'immagine
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            function hideImage() {
+                imageContainer.style.display = 'none';
+                document.body.classList.remove('has-image');
+            }
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            }
+
+            function hideError() {
+                errorMessage.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
