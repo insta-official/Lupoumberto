@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consenso Email</title>
+    <style>
+        body {
+            background-color: #f8f8f8; /* Bianco perla */
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            max-width: 200px;
+            margin-bottom: 20px;
+        }
+        
+        .motivational {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.4;
+            color: #444;
+        }
+        
+        .email-form {
+            margin: 30px 0;
+        }
+        
+        .email-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
+        
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .accept {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .accept:hover {
+            background-color: #45a049;
+        }
+        
+        .reject {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .reject:hover {
+            background-color: #d32f2f;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://materiaprimadesign.carrd.co/assets/images/image05.png?v=a89778b0" alt="Logo" class="logo">
+        
+        <p class="motivational">Non vendiamo le cose come sono ma le vediamo come siamo</p>
+        
+        <div class="email-form">
+            <input type="email" class="email-input" placeholder="Inserisci la tua email" required>
+            
+            <div class="buttons">
+                <button class="accept">Accetta</button>
+                <button class="reject">Non voglio più essere disturbato</button>
+            </div>
+        </div>
+        
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const acceptBtn = document.querySelector('.accept');
+            const rejectBtn = document.querySelector('.reject');
+            const emailInput = document.querySelector('.email-input');
+            const messageDiv = document.getElementById('message');
+            
+            // Funzione per inviare i dati al server
+            function sendConsent(choice) {
+                const email = emailInput.value;
+                
+                // Validazione email base
+                if (!email || !email.includes('@')) {
+                    showMessage('Inserisci un indirizzo email valido', 'error');
+                    return;
+                }
+                
+                // Preparazione dati da inviare
+                const data = {
+                    email: email,
+                    choice: choice,
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Invio dati al server
+                fetch('https://68f91627deff18f212b898eb.mockapi.io/api/v1/consensi', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Errore nella risposta del server');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    showMessage(`Grazie! La tua scelta è stata registrata.`, 'success');
+                    emailInput.value = '';
+                })
+                .catch(error => {
+                    console.error('Errore:', error);
+                    showMessage('Si è verificato un errore. Riprova più tardi.', 'error');
+                });
+            }
+            
+            // Funzione per mostrare messaggi
+            function showMessage(text, type) {
+                messageDiv.textContent = text;
+                messageDiv.className = 'message ' + type;
+                messageDiv.style.display = 'block';
+                
+                // Nascondi il messaggio dopo 5 secondi
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Gestione click sui pulsanti
+            acceptBtn.addEventListener('click', function() {
+                sendConsent('accetta');
+            });
+            
+            rejectBtn.addEventListener('click', function() {
+                sendConsent('non voglio più essere disturbato');
+            });
+            
+            // Invio con tasto Enter
+            emailInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendConsent('accetta');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
