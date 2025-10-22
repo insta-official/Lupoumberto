@@ -16,6 +16,7 @@
             justify-content: center;
             min-height: 100vh;
             color: #333;
+            overflow-x: hidden;
         }
         
         .container {
@@ -26,6 +27,8 @@
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
         }
         
         .logo {
@@ -105,6 +108,50 @@
             background-color: #f2dede;
             color: #a94442;
         }
+        
+        /* Stili per l'animazione dei coriandoli */
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            display: none;
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.8;
+            border-radius: 50%;
+        }
+        
+        .thank-you-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px 50px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            font-size: 24px;
+            font-weight: bold;
+            color: #4CAF50;
+            z-index: 101;
+            display: none;
+            animation: popIn 0.5s ease-out;
+        }
+        
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            70% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -125,12 +172,102 @@
         <div id="message" class="message"></div>
     </div>
 
+    <!-- Contenitore per i coriandoli -->
+    <div class="confetti-container" id="confettiContainer"></div>
+    
+    <!-- Messaggio di ringraziamento -->
+    <div class="thank-you-message" id="thankYouMessage">
+        Grazie per avercelo segnalato!
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const acceptBtn = document.querySelector('.accept');
             const rejectBtn = document.querySelector('.reject');
             const emailInput = document.querySelector('.email-input');
             const messageDiv = document.getElementById('message');
+            const confettiContainer = document.getElementById('confettiContainer');
+            const thankYouMessage = document.getElementById('thankYouMessage');
+            
+            // Funzione per creare i coriandoli
+            function createConfetti() {
+                const colors = ['#f94144', '#f3722c', '#f8961e', '#f9c74f', '#90be6d', '#43aa8b', '#577590', '#4d908e'];
+                const confettiCount = 150;
+                
+                for (let i = 0; i < confettiCount; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    
+                    // Posizione casuale
+                    const posX = Math.random() * 100;
+                    const posY = Math.random() * 100;
+                    
+                    // Colore casuale
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // Dimensione casuale
+                    const size = Math.random() * 10 + 5;
+                    
+                    // Applica stili
+                    confetti.style.left = `${posX}%`;
+                    confetti.style.top = `${-posY}%`;
+                    confetti.style.backgroundColor = color;
+                    confetti.style.width = `${size}px`;
+                    confetti.style.height = `${size}px`;
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                    
+                    // Animazione
+                    const animationDuration = Math.random() * 3 + 2;
+                    const animationDelay = Math.random() * 2;
+                    
+                    confetti.style.animation = `fall ${animationDuration}s ease-in ${animationDelay}s forwards`;
+                    
+                    // Aggiungi al contenitore
+                    confettiContainer.appendChild(confetti);
+                    
+                    // Rimuovi dopo l'animazione
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, (animationDuration + animationDelay) * 1000);
+                }
+                
+                // Aggiungi keyframes per l'animazione di caduta
+                if (!document.getElementById('confettiAnimation')) {
+                    const style = document.createElement('style');
+                    style.id = 'confettiAnimation';
+                    style.textContent = `
+                        @keyframes fall {
+                            0% {
+                                transform: translateY(0) rotate(0deg);
+                                opacity: 1;
+                            }
+                            100% {
+                                transform: translateY(100vh) rotate(360deg);
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+            
+            // Funzione per mostrare l'animazione
+            function showConfettiAnimation() {
+                // Mostra il contenitore dei coriandoli
+                confettiContainer.style.display = 'block';
+                
+                // Crea i coriandoli
+                createConfetti();
+                
+                // Mostra il messaggio di ringraziamento
+                thankYouMessage.style.display = 'block';
+                
+                // Nascondi tutto dopo 3 secondi
+                setTimeout(() => {
+                    confettiContainer.style.display = 'none';
+                    thankYouMessage.style.display = 'none';
+                }, 3000);
+            }
             
             // Funzione per inviare i dati al server
             function sendConsent(choice) {
@@ -166,6 +303,9 @@
                 .then(data => {
                     showMessage(`Grazie! La tua scelta è stata registrata.`, 'success');
                     emailInput.value = '';
+                    
+                    // Mostra animazione coriandoli
+                    showConfettiAnimation();
                 })
                 .catch(error => {
                     console.error('Errore:', error);
