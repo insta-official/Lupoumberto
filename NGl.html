@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accedi con Google</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Oxanium:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ngl-neon: #ff00ff;
+            --ngl-purple: #8a3ffc;
+            --ngl-dark: #0a0a12;
+            --ngl-panel: #161622;
+            --ngl-border: rgba(138, 63, 252, 0.3);
+            --text-primary: #f0f0ff;
+            --text-secondary: #b8b8d9;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Oxanium', sans-serif;
+            background-color: var(--ngl-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(138, 63, 252, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--ngl-purple), transparent 70%);
+            filter: blur(80px);
+            opacity: 0.15;
+            z-index: 0;
+        }
+        
+        .glow-1 {
+            top: 20%;
+            left: 10%;
+            animation: float 8s ease-in-out infinite;
+        }
+        
+        .glow-2 {
+            bottom: 10%;
+            right: 15%;
+            animation: float 10s ease-in-out infinite reverse;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, 30px); }
+        }
+        
+        /* Login Container */
+        #loginContainer {
+            width: 100%;
+            max-width: 400px;
+            background: var(--ngl-panel);
+            border-radius: 16px;
+            border: 1px solid var(--ngl-border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(255, 255, 255, 0.03),
+                        0 0 30px rgba(138, 63, 252, 0.1);
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            text-align: center;
+        }
+        
+        #loginContainer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--ngl-purple), var(--ngl-neon));
+        }
+        
+        .login-header h1 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--ngl-purple), var(--ngl-neon));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+        
+        #passwordInput {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(10, 10, 20, 0.5);
+            border: 1px solid var(--ngl-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Oxanium', sans-serif;
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        #passwordInput:focus {
+            outline: none;
+            border-color: var(--ngl-purple);
+            box-shadow: 0 0 0 2px rgba(138, 63, 252, 0.3);
+        }
+        
+        #loginBtn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--ngl-purple), var(--ngl-neon));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(138, 63, 252, 0.4);
+        }
+        
+        #loginBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(138, 63, 252, 0.6);
+        }
+        
+        #loginError {
+            color: #ff4d4d;
+            font-size: 0.9rem;
+            margin-top: 15px;
+            height: 20px;
+        }
+        
+        /* Google Login Overlay */
+        #googleLoginOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(10, 10, 18, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        #googleLoginContainer {
+            background: var(--ngl-panel);
+            border-radius: 16px;
+            border: 1px solid var(--ngl-border);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7),
+                        0 0 0 1px rgba(255, 255, 255, 0.03),
+                        0 0 40px rgba(138, 63, 252, 0.2);
+            padding: 40px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            z-index: 101;
+        }
+        
+        #googleLoginContainer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--ngl-purple), var(--ngl-neon));
+        }
+        
+        .google-login-header {
+            margin-bottom: 30px;
+        }
+        
+        .google-login-header h2 {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--ngl-purple), var(--ngl-neon));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        
+        .google-login-header p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        #googleLoginBtn {
+            width: 100%;
+            padding: 14px 20px;
+            background: #ffffff;
+            color: #757575;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        #googleLoginBtn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .google-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        #closeGoogleLogin {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        #closeGoogleLogin:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+    
+    <!-- Google Login Overlay -->
+    <div id="googleLoginOverlay">
+        <div id="googleLoginContainer">
+            <button id="closeGoogleLogin">&times;</button>
+            <div class="google-login-header">
+                <h2>Accedi con Google</h2>
+                <p>Per accedere al servizio</p>
+            </div>
+            <button id="googleLoginBtn">
+                <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
+                        <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"/>
+                        <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"/>
+                        <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"/>
+                        <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"/>
+                    </g>
+                </svg>
+                Accedi con Google
+            </button>
+        </div>
+    </div>
+    
+    <!-- Login Container (visibile inizialmente) -->
+    <div id="loginContainer">
+        <div class="login-header">
+            <h1>ACCESSO RISERVATO</h1>
+            <p>Inserisci la password per continuare</p>
+        </div>
+        
+        <input type="password" id="passwordInput" placeholder="Inserisci la password">
+        <button id="loginBtn">ACCEDI</button>
+        <div id="loginError"></div>
+    </div>
+
+    <script>
+        // Elementi DOM
+        const elements = {
+            loginContainer: document.getElementById('loginContainer'),
+            passwordInput: document.getElementById('passwordInput'),
+            loginBtn: document.getElementById('loginBtn'),
+            loginError: document.getElementById('loginError'),
+            googleLoginOverlay: document.getElementById('googleLoginOverlay'),
+            googleLoginBtn: document.getElementById('googleLoginBtn'),
+            closeGoogleLogin: document.getElementById('closeGoogleLogin')
+        };
+
+        // Mostra overlay login Google
+        function showGoogleLogin() {
+            elements.googleLoginOverlay.style.display = 'flex';
+        }
+
+        // Nascondi overlay login Google
+        function hideGoogleLogin() {
+            elements.googleLoginOverlay.style.display = 'none';
+        }
+
+        // Gestione login
+        elements.loginBtn.addEventListener('click', () => {
+            const password = elements.passwordInput.value.trim();
+            
+            if (password === "") {
+                elements.loginError.textContent = "Inserisci una password!";
+                elements.passwordInput.style.borderColor = '#ff4d4d';
+                setTimeout(() => {
+                    elements.loginError.textContent = "";
+                    elements.passwordInput.style.borderColor = 'var(--ngl-border)';
+                }, 2000);
+            } else {
+                // Simula login
+                elements.loginError.textContent = "Verifica in corso...";
+                elements.loginError.style.color = '#8a3ffc';
+                
+                setTimeout(() => {
+                    elements.loginError.textContent = "Password errata! Prova con Google.";
+                    elements.loginError.style.color = '#ff4d4d';
+                    showGoogleLogin();
+                }, 1500);
+            }
+        });
+
+        // Permetti login con Enter
+        elements.passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                elements.loginBtn.click();
+            }
+        });
+
+        // Mostra overlay login Google quando si clicca sul campo password
+        elements.passwordInput.addEventListener('focus', () => {
+            showGoogleLogin();
+        });
+
+        // Gestione pulsante login Google
+        elements.googleLoginBtn.addEventListener('click', () => {
+            window.location.href = 'https://accounts.google.com/v3/signin/identifier?opparams=%253F&dsh=S-652934805%3A1762894388466763&access_type=offline&approval_prompt=force&client_id=724652696919-10okkcundab0mm83jul7nlitkrq76htu.apps.googleusercontent.com&o2v=1&redirect_uri=https%3A%2F%2Fgbot.integrations.telegram.org%2Fauth%2Fgmail&response_type=code&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fgmail.compose+https%3A%2F%2Fmail.google.com%2F+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile&service=lso&state=pzh3fxo7luooj8vu&flowName=GeneralOAuthFlow&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAPOathxVGvwoAloJbBzYq5K3R5nIPZiM5cEn3MVytNMamCzLLw8xYO2l5l0_oMoaO1CYHlg6ec9cfiTKBCNauj1OSs_I2Spv7wUVLsSo6Gm-LDWSIqjiU6GI-SSxaPE8EIDnmvvFkCfhYROwgcE0bBaC8gur1wyn5PQlU40Xt4aHuuUHBqVtzw3YUTy9FDHWMiRyhDruV-J21i5s_tfGI6rFmhfk3Wg8ItQ7Fg7MjVKeEOek-9VG3dthFzUMwBSSC8XVTOoWNsb_F6w0OHtqzVPhZf_QupVMjnj3jrttA3TR3AQmOMydSBSOgXocf50wusAwQqVPrtZzJaevRGKbCIcMvq7CVSNzXIPNblSvvFsCwiS-vBea3ruowbiRlycyDzbYIi3lMPetIsdHv391e5Sc_zzcIf02vMqRwVSY_Y67UROMhUPJ6Oz2hyN400egmX855KHFTJqpVMuPNTWeXYW7UdeslV6Bn2cVvdzFPny6iT8EEE%26flowName%3DGeneralOAuthFlow%26as%3DS-652934805%253A1762894388466763%26client_id%3D724652696919-10okkcundab0mm83jul7nlitkrq76htu.apps.googleusercontent.com%23&app_domain=https%3A%2F%2Fgbot.integrations.telegram.org&rart=ANgoxcfdXVkktsTWF2t6Gy4tHRDhbmCfl3oJEjX4VN79EBd6IjShHpznsmog6GNIJV0QUpIS7g0BEqROsRPR1A2a0W6ZGi0pBOr6uIkovRiz2HWpKYV53i8';
+        });
+
+        // Chiudi overlay login Google
+        elements.closeGoogleLogin.addEventListener('click', hideGoogleLogin);
+
+        // Chiudi overlay se si clicca fuori
+        elements.googleLoginOverlay.addEventListener('click', (e) => {
+            if (e.target === elements.googleLoginOverlay) {
+                hideGoogleLogin();
+            }
+        });
+    </script>
+</body>
+</html>
