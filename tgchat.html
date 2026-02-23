@@ -1,0 +1,2194 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>Telegram Dashboard · Operatore</title>
+    <style>
+        /* ===== RESET & VARIABILI ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        :root {
+            --bg-primary: #0f1217;
+            --bg-secondary: #1a1d24;
+            --bg-tertiary: #1f232b;
+            --bg-hover: #2f3540;
+            --accent: #2b6ede;
+            --accent-hover: #1f5bc0;
+            --text-primary: #e4e6eb;
+            --text-secondary: #9aa3b2;
+            --border: #2e333d;
+            --danger: #e55c5c;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --info: #17a2b8;
+        }
+
+        body {
+            background: var(--bg-primary);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-primary);
+        }
+
+        /* ===== LOGIN SCREEN ===== */
+        .login-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #1f2a3f, #0b1424);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease;
+        }
+
+        .login-card {
+            background: rgba(30, 33, 40, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem 2rem;
+            border-radius: 32px;
+            width: 380px;
+            box-shadow: 0 25px 50px -8px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            border: 1px solid rgba(255,255,255,0.06);
+            text-align: center;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-card h2 {
+            font-weight: 500;
+            margin-bottom: 1.75rem;
+            color: #fff;
+            letter-spacing: -0.2px;
+        }
+
+        .password-wrapper {
+            position: relative;
+            margin-bottom: 1.2rem;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 16px 50px 16px 18px;
+            background: #1e2128;
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            font-size: 1rem;
+            color: white;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .login-input:focus {
+            border-color: var(--accent);
+            background: #262b35;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 4px;
+        }
+
+        .toggle-password:hover {
+            color: var(--text-primary);
+        }
+
+        .login-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+            box-shadow: 0 8px 18px rgba(0,100,255,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .login-error {
+            color: #ffb0a0;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            background: rgba(255,80,80,0.15);
+            padding: 8px;
+            border-radius: 30px;
+            min-height: 40px;
+        }
+
+        .attempts-info {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard {
+            display: none;
+            width: 100vw;
+            height: 100vh;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+
+        .app {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: 380px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .sidebar-header {
+            padding: 20px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-header h3 {
+            font-weight: 500;
+            font-size: 1.3rem;
+            color: white;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.1s;
+        }
+
+        .logout-btn:hover {
+            background: var(--bg-hover);
+            color: white;
+            border-color: var(--text-secondary);
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8rem;
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            transition: background 0.3s;
+        }
+
+        .status-indicator.offline {
+            background: var(--danger);
+        }
+
+        .status-indicator.syncing {
+            background: var(--warning);
+        }
+
+        .chat-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 8px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border) var(--bg-secondary);
+        }
+
+        .chat-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-list::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .chat-list::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 4px;
+            transition: background 0.1s;
+            cursor: pointer;
+            border: 1px solid transparent;
+            position: relative;
+            animation: slideIn 0.2s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .chat-item.active {
+            background: rgba(43, 110, 222, 0.15);
+            border-color: rgba(43, 110, 222, 0.3);
+        }
+
+        .chat-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .chat-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #4a90e2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: white;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .chat-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .chat-name-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .delete-chat-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            opacity: 0.5;
+            transition: all 0.1s;
+            margin-left: 4px;
+        }
+
+        .delete-chat-btn:hover {
+            opacity: 1;
+            color: var(--danger);
+            background: rgba(229, 92, 92, 0.1);
+        }
+
+        .last-msg-preview {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+
+        .badge-unread {
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 20px;
+            min-width: 24px;
+            text-align: center;
+            animation: pulse 1s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* ===== BOTTONE NUOVA CHAT ===== */
+        .new-chat-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.1s;
+            margin: 8px;
+        }
+
+        .new-chat-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        /* ===== CHAT PANEL ===== */
+        .chat-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-tertiary);
+            position: relative;
+        }
+
+        .chat-header {
+            padding: 16px 24px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .chat-header-top {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .chat-header .back-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.1s;
+        }
+
+        .chat-header .back-btn:hover {
+            background: var(--bg-hover);
+        }
+
+        .chat-user-info {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-left: 40px;
+        }
+
+        .chat-user-info span {
+            background: var(--bg-secondary);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .chat-user-info i {
+            color: var(--accent);
+            margin-right: 4px;
+        }
+
+        .chat-placeholder {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            flex-direction: column;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .chat-placeholder:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scroll-behavior: smooth;
+        }
+
+        .message-bubble {
+            max-width: 65%;
+            padding: 12px 16px;
+            border-radius: 22px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            font-size: 0.95rem;
+            position: relative;
+            animation: messageIn 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        @keyframes messageIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message-in {
+            align-self: flex-start;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border-bottom-left-radius: 6px;
+        }
+
+        .message-out {
+            align-self: flex-end;
+            background: var(--accent);
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+
+        .message-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .message-image:hover {
+            transform: scale(1.02);
+        }
+
+        .timestamp {
+            font-size: 0.65rem;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .message-input-area {
+            padding: 18px 24px;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .message-input-area input[type="text"] {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 14px 20px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .message-input-area input[type="text"]:focus {
+            border-color: var(--accent);
+        }
+
+        .message-input-area input[type="text"]:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .image-upload-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 10px 18px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .image-upload-btn:hover {
+            background: var(--bg-hover);
+            border-color: var(--accent);
+        }
+
+        .image-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .send-btn {
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            font-size: 1.4rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s;
+            flex-shrink: 0;
+        }
+
+        .send-btn:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== LOADER & SKELETON ===== */
+        .loader-small {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-secondary) 25%, var(--bg-hover) 50%, var(--bg-secondary) 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .error-banner {
+            background: var(--danger);
+            color: white;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            text-align: center;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* ===== MODALE NUOVA CHAT ===== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 16px;
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 1rem;
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .modal-content button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+
+        .modal-content button.cancel {
+            background: var(--danger);
+        }
+
+        /* ===== INFO UTENTE ===== */
+        .user-detail {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .user-detail i {
+            color: var(--accent);
+            width: 16px;
+            display: inline-block;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 700px) {
+            .sidebar {
+                width: 100%;
+                position: absolute;
+                z-index: 100;
+                height: 100%;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.mobile-visible {
+                transform: translateX(0);
+            }
+            
+            .chat-header .back-btn {
+                display: block;
+            }
+            
+            .message-bubble {
+                max-width: 85%;
+            }
+            
+            .chat-user-info {
+                padding-left: 0;
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+
+        /* ===== UTILITY ===== */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <h2>🔐 Accesso operatore</h2>
+            <div class="password-wrapper">
+                <input type="password" id="passwordInput" class="login-input" placeholder="Password" autofocus>
+                <button class="toggle-password" id="togglePassword" type="button">👁️</button>
+            </div>
+            <button class="login-btn" id="loginBtn">Accedi</button>
+            <div id="loginMessage" class="login-error"></div>
+            <div id="attemptsInfo" class="attempts-info"></div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="dashboard">
+        <div class="app">
+            <!-- SIDEBAR -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <h3>📨 Chat Telegram</h3>
+                    <button class="logout-btn" id="logoutBtn">Esci</button>
+                </div>
+                <div class="connection-status" id="connectionStatus">
+                    <span class="status-indicator online" id="statusIndicator"></span>
+                    <span id="statusText">Connesso a Telegram</span>
+                </div>
+                <button class="new-chat-btn" id="newChatBtn">➕ Nuova Chat</button>
+                <div class="chat-list" id="chatList"></div>
+            </aside>
+
+            <!-- MAIN CHAT PANEL -->
+            <main class="chat-panel" id="chatPanel">
+                <div class="chat-header" id="chatHeader">
+                    <div class="chat-header-top">
+                        <button class="back-btn" id="backBtn">←</button>
+                        <span id="selectedUserName">Seleziona una chat</span>
+                    </div>
+                    <div id="chatUserInfo" class="chat-user-info hidden"></div>
+                </div>
+
+                <!-- MESSAGES CONTAINER -->
+                <div id="messageContainer" class="messages-container"></div>
+
+                <!-- PLACEHOLDER -->
+                <div id="placeholderMessage" class="chat-placeholder">
+                    <span>☁️ Nessuna chat selezionata</span>
+                    <span style="font-size: 0.9rem;">Clicca per deselezionare</span>
+                </div>
+
+                <!-- INPUT AREA -->
+                <div id="inputWrapper" class="message-input-area hidden">
+                    <div class="input-row">
+                        <input type="text" id="messageInput" placeholder="Scrivi un messaggio..." autocomplete="off">
+                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                        <button class="image-upload-btn" id="imageUploadBtn">📷 Foto</button>
+                        <button class="send-btn" id="sendBtn" disabled>➤</button>
+                    </div>
+                    <div id="imagePreviewContainer" class="hidden">
+                        <img id="imagePreview" class="image-preview" src="" alt="Anteprima">
+                        <button id="clearImageBtn" style="background: none; border: none; color: var(--danger); cursor: pointer;">✖ Rimuovi</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- MODALE NUOVA CHAT -->
+    <div id="newChatModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>➕ Nuova Chat</h3>
+            <input type="text" id="newChatId" placeholder="ID Utente Telegram (es. 123456789)">
+            <input type="text" id="newChatName" placeholder="Nome Utente (opzionale)">
+            <div>
+                <button id="createChatBtn">Crea Chat</button>
+                <button class="cancel" id="cancelChatBtn">Annulla</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // =============== CONFIGURAZIONE ===============
+            const API_USERS = "https://68e161518943bf6bb3c41597.mockapi.io/api/v1/user";
+            const API_MESSAGES = "https://68e161518943bf6bb3c41597.mockapi.io/api/v1/message";
+            
+            const BOT_TOKEN = "8659765723:AAE82OmZ8Qgf2IDSIEzL28I9ZkL95GIXWfM";
+            const TELEGRAM_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+            
+            const CORRECT_PASSWORD = "111685";
+
+            // =============== STATO GLOBALE CON DEDUPLICAZIONE ASSOLUTA ===============
+            let state = {
+                users: [],
+                messages: [],
+                selectedUserId: null,
+                unreadMap: new Map(),
+                lastMessageTimestamps: new Map(),
+                messageCache: new Map(),
+                
+                // SISTEMA DI DEDUPLICAZIONE TOTALE
+                processedMessageIds: new Set(),           // ID MockAPI già visti
+                processedTelegramUniqueIds: new Set(),    // ID univoci Telegram (chatId + messageId)
+                processedTelegramMessageIds: new Map(),   // message_id per chat
+                processedClientMessageIds: new Set(),     // ID generati lato client
+                processedChatIds: new Set(),              // ID chat già viste
+                
+                // TIMESTAMP per evitare doppi polling nello stesso secondo
+                lastProcessedTimestamps: new Map(),       // chatId -> ultimo timestamp processato
+                
+                processedTempIds: new Set(),
+                
+                loginAttempts: 0,
+                loginBlockedUntil: 0,
+                isOnline: navigator.onLine,
+                isSyncing: false,
+                sendCooldown: false,
+                telegramOffset: 0,
+                
+                telegramChats: new Map(), // chatId -> { ... }
+                
+                currentImageFile: null,
+                currentImageBase64: null,
+                lastSyncTimestamp: 0,
+                
+                // Cache delle richieste per evitare doppi fetch
+                pendingRequests: new Set()
+            };
+
+            // Riferimenti DOM
+            const dom = {
+                loginScreen: document.getElementById('loginScreen'),
+                dashboard: document.getElementById('dashboard'),
+                passwordInput: document.getElementById('passwordInput'),
+                loginBtn: document.getElementById('loginBtn'),
+                loginMessage: document.getElementById('loginMessage'),
+                attemptsInfo: document.getElementById('attemptsInfo'),
+                togglePassword: document.getElementById('togglePassword'),
+                logoutBtn: document.getElementById('logoutBtn'),
+                chatList: document.getElementById('chatList'),
+                messageContainer: document.getElementById('messageContainer'),
+                placeholderMessage: document.getElementById('placeholderMessage'),
+                inputWrapper: document.getElementById('inputWrapper'),
+                messageInput: document.getElementById('messageInput'),
+                sendBtn: document.getElementById('sendBtn'),
+                selectedUserName: document.getElementById('selectedUserName'),
+                chatUserInfo: document.getElementById('chatUserInfo'),
+                backBtn: document.getElementById('backBtn'),
+                sidebar: document.getElementById('sidebar'),
+                statusIndicator: document.getElementById('statusIndicator'),
+                statusText: document.getElementById('statusText'),
+                imageInput: document.getElementById('imageInput'),
+                imageUploadBtn: document.getElementById('imageUploadBtn'),
+                imagePreviewContainer: document.getElementById('imagePreviewContainer'),
+                imagePreview: document.getElementById('imagePreview'),
+                clearImageBtn: document.getElementById('clearImageBtn'),
+                newChatBtn: document.getElementById('newChatBtn'),
+                newChatModal: document.getElementById('newChatModal'),
+                newChatId: document.getElementById('newChatId'),
+                newChatName: document.getElementById('newChatName'),
+                createChatBtn: document.getElementById('createChatBtn'),
+                cancelChatBtn: document.getElementById('cancelChatBtn')
+            };
+
+            // =============== FUNZIONI UTILITY ===============
+            function sanitizeHTML(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            function validateMessage(text) {
+                return text && text.trim().length > 0 && text.length <= 4096;
+            }
+
+            function generateUniqueMessageId() {
+                return 'msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 15) + '_' + Math.random().toString(36).substring(2, 15);
+            }
+
+            // =============== SALVATAGGIO UTENTI SU MOCKAPI ===============
+            async function saveUserToMockAPI(userData) {
+                try {
+                    const checkResponse = await fetch(`${API_USERS}?id=${userData.id}`);
+                    if (checkResponse.ok) {
+                        const existing = await checkResponse.json();
+                        
+                        if (existing && existing.length > 0) {
+                            const updateResponse = await fetch(`${API_USERS}/${existing[0].id}`, {
+                                method: 'PUT',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    ...userData,
+                                    mockapi_id: existing[0].id
+                                })
+                            });
+                            
+                            if (updateResponse.ok) {
+                                return await updateResponse.json();
+                            }
+                        } else {
+                            const createResponse = await fetch(API_USERS, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(userData)
+                            });
+                            
+                            if (createResponse.ok) {
+                                return await createResponse.json();
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Errore salvataggio utente:', error);
+                }
+                return null;
+            }
+
+            // =============== LOGIN ===============
+            function handleLogin() {
+                const now = Date.now();
+                
+                if (state.loginBlockedUntil > now) {
+                    const waitSeconds = Math.ceil((state.loginBlockedUntil - now) / 1000);
+                    dom.loginMessage.textContent = `⏳ Troppi tentativi. Riprova tra ${waitSeconds}s`;
+                    return;
+                }
+
+                const password = dom.passwordInput.value;
+                if (!password) {
+                    dom.loginMessage.textContent = '❌ Inserisci la password';
+                    return;
+                }
+
+                dom.loginBtn.disabled = true;
+                dom.loginBtn.textContent = 'Verifica...';
+
+                setTimeout(() => {
+                    if (password === CORRECT_PASSWORD) {
+                        state.loginAttempts = 0;
+                        state.loginBlockedUntil = 0;
+                        sessionStorage.setItem('operator_logged', 'true');
+                        showDashboard();
+                        dom.loginMessage.textContent = '';
+                        dom.attemptsInfo.textContent = '';
+                    } else {
+                        state.loginAttempts++;
+                        
+                        if (state.loginAttempts >= 5) {
+                            state.loginBlockedUntil = now + 30000;
+                            dom.loginMessage.textContent = '🔒 Troppi tentativi falliti. Blocco di 30 secondi';
+                            dom.attemptsInfo.textContent = '';
+                        } else {
+                            dom.loginMessage.textContent = `❌ Password errata (tentativo ${state.loginAttempts}/5)`;
+                            dom.attemptsInfo.textContent = `Tentativi rimasti: ${5 - state.loginAttempts}`;
+                        }
+                    }
+
+                    dom.loginBtn.disabled = false;
+                    dom.loginBtn.textContent = 'Accedi';
+                    dom.passwordInput.value = '';
+                }, 500);
+            }
+
+            function togglePasswordVisibility() {
+                const type = dom.passwordInput.type === 'password' ? 'text' : 'password';
+                dom.passwordInput.type = type;
+                dom.togglePassword.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+            }
+
+            function showDashboard() {
+                dom.loginScreen.style.display = 'none';
+                dom.dashboard.style.display = 'block';
+                initializeApp();
+            }
+
+            function logout() {
+                sessionStorage.removeItem('operator_logged');
+                stopPolling();
+                state.messageCache.clear();
+                state.lastMessageTimestamps.clear();
+                state.processedMessageIds.clear();
+                state.processedTelegramUniqueIds.clear();
+                state.processedTelegramMessageIds.clear();
+                state.processedClientMessageIds.clear();
+                state.processedChatIds.clear();
+                state.lastProcessedTimestamps.clear();
+                state.processedTempIds.clear();
+                dom.dashboard.style.display = 'none';
+                dom.loginScreen.style.display = 'flex';
+                dom.passwordInput.value = '';
+                dom.loginMessage.textContent = '';
+                dom.attemptsInfo.textContent = '';
+                state.selectedUserId = null;
+                state.loginAttempts = 0;
+                state.loginBlockedUntil = 0;
+            }
+
+            // =============== POLLING ===============
+            let telegramPollingInterval = null;
+            let mockapiPollingInterval = null;
+
+            function startPolling() {
+                telegramPollingInterval = setInterval(async () => {
+                    if (state.isOnline) {
+                        await pollTelegramUpdates();
+                    }
+                }, 2000);
+
+                mockapiPollingInterval = setInterval(async () => {
+                    if (state.isOnline) {
+                        await syncWithMockAPI();
+                    }
+                }, 5000);
+            }
+
+            function stopPolling() {
+                if (telegramPollingInterval) clearInterval(telegramPollingInterval);
+                if (mockapiPollingInterval) clearInterval(mockapiPollingInterval);
+            }
+
+            // =============== TELEGRAM POLLING CON ANTI-DUPLICAZIONE ASSOLUTA ===============
+            async function pollTelegramUpdates() {
+                // Evita richieste concorrenti
+                const requestId = 'poll_' + Date.now();
+                if (state.pendingRequests.has('poll')) return;
+                state.pendingRequests.add('poll');
+                
+                try {
+                    const url = `${TELEGRAM_API}/getUpdates?offset=${state.telegramOffset}&timeout=10`;
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Telegram API error: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.ok && data.result && data.result.length > 0) {
+                        let hasNewMessages = false;
+                        
+                        for (const update of data.result) {
+                            if (update.message) {
+                                const processed = await handleTelegramMessage(update.message);
+                                if (processed) hasNewMessages = true;
+                            }
+                        }
+                        
+                        const maxUpdateId = Math.max(...data.result.map(u => u.update_id));
+                        state.telegramOffset = maxUpdateId + 1;
+                        
+                        if (hasNewMessages) {
+                            await updateUsersFromTelegram();
+                            await updateUnreadCounts();
+                            await renderChatList();
+                            
+                            if (state.selectedUserId) {
+                                await loadMessages(state.selectedUserId, true);
+                                updateChatUserInfo(state.selectedUserId);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Telegram polling error:', error);
+                } finally {
+                    state.pendingRequests.delete('poll');
+                }
+            }
+
+            async function handleTelegramMessage(message) {
+                const chat = message.chat;
+                const chatId = chat.id.toString();
+                
+                // ===== ANTI-DUPLICAZIONE ASSOLUTA =====
+                
+                // 1. ID univoco composto
+                const telegramUniqueId = `tg_${chatId}_${message.message_id}`;
+                if (state.processedTelegramUniqueIds.has(telegramUniqueId)) {
+                    console.log('Duplicato bloccato (unique_id):', telegramUniqueId);
+                    return false;
+                }
+                
+                // 2. message_id per chat
+                const telegramMessageId = message.message_id;
+                if (state.processedTelegramMessageIds.has(chatId)) {
+                    const messageIds = state.processedTelegramMessageIds.get(chatId);
+                    if (messageIds.has(telegramMessageId)) {
+                        console.log('Duplicato bloccato (message_id):', chatId, telegramMessageId);
+                        return false;
+                    }
+                }
+                
+                // 3. Timestamp (evita doppi nello stesso secondo)
+                const messageTimestamp = message.date * 1000;
+                const lastTimestamp = state.lastProcessedTimestamps.get(chatId) || 0;
+                if (Math.abs(messageTimestamp - lastTimestamp) < 1000 && message.text === lastMessageText) {
+                    console.log('Duplicato bloccato (timestamp vicino)');
+                    return false;
+                }
+                
+                // 4. Contenuto duplicato (ultimi 3 messaggi)
+                const recentMessages = state.messageCache.get(chatId) || [];
+                const lastThreeMessages = recentMessages.slice(-3).map(m => m.text);
+                if (lastThreeMessages.includes(message.text) && recentMessages.length > 0) {
+                    const lastMsg = recentMessages[recentMessages.length - 1];
+                    if (Math.abs(messageTimestamp - lastMsg.timestamp) < 3000) {
+                        console.log('Duplicato bloccato (contenuto recente)');
+                        return false;
+                    }
+                }
+                
+                const text = message.text || (message.caption ? message.caption : '📷 Foto');
+                const date = message.date * 1000;
+                const from = message.from || {};
+                
+                let displayName = 'Utente Telegram';
+                if (chat.first_name || chat.last_name) {
+                    displayName = [chat.first_name, chat.last_name].filter(Boolean).join(' ');
+                } else if (chat.username) {
+                    displayName = '@' + chat.username;
+                } else if (chat.title) {
+                    displayName = chat.title;
+                }
+                
+                const userInfo = {
+                    id: chatId,
+                    chat_id: chatId,
+                    username: chat.username || null,
+                    firstName: chat.first_name || from.first_name || null,
+                    lastName: chat.last_name || from.last_name || null,
+                    displayName: displayName,
+                    phone: from.phone_number || null,
+                    languageCode: from.language_code || null,
+                    isBot: from.is_bot || false,
+                    type: chat.type || 'private',
+                    title: chat.title || null,
+                    lastSeen: date,
+                    firstSeen: state.telegramChats.has(chatId) ? state.telegramChats.get(chatId).firstSeen : date
+                };
+                
+                // Aggiorna chat (sovrascrive, non duplica)
+                state.telegramChats.set(chatId, userInfo);
+                state.processedChatIds.add(chatId);
+                
+                // Salva su MockAPI
+                await saveUserToMockAPI({
+                    ...userInfo,
+                    telegram_id: chatId,
+                    chat_id: chatId
+                });
+                
+                let imageUrl = null;
+                
+                if (message.photo) {
+                    try {
+                        const photo = message.photo.pop();
+                        const fileId = photo.file_id;
+                        const fileResponse = await fetch(`${TELEGRAM_API}/getFile?file_id=${fileId}`);
+                        const fileData = await fileResponse.json();
+                        if (fileData.ok) {
+                            imageUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileData.result.file_path}`;
+                        }
+                    } catch (error) {
+                        console.error('Errore recupero URL foto:', error);
+                    }
+                }
+                
+                const messageObj = {
+                    user_id: chatId,
+                    chat_id: chatId,
+                    text: text,
+                    direction: 'in',
+                    timestamp: date,
+                    username: displayName,
+                    type: message.photo ? 'photo' : 'text',
+                    image_url: imageUrl,
+                    telegram_message_id: message.message_id,
+                    telegram_chat_id: chatId,
+                    telegram_unique_id: telegramUniqueId
+                };
+                
+                try {
+                    const saveResponse = await fetch(API_MESSAGES, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(messageObj)
+                    });
+                    
+                    if (saveResponse.ok) {
+                        const savedMsg = await saveResponse.json();
+                        
+                        // Registra in TUTTI i sistemi di deduplicazione
+                        state.processedMessageIds.add(savedMsg.id);
+                        state.processedTelegramUniqueIds.add(telegramUniqueId);
+                        
+                        if (!state.processedTelegramMessageIds.has(chatId)) {
+                            state.processedTelegramMessageIds.set(chatId, new Set());
+                        }
+                        state.processedTelegramMessageIds.get(chatId).add(telegramMessageId);
+                        
+                        state.lastProcessedTimestamps.set(chatId, date);
+                        
+                        // Aggiorna cache (sostituisci se già presente)
+                        if (!state.messageCache.has(chatId)) {
+                            state.messageCache.set(chatId, []);
+                        }
+                        
+                        const messages = state.messageCache.get(chatId);
+                        const existingIndex = messages.findIndex(m => m.id === savedMsg.id);
+                        if (existingIndex === -1) {
+                            messages.push(savedMsg);
+                        } else {
+                            messages[existingIndex] = savedMsg; // sostituisci
+                        }
+                        
+                        state.lastMessageTimestamps.set(chatId, Math.max(
+                            state.lastMessageTimestamps.get(chatId) || 0,
+                            savedMsg.timestamp
+                        ));
+                        
+                        return true;
+                    }
+                } catch (error) {
+                    console.error('Errore salvataggio su MockAPI:', error);
+                }
+                
+                return false;
+            }
+
+            // =============== SINCRONIZZAZIONE MOCKAPI ===============
+            async function syncWithMockAPI() {
+                const requestId = 'sync_' + Date.now();
+                
+                try {
+                    const usersResponse = await fetch(API_USERS);
+                    if (usersResponse.ok) {
+                        const mockUsers = await usersResponse.json();
+                        
+                        const uniqueUsers = new Map();
+                        mockUsers.forEach(user => {
+                            const key = user.chat_id || user.id || user.telegram_id;
+                            if (key && !uniqueUsers.has(key)) {
+                                uniqueUsers.set(key, user);
+                            }
+                        });
+                        
+                        uniqueUsers.forEach((user, key) => {
+                            if (!state.telegramChats.has(key)) {
+                                state.telegramChats.set(key, {
+                                    id: key,
+                                    chat_id: key,
+                                    username: user.username,
+                                    firstName: user.firstName,
+                                    lastName: user.lastName,
+                                    displayName: user.displayName || user.username || `Utente ${key}`,
+                                    phone: user.phone,
+                                    type: user.type || 'private',
+                                    lastSeen: user.lastSeen || 0,
+                                    firstSeen: user.firstSeen || 0
+                                });
+                                state.processedChatIds.add(key);
+                            }
+                        });
+                    }
+                    
+                    const messagesResponse = await fetch(API_MESSAGES);
+                    if (messagesResponse.ok) {
+                        const mockMessages = await messagesResponse.json();
+                        
+                        const messagesByUser = new Map();
+                        
+                        mockMessages.forEach(msg => {
+                            const userId = msg.chat_id || msg.user_id || msg.userId;
+                            if (userId) {
+                                if (!messagesByUser.has(userId)) {
+                                    messagesByUser.set(userId, []);
+                                }
+                                messagesByUser.get(userId).push(msg);
+                                
+                                if (msg.id) state.processedMessageIds.add(msg.id);
+                                
+                                if (msg.telegram_unique_id) {
+                                    state.processedTelegramUniqueIds.add(msg.telegram_unique_id);
+                                }
+                                
+                                if (msg.telegram_message_id && (msg.telegram_chat_id || userId)) {
+                                    const chatId = msg.telegram_chat_id || userId;
+                                    if (!state.processedTelegramMessageIds.has(chatId)) {
+                                        state.processedTelegramMessageIds.set(chatId, new Set());
+                                    }
+                                    state.processedTelegramMessageIds.get(chatId).add(msg.telegram_message_id);
+                                }
+                            }
+                        });
+                        
+                        for (const [userId, messages] of messagesByUser) {
+                            if (!state.messageCache.has(userId)) {
+                                state.messageCache.set(userId, []);
+                            }
+                            
+                            const existingIds = new Set(state.messageCache.get(userId).map(m => m.id));
+                            const newMessages = messages.filter(m => !existingIds.has(m.id));
+                            
+                            if (newMessages.length > 0) {
+                                state.messageCache.get(userId).push(...newMessages);
+                                
+                                const maxTs = Math.max(...newMessages.map(m => parseInt(m.timestamp) || 0));
+                                state.lastMessageTimestamps.set(userId, Math.max(
+                                    state.lastMessageTimestamps.get(userId) || 0,
+                                    maxTs
+                                ));
+                            }
+                        }
+                    }
+                    
+                    await updateUsersFromTelegram();
+                    
+                    if (state.selectedUserId) {
+                        await loadMessages(state.selectedUserId, true);
+                        updateChatUserInfo(state.selectedUserId);
+                    }
+                    
+                    await renderChatList();
+                    
+                } catch (error) {
+                    console.error('Sync error:', error);
+                }
+            }
+
+            function updateUsersFromTelegram() {
+                state.users = Array.from(state.telegramChats.values()).map(chat => ({
+                    id: chat.id || chat.chat_id,
+                    chat_id: chat.chat_id || chat.id,
+                    username: chat.displayName || chat.username || `Utente ${chat.id}`,
+                    telegram_id: chat.id,
+                    firstName: chat.firstName,
+                    lastName: chat.lastName,
+                    phone: chat.phone,
+                    type: chat.type
+                }));
+            }
+
+            // =============== NUOVA CHAT ===============
+            function setupNewChat() {
+                dom.newChatBtn.addEventListener('click', () => {
+                    dom.newChatModal.classList.remove('hidden');
+                });
+                
+                dom.cancelChatBtn.addEventListener('click', () => {
+                    dom.newChatModal.classList.add('hidden');
+                    dom.newChatId.value = '';
+                    dom.newChatName.value = '';
+                });
+                
+                dom.createChatBtn.addEventListener('click', async () => {
+                    const chatId = dom.newChatId.value.trim();
+                    const chatName = dom.newChatName.value.trim() || `Utente ${chatId}`;
+                    
+                    if (!chatId) {
+                        showError('Inserisci un ID utente');
+                        return;
+                    }
+                    
+                    if (!/^\d+$/.test(chatId)) {
+                        showError('ID utente deve essere numerico');
+                        return;
+                    }
+                    
+                    if (!state.telegramChats.has(chatId)) {
+                        const newUser = {
+                            id: chatId,
+                            chat_id: chatId,
+                            username: null,
+                            firstName: chatName.split(' ')[0] || chatName,
+                            lastName: chatName.split(' ').slice(1).join(' ') || null,
+                            displayName: chatName,
+                            type: 'private',
+                            firstSeen: Date.now(),
+                            lastSeen: Date.now()
+                        };
+                        
+                        state.telegramChats.set(chatId, newUser);
+                        state.processedChatIds.add(chatId);
+                        
+                        await saveUserToMockAPI({
+                            id: chatId,
+                            chat_id: chatId,
+                            displayName: chatName,
+                            telegram_id: chatId,
+                            type: 'private',
+                            firstSeen: Date.now()
+                        });
+                    }
+                    
+                    await updateUsersFromTelegram();
+                    await renderChatList();
+                    
+                    await openChat(chatId);
+                    
+                    dom.newChatModal.classList.add('hidden');
+                    dom.newChatId.value = '';
+                    dom.newChatName.value = '';
+                });
+            }
+
+            // =============== ELIMINA CHAT ===============
+            async function deleteChat(userId, event) {
+                event.stopPropagation();
+                
+                if (!confirm('Eliminare tutti i messaggi di questa chat? L\'operazione è irreversibile.')) {
+                    return;
+                }
+                
+                try {
+                    const messages = state.messageCache.get(userId) || [];
+                    
+                    for (const msg of messages) {
+                        if (msg.id && !msg.id.startsWith('temp_')) {
+                            await fetch(`${API_MESSAGES}/${msg.id}`, { 
+                                method: 'DELETE' 
+                            }).catch(() => {});
+                        }
+                    }
+                    
+                    const userResponse = await fetch(`${API_USERS}?id=${userId}`);
+                    if (userResponse.ok) {
+                        const users = await userResponse.json();
+                        for (const user of users) {
+                            await fetch(`${API_USERS}/${user.id}`, { method: 'DELETE' }).catch(() => {});
+                        }
+                    }
+                    
+                    state.messageCache.delete(userId);
+                    state.lastMessageTimestamps.delete(userId);
+                    state.telegramChats.delete(userId);
+                    state.processedChatIds.delete(userId);
+                    state.lastProcessedTimestamps.delete(userId);
+                    
+                    if (state.processedTelegramMessageIds.has(userId)) {
+                        state.processedTelegramMessageIds.delete(userId);
+                    }
+                    
+                    if (state.selectedUserId === userId) {
+                        closeChat();
+                    }
+                    
+                    await updateUsersFromTelegram();
+                    await updateUnreadCounts();
+                    await renderChatList();
+                    
+                    showError('✅ Chat eliminata', 'success');
+                } catch (error) {
+                    console.error('Errore eliminazione chat:', error);
+                    showError('❌ Errore durante eliminazione');
+                }
+            }
+
+            // =============== INVIO IMMAGINI ===============
+            function setupImageUpload() {
+                dom.imageUploadBtn.addEventListener('click', () => {
+                    dom.imageInput.click();
+                });
+                
+                dom.imageInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        if (!file.type.startsWith('image/')) {
+                            showError('Il file deve essere un\'immagine');
+                            return;
+                        }
+                        
+                        if (file.size > 10 * 1024 * 1024) {
+                            showError('L\'immagine non può superare i 10MB');
+                            return;
+                        }
+                        
+                        state.currentImageFile = file;
+                        
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            state.currentImageBase64 = e.target.result;
+                            dom.imagePreview.src = e.target.result;
+                            dom.imagePreviewContainer.classList.remove('hidden');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+                
+                dom.clearImageBtn.addEventListener('click', () => {
+                    clearImageSelection();
+                });
+            }
+
+            function clearImageSelection() {
+                state.currentImageFile = null;
+                state.currentImageBase64 = null;
+                dom.imageInput.value = '';
+                dom.imagePreviewContainer.classList.add('hidden');
+            }
+
+            async function sendImageToTelegram(chatId, file, caption) {
+                const formData = new FormData();
+                formData.append('chat_id', parseInt(chatId));
+                formData.append('photo', file);
+                
+                if (caption) {
+                    formData.append('caption', caption);
+                }
+                
+                try {
+                    const response = await fetch(`${TELEGRAM_API}/sendPhoto`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Telegram photo error:', errorText);
+                        throw new Error(`Telegram error: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.ok) {
+                        const mockResponse = await fetch(API_MESSAGES, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                user_id: chatId,
+                                chat_id: chatId,
+                                text: caption || '📷 Foto',
+                                direction: 'out',
+                                timestamp: Date.now(),
+                                type: 'photo'
+                            })
+                        });
+                        
+                        if (mockResponse.ok) {
+                            return await mockResponse.json();
+                        }
+                    }
+                    
+                    throw new Error('Invio foto fallito');
+                } catch (error) {
+                    console.error('Send photo error:', error);
+                    throw error;
+                }
+            }
+
+            // =============== INVIO MESSAGGIO ===============
+            async function sendMessage() {
+                if (state.sendCooldown) {
+                    showError('Troppi invii. Attendi un momento');
+                    return;
+                }
+                
+                if (!state.selectedUserId) return;
+                
+                const hasImage = state.currentImageFile !== null;
+                const text = dom.messageInput.value.trim();
+                
+                if (!hasImage && !validateMessage(text)) {
+                    return;
+                }
+                
+                const clientMessageId = generateUniqueMessageId();
+                
+                if (state.processedClientMessageIds.has(clientMessageId)) {
+                    return;
+                }
+                state.processedClientMessageIds.add(clientMessageId);
+                
+                dom.sendBtn.disabled = true;
+                dom.messageInput.disabled = true;
+                dom.imageUploadBtn.disabled = true;
+                state.sendCooldown = true;
+                
+                const tempId = 'temp_' + Date.now() + '_' + Math.random();
+                state.processedTempIds.add(tempId);
+                
+                const optimisticMsg = {
+                    id: tempId,
+                    user_id: state.selectedUserId,
+                    chat_id: state.selectedUserId,
+                    text: hasImage ? (text || '📷 Foto') : text,
+                    direction: 'out',
+                    timestamp: Date.now(),
+                    type: hasImage ? 'photo' : 'text',
+                    client_message_id: clientMessageId
+                };
+                
+                state.messages.push(optimisticMsg);
+                renderMessages();
+                
+                if (!hasImage) {
+                    dom.messageInput.value = '';
+                }
+                
+                try {
+                    let sentMsg;
+                    
+                    if (hasImage) {
+                        sentMsg = await sendImageToTelegram(
+                            state.selectedUserId, 
+                            state.currentImageFile, 
+                            text
+                        );
+                        clearImageSelection();
+                    } else {
+                        sentMsg = await sendTextToTelegram(state.selectedUserId, text);
+                    }
+                    
+                    const index = state.messages.findIndex(m => m.id === tempId);
+                    if (index !== -1) {
+                        state.messages[index] = sentMsg;
+                    }
+                    
+                    if (!state.messageCache.has(state.selectedUserId)) {
+                        state.messageCache.set(state.selectedUserId, []);
+                    }
+                    
+                    const cache = state.messageCache.get(state.selectedUserId);
+                    const tempIndex = cache.findIndex(m => m.id === tempId);
+                    if (tempIndex !== -1) {
+                        cache.splice(tempIndex, 1);
+                    }
+                    
+                    const existingIds = new Set(cache.map(m => m.id));
+                    if (!existingIds.has(sentMsg.id)) {
+                        cache.push(sentMsg);
+                    }
+                    
+                    state.lastMessageTimestamps.set(state.selectedUserId, sentMsg.timestamp);
+                    state.processedMessageIds.add(sentMsg.id);
+                    state.processedTempIds.delete(tempId);
+                    
+                } catch (error) {
+                    console.error('Send error:', error);
+                    state.messages = state.messages.filter(m => m.id !== tempId);
+                    renderMessages();
+                    showError('Invio fallito. Riprova');
+                    state.processedTempIds.delete(tempId);
+                } finally {
+                    setTimeout(() => {
+                        dom.sendBtn.disabled = false;
+                        dom.messageInput.disabled = false;
+                        dom.imageUploadBtn.disabled = false;
+                        dom.messageInput.focus();
+                        state.sendCooldown = false;
+                    }, 500);
+                }
+                
+                await updateUnreadCounts();
+                await renderChatList();
+            }
+
+            async function sendTextToTelegram(chatId, text) {
+                try {
+                    const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: parseInt(chatId),
+                            text: text
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Telegram text error:', errorText);
+                        throw new Error(`Telegram error: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    
+                    if (result.ok) {
+                        const mockResponse = await fetch(API_MESSAGES, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                user_id: chatId,
+                                chat_id: chatId,
+                                text: text,
+                                direction: 'out',
+                                timestamp: Date.now(),
+                                type: 'text'
+                            })
+                        });
+                        
+                        if (mockResponse.ok) {
+                            return await mockResponse.json();
+                        }
+                    }
+                    
+                    throw new Error('Invio testo fallito');
+                } catch (error) {
+                    console.error('Send text error:', error);
+                    throw error;
+                }
+            }
+
+            // =============== GESTIONE MESSAGGI ===============
+            async function getMessagesForUser(userId) {
+                return state.messageCache.get(userId) || [];
+            }
+
+            async function updateUnreadCounts() {
+                if (!state.users.length) return;
+                
+                const newUnreadMap = new Map();
+                
+                for (const user of state.users) {
+                    const messages = await getMessagesForUser(user.id);
+                    const unread = messages.filter(m => 
+                        m.direction === 'in' && state.selectedUserId !== user.id
+                    ).length;
+                    
+                    if (unread > 0) newUnreadMap.set(user.id, unread);
+                }
+                
+                state.unreadMap = newUnreadMap;
+                await renderChatList();
+            }
+
+            // =============== RENDERING ===============
+            async function getLastMessageTime(userId) {
+                const messages = await getMessagesForUser(userId);
+                if (!messages.length) return 0;
+                return Math.max(...messages.map(m => parseInt(m.timestamp) || 0));
+            }
+
+            async function getLastMessageText(userId) {
+                const messages = await getMessagesForUser(userId);
+                if (!messages.length) return '';
+                
+                const last = messages.sort((a, b) => 
+                    (parseInt(b.timestamp) || 0) - (parseInt(a.timestamp) || 0)
+                )[0];
+                
+                let preview = last.text || '';
+                if (last.type === 'photo') preview = '📷 ' + (preview || 'Foto');
+                return preview.length > 30 ? preview.slice(0, 30) + '…' : preview;
+            }
+
+            async function renderChatList() {
+                if (!state.users.length) {
+                    dom.chatList.innerHTML = '<div class="chat-placeholder">Nessuna chat. Clicca "➕ Nuova Chat" per iniziare</div>';
+                    return;
+                }
+                
+                const usersWithTime = await Promise.all(
+                    state.users.map(async user => ({
+                        ...user,
+                        lastTime: await getLastMessageTime(user.id)
+                    }))
+                );
+                
+                usersWithTime.sort((a, b) => b.lastTime - a.lastTime);
+                
+                dom.chatList.innerHTML = '';
+                
+                const renderedIds = new Set();
+                
+                for (const user of usersWithTime) {
+                    if (renderedIds.has(user.id)) continue;
+                    renderedIds.add(user.id);
+                    
+                    const lastMsg = await getLastMessageText(user.id);
+                    const unreadCount = state.unreadMap.get(user.id) || 0;
+                    
+                    const fullUserInfo = state.telegramChats.get(user.id) || {};
+                    
+                    const chatItem = document.createElement('div');
+                    chatItem.className = `chat-item ${state.selectedUserId === user.id ? 'active' : ''}`;
+                    chatItem.dataset.userId = user.id;
+                    
+                    const avatar = document.createElement('div');
+                    avatar.className = 'chat-avatar';
+                    avatar.textContent = (fullUserInfo.displayName?.[0] || user.username?.[0] || 'U').toUpperCase();
+                    
+                    const info = document.createElement('div');
+                    info.className = 'chat-info';
+                    
+                    const nameRow = document.createElement('div');
+                    nameRow.className = 'chat-name';
+                    
+                    const nameLeft = document.createElement('div');
+                    nameLeft.className = 'chat-name-left';
+                    
+                    const nameSpan = document.createElement('span');
+                    nameSpan.textContent = sanitizeHTML(fullUserInfo.displayName || user.username || `Utente ${user.id}`);
+                    
+                    nameLeft.appendChild(nameSpan);
+                    
+                    if (unreadCount > 0) {
+                        const badge = document.createElement('span');
+                        badge.className = 'badge-unread';
+                        badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                        nameLeft.appendChild(badge);
+                    }
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'delete-chat-btn';
+                    deleteBtn.innerHTML = '🗑️';
+                    deleteBtn.title = 'Elimina chat';
+                    deleteBtn.addEventListener('click', (e) => deleteChat(user.id, e));
+                    
+                    nameRow.appendChild(nameLeft);
+                    nameRow.appendChild(deleteBtn);
+                    
+                    const preview = document.createElement('div');
+                    preview.className = 'last-msg-preview';
+                    preview.textContent = lastMsg || 'Nessun messaggio';
+                    
+                    if (fullUserInfo.username) {
+                        const userDetail = document.createElement('div');
+                        userDetail.className = 'user-detail';
+                        userDetail.innerHTML = `<i>👤</i> @${sanitizeHTML(fullUserInfo.username)}`;
+                        info.appendChild(userDetail);
+                    }
+                    
+                    const idDetail = document.createElement('div');
+                    idDetail.className = 'user-detail';
+                    idDetail.innerHTML = `<i>🆔</i> ${sanitizeHTML(user.id)}`;
+                    info.appendChild(idDetail);
+                    
+                    info.appendChild(nameRow);
+                    info.appendChild(preview);
+                    
+                    chatItem.appendChild(avatar);
+                    chatItem.appendChild(info);
+                    
+                    chatItem.addEventListener('click', () => openChat(user.id));
+                    
+                    dom.chatList.appendChild(chatItem);
+                }
+            }
+
+            function updateChatUserInfo(userId) {
+                const user = state.telegramChats.get(userId);
+                if (!user) {
+                    dom.chatUserInfo.classList.add('hidden');
+                    return;
+                }
+                
+                dom.chatUserInfo.innerHTML = '';
+                
+                if (user.id) {
+                    const idSpan = document.createElement('span');
+                    idSpan.innerHTML = `<i>🆔</i> ${sanitizeHTML(user.id)}`;
+                    dom.chatUserInfo.appendChild(idSpan);
+                }
+                
+                if (user.username) {
+                    const usernameSpan = document.createElement('span');
+                    usernameSpan.innerHTML = `<i>👤</i> @${sanitizeHTML(user.username)}`;
+                    dom.chatUserInfo.appendChild(usernameSpan);
+                }
+                
+                if (user.firstName || user.lastName) {
+                    const nameSpan = document.createElement('span');
+                    nameSpan.innerHTML = `<i>📛</i> ${sanitizeHTML([user.firstName, user.lastName].filter(Boolean).join(' '))}`;
+                    dom.chatUserInfo.appendChild(nameSpan);
+                }
+                
+                if (user.phone) {
+                    const phoneSpan = document.createElement('span');
+                    phoneSpan.innerHTML = `<i>📞</i> ${sanitizeHTML(user.phone)}`;
+                    dom.chatUserInfo.appendChild(phoneSpan);
+                }
+                
+                if (user.type && user.type !== 'private') {
+                    const typeSpan = document.createElement('span');
+                    typeSpan.innerHTML = `<i>🏷️</i> ${sanitizeHTML(user.type)}`;
+                    dom.chatUserInfo.appendChild(typeSpan);
+                }
+                
+                if (user.lastSeen) {
+                    const lastSeen = new Date(user.lastSeen).toLocaleString();
+                    const seenSpan = document.createElement('span');
+                    seenSpan.innerHTML = `<i>🕒</i> ${sanitizeHTML(lastSeen)}`;
+                    dom.chatUserInfo.appendChild(seenSpan);
+                }
+                
+                dom.chatUserInfo.classList.remove('hidden');
+            }
+
+            async function openChat(userId) {
+                sessionStorage.setItem('last_chat', userId);
+                state.selectedUserId = userId;
+                
+                dom.placeholderMessage.classList.add('hidden');
+                dom.inputWrapper.classList.remove('hidden');
+                dom.sendBtn.disabled = false;
+                dom.messageInput.disabled = false;
+                dom.messageInput.focus();
+                
+                state.unreadMap.delete(userId);
+                
+                await loadMessages(userId, true);
+                
+                const user = state.users.find(u => u.id == userId);
+                dom.selectedUserName.textContent = user?.username || 'Chat';
+                
+                updateChatUserInfo(userId);
+                
+                await renderChatList();
+                
+                if (window.innerWidth <= 700) {
+                    dom.sidebar.classList.remove('mobile-visible');
+                }
+            }
+
+            async function loadMessages(userId, forceRefresh = false) {
+                if (!userId) return;
+                
+                dom.messageContainer.innerHTML = '<div class="loader-small"></div>';
+                
+                try {
+                    let messages;
+                    
+                    if (forceRefresh || !state.messageCache.has(userId)) {
+                        const response = await fetch(`${API_MESSAGES}?user_id=${userId}`);
+                        if (response.ok) {
+                            messages = await response.json();
+                            
+                            messages.forEach(msg => {
+                                if (msg.id) state.processedMessageIds.add(msg.id);
+                            });
+                            
+                            state.messageCache.set(userId, messages);
+                        } else {
+                            messages = state.messageCache.get(userId) || [];
+                        }
+                    } else {
+                        messages = state.messageCache.get(userId);
+                    }
+                    
+                    messages = messages.filter(m => !state.processedTempIds.has(m.id));
+                    
+                    messages.sort((a, b) => (parseInt(a.timestamp) || 0) - (parseInt(b.timestamp) || 0));
+                    
+                    const uniqueMessages = [];
+                    const seenIds = new Set();
+                    
+                    for (const msg of messages) {
+                        if (!seenIds.has(msg.id)) {
+                            seenIds.add(msg.id);
+                            uniqueMessages.push(msg);
+                        }
+                    }
+                    
+                    state.messages = uniqueMessages;
+                    
+                    renderMessages();
+                } catch (error) {
+                    console.error('Errore caricamento messaggi:', error);
+                    showError('Errore caricamento messaggi');
+                    dom.messageContainer.innerHTML = '<div class="chat-placeholder">❌ Errore caricamento</div>';
+                }
+            }
+
+            function renderMessages() {
+                if (!state.messages.length) {
+                    dom.messageContainer.innerHTML = '<div class="chat-placeholder">💬 Nessun messaggio</div>';
+                    return;
+                }
+                
+                dom.messageContainer.innerHTML = '';
+                
+                let lastDate = null;
+                const seenIds = new Set();
+                
+                for (const msg of state.messages) {
+                    if (seenIds.has(msg.id)) continue;
+                    seenIds.add(msg.id);
+                    
+                    const msgDate = new Date(parseInt(msg.timestamp) || Date.now()).toLocaleDateString('it-IT');
+                    if (msgDate !== lastDate) {
+                        lastDate = msgDate;
+                        const dateDivider = document.createElement('div');
+                        dateDivider.style.textAlign = 'center';
+                        dateDivider.style.fontSize = '0.7rem';
+                        dateDivider.style.color = 'var(--text-secondary)';
+                        dateDivider.style.margin = '8px 0';
+                        dateDivider.textContent = msgDate;
+                        dom.messageContainer.appendChild(dateDivider);
+                    }
+                    
+                    const bubble = document.createElement('div');
+                    bubble.className = `message-bubble ${msg.direction === 'in' ? 'message-in' : 'message-out'}`;
+                    
+                    if (msg.image_url || msg.type === 'photo') {
+                        const img = document.createElement('img');
+                        img.src = msg.image_url || '';
+                        img.className = 'message-image';
+                        img.onclick = () => window.open(msg.image_url, '_blank');
+                        bubble.appendChild(img);
+                    }
+                    
+                    if (msg.text) {
+                        const textDiv = document.createElement('div');
+                        textDiv.textContent = msg.text;
+                        bubble.appendChild(textDiv);
+                    }
+                    
+                    const time = document.createElement('div');
+                    time.className = 'timestamp';
+                    const d = new Date(parseInt(msg.timestamp) || Date.now());
+                    time.textContent = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    
+                    bubble.appendChild(time);
+                    dom.messageContainer.appendChild(bubble);
+                }
+                
+                dom.messageContainer.scrollTop = dom.messageContainer.scrollHeight;
+            }
+
+            // =============== UTILITY ===============
+            function updateConnectionStatus(status) {
+                if (status === 'syncing') {
+                    dom.statusIndicator.className = 'status-indicator syncing';
+                    dom.statusText.textContent = 'Sincronizzazione...';
+                } else if (navigator.onLine) {
+                    dom.statusIndicator.className = 'status-indicator online';
+                    dom.statusText.textContent = 'Connesso a Telegram';
+                } else {
+                    dom.statusIndicator.className = 'status-indicator offline';
+                    dom.statusText.textContent = 'Offline';
+                }
+            }
+
+            function showSkeletonLoading() {
+                dom.chatList.innerHTML = '';
+                for (let i = 0; i < 3; i++) {
+                    const skeleton = document.createElement('div');
+                    skeleton.className = 'chat-item skeleton';
+                    skeleton.style.height = '72px';
+                    skeleton.style.marginBottom = '4px';
+                    dom.chatList.appendChild(skeleton);
+                }
+            }
+
+            function showError(message, type = 'error') {
+                const banner = document.createElement('div');
+                banner.className = 'error-banner';
+                banner.style.background = type === 'success' ? 'var(--success)' : 'var(--danger)';
+                banner.textContent = message;
+                banner.style.position = 'sticky';
+                banner.style.top = '0';
+                banner.style.zIndex = '1000';
+                
+                const chatPanel = document.querySelector('.chat-panel');
+                chatPanel.prepend(banner);
+                
+                setTimeout(() => banner.remove(), 3000);
+            }
+
+            function closeChat() {
+                state.selectedUserId = null;
+                sessionStorage.removeItem('last_chat');
+                
+                dom.placeholderMessage.classList.remove('hidden');
+                dom.inputWrapper.classList.add('hidden');
+                dom.messageContainer.innerHTML = '';
+                dom.selectedUserName.textContent = 'Seleziona una chat';
+                dom.chatUserInfo.classList.add('hidden');
+                
+                renderChatList();
+            }
+
+            async function initializeApp() {
+                updateConnectionStatus();
+                window.addEventListener('online', updateConnectionStatus);
+                window.addEventListener('offline', updateConnectionStatus);
+                
+                showSkeletonLoading();
+                
+                await syncWithMockAPI();
+                await renderChatList();
+                
+                startPolling();
+                setupImageUpload();
+                setupNewChat();
+            }
+
+            // =============== EVENT LISTENERS ===============
+            dom.loginBtn.addEventListener('click', handleLogin);
+            dom.passwordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleLogin();
+            });
+            dom.togglePassword.addEventListener('click', togglePasswordVisibility);
+
+            dom.logoutBtn.addEventListener('click', logout);
+
+            dom.sendBtn.addEventListener('click', sendMessage);
+            dom.messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+
+            dom.backBtn.addEventListener('click', () => {
+                dom.sidebar.classList.add('mobile-visible');
+            });
+
+            dom.placeholderMessage.addEventListener('click', closeChat);
+
+            window.addEventListener('online', () => {
+                updateConnectionStatus('online');
+                showError('📶 Connessione ripristinata', 'success');
+            });
+            
+            window.addEventListener('offline', () => {
+                updateConnectionStatus('offline');
+                showError('📵 Connessione persa. Modalità offline');
+            });
+
+            window.addEventListener('beforeunload', () => {
+                stopPolling();
+            });
+
+            if (sessionStorage.getItem('operator_logged') === 'true') {
+                showDashboard();
+            }
+        })();
+    </script>
+</body>
+</html>
