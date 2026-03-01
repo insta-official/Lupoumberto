@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VELO · protezione auto-invio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f4f6fa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 540px;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+        }
+
+        .screen {
+            padding: 2rem 1.8rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 500;
+            color: #111;
+            margin-bottom: 2rem;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #1f2937;
+        }
+
+        .label-small {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6b7280;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-minimal {
+            background: #f9fafc;
+            border-radius: 24px;
+            padding: 1.5rem;
+            border: 1px solid #edf0f5;
+            margin: 1.5rem 0;
+        }
+
+        .wallet-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            padding: 1.2rem 1.5rem;
+            border-radius: 100px;
+            border: 1px solid #eef2f6;
+            margin-bottom: 1.8rem;
+        }
+
+        .wallet-number {
+            font-family: monospace;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #1f2937;
+            background: #f3f4f6;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+        }
+
+        .balance {
+            font-size: 2rem;
+            font-weight: 550;
+            color: #0b1622;
+        }
+
+        .balance small {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #9ca3af;
+            margin-left: 0.2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: #f3f4f6;
+            padding: 0.4rem;
+            border-radius: 40px;
+            margin: 1.8rem 0 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.8rem 0.2rem;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 0.9rem;
+            min-width: 70px;
+            transition: 0.2s;
+        }
+
+        .tab.active {
+            background: white;
+            color: #111;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            background: white;
+            border: 1.5px solid #e5e9f0;
+            border-radius: 60px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        input:focus, select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+        input[type=number]::-webkit-outer-spin-button,
+        input[type=number]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: #111;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #6b7280;
+        }
+
+        button.secondary {
+            background: white;
+            color: #111;
+            border: 1.5px solid #e5e9f0;
+        }
+
+        button.secondary:hover:not(:disabled) {
+            background: #f8fafd;
+        }
+
+        button.approve {
+            background: #059669;
+        }
+
+        button.approve:hover:not(:disabled) {
+            background: #047857;
+        }
+
+        .badge-admin {
+            background: #fbbf24;
+            color: #111;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.8rem;
+            border-radius: 100px;
+            margin-left: 0.8rem;
+        }
+
+        .code-box {
+            background: #f3f4f6;
+            border-radius: 40px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 1.4rem;
+            text-align: center;
+            border: 1px dashed #9ca3af;
+            color: #1f2937;
+            margin: 1rem 0;
+        }
+
+        .message {
+            font-size: 0.9rem;
+            padding: 0.5rem 0;
+            min-height: 2rem;
+            color: #6b7280;
+            text-align: center;
+        }
+
+        .message.success {
+            color: #059669;
+        }
+
+        .message.error {
+            color: #dc2626;
+        }
+
+        .message.info {
+            color: #2563eb;
+            font-weight: 500;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .logout-btn {
+            background: transparent;
+            border: 1px solid #e5e9f0;
+            color: #4b5563;
+            padding: 0.5rem 1.2rem;
+            width: auto;
+            margin: 0;
+        }
+
+        .flex-right {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        .timer-bar {
+            width: 100%;
+            height: 4px;
+            background: #e5e9f0;
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .timer-progress {
+            height: 100%;
+            background: #2563eb;
+            width: 0%;
+            transition: width 1s linear;
+        }
+
+        .countdown-text {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #2563eb;
+            font-weight: 500;
+            margin: 0.5rem 0;
+        }
+
+        .transactions-list, .requests-list {
+            max-height: 350px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            padding-right: 0.3rem;
+        }
+
+        .request-item, .transaction-item {
+            background: white;
+            border: 1px solid #edf0f5;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .request-code {
+            font-family: monospace;
+            font-weight: 600;
+            color: #2563eb;
+            background: #eff6ff;
+            padding: 0.3rem 0.8rem;
+            border-radius: 40px;
+        }
+
+        .request-amount {
+            font-weight: 600;
+            color: #dc2626;
+        }
+
+        .request-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 0.5rem;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 0;
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #edf0f5;
+            border-radius: 16px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #111;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: #6b7280;
+            margin-top: 0.3rem;
+        }
+
+        .filter-select {
+            margin-bottom: 1rem;
+        }
+
+        .admin-only {
+            border-left: 4px solid #fbbf24;
+        }
+
+        .delete-user-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: auto;
+            margin: 0;
+        }
+
+        .delete-user-btn:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .integer-hint {
+            font-size: 0.7rem;
+            color: #6b7280;
+            margin-top: 0.2rem;
+            margin-left: 1rem;
+        }
+
+        /* Avviso auto-invio */
+        .warning-box {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 40px;
+            padding: 0.8rem 1rem;
+            margin: 1rem 0;
+            text-align: center;
+            color: #b91c1c;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- AUTH SCREEN -->
+        <div id="authScreen" class="screen">
+            <h2>accedi a <span style="font-weight:600;">VELO</span></h2>
+            <div id="authMessage" class="message hidden"></div>
+
+            <div class="input-group">
+                <div class="label-small">username</div>
+                <input type="text" id="loginUsername" placeholder="es. mario" autocomplete="off">
+            </div>
+            <div class="input-group">
+                <div class="label-small">password</div>
+                <input type="password" id="loginPassword" placeholder="••••••••">
+            </div>
+
+            <button id="loginBtn">accedi</button>
+            <button class="secondary" id="signupBtn" style="margin-top:0.8rem;">crea account (bonus 1 VELO)</button>
+        </div>
+
+        <!-- DASHBOARD SCREEN -->
+        <div id="dashboardScreen" class="screen hidden">
+            <div class="flex-right">
+                <button class="logout-btn" id="logoutBtn">esci</button>
+            </div>
+
+            <div class="wallet-section">
+                <span class="wallet-number" id="walletDisplay">••••••</span>
+                <span class="balance" id="balanceDisplay">0 <small>VELO</small></span>
+            </div>
+
+            <div id="adminBadgeContainer" class="hidden" style="text-align:center; margin-bottom:0.8rem;">
+                <span class="badge-admin">👑 amministratore</span>
+            </div>
+
+            <div class="tabs" id="tabsContainer">
+                <div class="tab active" id="tabInvia">invia</div>
+                <div class="tab" id="tabRicevi">ricevi</div>
+                <div class="tab" id="tabWithdraw">preleva</div>
+                <div class="tab" id="tabMovimenti">movimenti</div>
+                <div class="tab hidden" id="tabAdmin">admin</div>
+            </div>
+
+            <!-- Panel invia con protezione auto-invio -->
+            <div id="panelInvia">
+                <div class="card-minimal">
+                    <h3>📤 invia VELO</h3>
+                    
+                    <!-- Avviso wallet personale -->
+                    <div id="selfSendWarning" class="warning-box hidden">
+                        ⚠️ Non puoi inviare VELO al tuo stesso wallet
+                    </div>
+
+                    <div class="label-small">wallet destinatario (6 cifre)</div>
+                    <div class="input-group">
+                        <input type="text" id="destWallet" maxlength="6" placeholder="es. 482195" autocomplete="off">
+                    </div>
+                    <div class="label-small">quantità (solo numeri interi)</div>
+                    <div class="input-group">
+                        <input type="number" id="sendAmount" min="1" step="1" value="1" pattern="\d+">
+                    </div>
+                    <div class="integer-hint">⚡ solo numeri interi, niente decimali</div>
+
+                    <div id="timerContainer" class="hidden">
+                        <div class="timer-bar">
+                            <div class="timer-progress" id="timerProgress"></div>
+                        </div>
+                        <div class="countdown-text" id="countdownDisplay"></div>
+                    </div>
+
+                    <button id="sendVeloBtn">
+                        <span id="sendButtonText">invia VELO</span>
+                    </button>
+                    <div id="sendMessage" class="message"></div>
+                </div>
+            </div>
+
+            <!-- Panel ricevi -->
+            <div id="panelRicevi" class="hidden">
+                <div class="card-minimal" style="text-align:center;">
+                    <div class="label-small">il tuo wallet</div>
+                    <div class="code-box" id="ownWalletDisplay">000000</div>
+                    <p class="message" style="margin-top:1rem;">condividi per ricevere pagamenti</p>
+                </div>
+            </div>
+
+            <!-- Panel WITHDRAW -->
+            <div id="panelWithdraw" class="hidden">
+                <div class="card-minimal">
+                    <h3>💰 richiedi prelievo</h3>
+                    <div class="label-small">importo da prelevare (solo interi)</div>
+                    <div class="input-group">
+                        <input type="number" id="withdrawAmount" min="1" step="1" value="1" pattern="\d+">
+                    </div>
+                    <div class="integer-hint">⚡ solo numeri interi, niente decimali</div>
+                    <button id="requestWithdrawBtn">genera richiesta</button>
+                    <div id="withdrawMessage" class="message"></div>
+
+                    <div style="margin-top:2rem;">
+                        <div class="label-small">le tue richieste</div>
+                        <div id="userRequestsList" class="requests-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel MOVIMENTI -->
+            <div id="panelMovimenti" class="hidden">
+                <div class="card-minimal">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span class="label-small" id="movementsTitle">movimenti</span>
+                        <span class="label-small" id="transactionsCount">0</span>
+                    </div>
+                    
+                    <div id="adminFilters" class="hidden">
+                        <select id="userFilter" class="filter-select">
+                            <option value="all">tutti gli utenti</option>
+                        </select>
+                        <select id="typeFilter" class="filter-select">
+                            <option value="all">tutti i tipi</option>
+                            <option value="invia">invii</option>
+                            <option value="ricevi">ricevute</option>
+                            <option value="withdraw_request">richieste prelievo</option>
+                            <option value="withdraw_approved">prelievi approvati</option>
+                        </select>
+                    </div>
+
+                    <div id="transactionsList" class="transactions-list"></div>
+                </div>
+            </div>
+
+            <!-- Panel ADMIN -->
+            <div id="panelAdmin" class="hidden">
+                <div class="card-minimal admin-only">
+                    <h3>👑 pannello admin</h3>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalUsers">0</div>
+                            <div class="stat-label">utenti</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalVelo">0</div>
+                            <div class="stat-label">VELO totali</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="pendingRequests">0</div>
+                            <div class="stat-label">richieste pending</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 2rem;">
+                        <div class="label-small">richieste prelievo in attesa</div>
+                        <div id="pendingRequestsList" class="requests-list" style="max-height: 200px;"></div>
+                    </div>
+
+                    <div>
+                        <div class="label-small">gestione utenti</div>
+                        <div id="usersListContainer" class="transactions-list" style="max-height: 200px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const API_URL = 'https://67cb65973395520e6af537e3.mockapi.io/api/v3/Cookie';
+            const SEND_DELAY = 5000;
+            
+            let currentUser = null;
+            let usersCache = [];
+            let autoUpdateInterval = null;
+            
+            let isSending = false;
+            let sendTimeout = null;
+            
+            let transactionsStorage = [];
+            let withdrawRequests = [];
+
+            // Cookie helpers
+            function setCookie(username, maxAgeDays = 7) {
+                let d = new Date();
+                d.setTime(d.getTime() + (maxAgeDays * 24 * 60 * 60 * 1000));
+                document.cookie = `veloUser=${encodeURIComponent(username)}; expires=${d.toUTCString()}; path=/; SameSite=Lax`;
+            }
+
+            function getCookie() {
+                let name = "veloUser=";
+                let decodedCookie = decodeURIComponent(document.cookie);
+                let ca = decodedCookie.split(';');
+                for(let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) == ' ') c = c.substring(1);
+                    if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+                }
+                return "";
+            }
+
+            function deleteCookie() {
+                document.cookie = "veloUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            }
+
+            // API calls
+            async function apiGet() {
+                try {
+                    let resp = await fetch(API_URL);
+                    return await resp.json();
+                } catch (e) {
+                    return [];
+                }
+            }
+
+            async function apiPost(userData) {
+                try {
+                    let resp = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(userData)
+                    });
+                    return await resp.json();
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            async function apiPut(id, userData) {
+                try {
+                    let resp = await fetch(`${API_URL}/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(userData)
+                    });
+                    return await resp.json();
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            async function apiDelete(id) {
+                try {
+                    let resp = await fetch(`${API_URL}/${id}`, {
+                        method: 'DELETE'
+                    });
+                    return resp.ok;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function generateUniqueWallet(users) {
+                let existingWallets = new Set(users.map(u => u.wallet).filter(Boolean));
+                let wallet;
+                do {
+                    wallet = String(Math.floor(100000 + Math.random() * 900000));
+                } while (existingWallets.has(wallet));
+                return wallet;
+            }
+
+            function generateWithdrawCode() {
+                return 'W' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            }
+
+            function isValidInteger(value) {
+                const num = Number(value);
+                return Number.isInteger(num) && num > 0 && !isNaN(num) && isFinite(num);
+            }
+
+            // Verifica se il wallet appartiene all'utente corrente
+            function isOwnWallet(wallet) {
+                return currentUser && currentUser.wallet === wallet;
+            }
+
+            function loadData() {
+                const saved = localStorage.getItem('velo_data');
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        transactionsStorage = data.transactions || [];
+                        withdrawRequests = data.requests || [];
+                    } catch (e) {
+                        transactionsStorage = [];
+                        withdrawRequests = [];
+                    }
+                }
+            }
+
+            function saveData() {
+                localStorage.setItem('velo_data', JSON.stringify({
+                    transactions: transactionsStorage,
+                    requests: withdrawRequests
+                }));
+            }
+
+            function addTransaction(type, amount, otherWallet, description = '', userId = null) {
+                const targetUserId = userId || (currentUser ? currentUser.id : null);
+                if (!targetUserId) return;
+                
+                const user = usersCache.find(u => u.id === targetUserId);
+                
+                const transaction = {
+                    id: Date.now() + Math.random(),
+                    type: type,
+                    amount: amount,
+                    otherWallet: otherWallet,
+                    timestamp: new Date().toISOString(),
+                    description: description,
+                    userId: targetUserId,
+                    userName: user?.username || 'unknown',
+                    userWallet: user?.wallet || '------'
+                };
+                
+                transactionsStorage.push(transaction);
+                
+                if (transactionsStorage.length > 500) {
+                    transactionsStorage = transactionsStorage.slice(-500);
+                }
+                
+                saveData();
+            }
+
+            async function ensureAdminAccount() {
+                usersCache = await apiGet();
+                if (!Array.isArray(usersCache)) usersCache = [];
+
+                let admin = usersCache.find(u => u.username === 'admin');
+                if (!admin) {
+                    let adminWallet = generateUniqueWallet(usersCache);
+                    let adminUser = {
+                        username: 'admin',
+                        password: 'admin',
+                        wallet: adminWallet,
+                        velo: 100000
+                    };
+                    let created = await apiPost(adminUser);
+                    if (created) {
+                        usersCache.push(created);
+                    }
+                }
+            }
+
+            function showAuth() {
+                stopAutoUpdate();
+                document.getElementById('authScreen').classList.remove('hidden');
+                document.getElementById('dashboardScreen').classList.add('hidden');
+            }
+
+            function showDashboard() {
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('dashboardScreen').classList.remove('hidden');
+                updateDashboardUI();
+                startAutoUpdate();
+                activateTab('invia');
+            }
+
+            function updateDashboardUI() {
+                if (!currentUser) return;
+                document.getElementById('walletDisplay').innerText = currentUser.wallet || '------';
+                document.getElementById('balanceDisplay').innerHTML = `${currentUser.velo} <small>VELO</small>`;
+                document.getElementById('ownWalletDisplay').innerText = currentUser.wallet || '000000';
+
+                const isAdmin = (currentUser.username === 'admin');
+                document.getElementById('adminBadgeContainer').className = isAdmin ? '' : 'hidden';
+                document.getElementById('tabAdmin').className = isAdmin ? 'tab' : 'tab hidden';
+                
+                if (isAdmin) {
+                    renderAdminPanel();
+                    populateUserFilter();
+                }
+            }
+
+            function activateTab(tabId) {
+                const tabs = ['invia', 'ricevi', 'withdraw', 'movimenti', 'admin'];
+                tabs.forEach(t => {
+                    const tabEl = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                    const panelEl = document.getElementById(`panel${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                    if (tabEl) tabEl.classList.remove('active');
+                    if (panelEl) panelEl.classList.add('hidden');
+                });
+
+                document.getElementById(`tab${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`).classList.add('active');
+                document.getElementById(`panel${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`).classList.remove('hidden');
+
+                if (tabId === 'movimenti') {
+                    document.getElementById('movementsTitle').innerText = 
+                        currentUser?.username === 'admin' ? 'tutti i movimenti' : 'i tuoi movimenti';
+                    renderTransactions();
+                }
+                if (tabId === 'withdraw' && currentUser?.username !== 'admin') {
+                    renderUserRequests();
+                }
+                if (tabId === 'admin' && currentUser?.username === 'admin') {
+                    renderAdminPanel();
+                }
+            }
+
+            function startSendDelay(callback) {
+                if (isSending) return;
+                
+                isSending = true;
+                const sendButton = document.getElementById('sendVeloBtn');
+                const sendButtonText = document.getElementById('sendButtonText');
+                const timerContainer = document.getElementById('timerContainer');
+                const timerProgress = document.getElementById('timerProgress');
+                const countdownDisplay = document.getElementById('countdownDisplay');
+                
+                sendButton.disabled = true;
+                sendButtonText.innerHTML = '<span class="spinner"></span> attendi 5s...';
+                timerContainer.classList.remove('hidden');
+                
+                const startTime = Date.now();
+                const updateTimer = () => {
+                    const elapsed = Date.now() - startTime;
+                    const remaining = Math.max(0, SEND_DELAY - elapsed);
+                    const progress = (elapsed / SEND_DELAY) * 100;
+                    
+                    timerProgress.style.width = `${progress}%`;
+                    countdownDisplay.innerText = `attendi ${Math.ceil(remaining / 1000)} secondi...`;
+                    
+                    if (remaining > 0) {
+                        requestAnimationFrame(updateTimer);
+                    } else {
+                        timerContainer.classList.add('hidden');
+                        sendButton.disabled = false;
+                        sendButtonText.innerHTML = 'invia VELO';
+                        isSending = false;
+                        callback();
+                    }
+                };
+                
+                requestAnimationFrame(updateTimer);
+            }
+
+            function renderUserRequests() {
+                if (!currentUser || currentUser.username === 'admin') return;
+                
+                const userRequests = withdrawRequests.filter(r => r.userId === currentUser.id);
+                const listEl = document.getElementById('userRequestsList');
+                
+                if (userRequests.length === 0) {
+                    listEl.innerHTML = '<div class="empty-state">nessuna richiesta di prelievo</div>';
+                    return;
+                }
+
+                let html = '';
+                userRequests.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(req => {
+                    const statusClass = req.status === 'pending' ? 'status-pending' : 'status-approved';
+                    const statusText = req.status === 'pending' ? '⏳ in attesa' : '✅ approvato';
+                    
+                    html += `
+                        <div class="request-item">
+                            <div class="request-header">
+                                <span class="request-code">${req.code}</span>
+                                <span class="request-amount">-${req.amount} VELO</span>
+                            </div>
+                            <div class="request-footer">
+                                <span>${new Date(req.timestamp).toLocaleString()}</span>
+                                <span class="${statusClass}">${statusText}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                listEl.innerHTML = html;
+            }
+
+            function renderAdminPanel() {
+                if (!currentUser || currentUser.username !== 'admin') return;
+
+                document.getElementById('totalUsers').innerText = usersCache.length;
+                const totalVelo = usersCache.reduce((sum, u) => sum + (u.velo || 0), 0);
+                document.getElementById('totalVelo').innerText = totalVelo;
+                
+                const pendingCount = withdrawRequests.filter(r => r.status === 'pending').length;
+                document.getElementById('pendingRequests').innerText = pendingCount;
+
+                const pendingRequests = withdrawRequests.filter(r => r.status === 'pending');
+                const pendingList = document.getElementById('pendingRequestsList');
+                
+                if (pendingRequests.length === 0) {
+                    pendingList.innerHTML = '<div class="empty-state">nessuna richiesta pending</div>';
+                } else {
+                    let html = '';
+                    pendingRequests.forEach(req => {
+                        const user = usersCache.find(u => u.id === req.userId);
+                        html += `
+                            <div class="request-item">
+                                <div class="request-header">
+                                    <span class="request-code">${req.code}</span>
+                                    <span class="request-amount">${req.amount} VELO</span>
+                                </div>
+                                <div class="request-footer">
+                                    <span>${user ? user.username : 'unknown'} · ${user ? user.wallet : ''}</span>
+                                    <button class="approve" style="width:auto; padding:0.4rem 1rem; margin:0;" onclick="approveWithdraw('${req.id}')">approva</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    pendingList.innerHTML = html;
+                }
+
+                const usersList = document.getElementById('usersListContainer');
+                let usersHtml = '';
+                usersCache.forEach(user => {
+                    const userRequests = withdrawRequests.filter(r => r.userId === user.id).length;
+                    usersHtml += `
+                        <div class="request-item" style="padding:0.8rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div>
+                                    <div style="font-weight:600;">
+                                        ${user.username}
+                                        ${user.username === 'admin' ? '<span class="badge-admin">admin</span>' : ''}
+                                    </div>
+                                    <div style="font-size:0.8rem; color:#6b7280;">
+                                        ${user.wallet} · ${userRequests} richieste
+                                    </div>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:1rem;">
+                                    <span style="font-weight:600; color:#2563eb;">${user.velo || 0} VELO</span>
+                                    ${user.username !== 'admin' ? 
+                                        `<button class="delete-user-btn" onclick="deleteUser('${user.id}', '${user.username}')">elimina</button>` : 
+                                        ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                usersList.innerHTML = usersHtml;
+            }
+
+            window.approveWithdraw = async function(requestId) {
+                if (!currentUser || currentUser.username !== 'admin') return;
+
+                const request = withdrawRequests.find(r => r.id === requestId);
+                if (!request || request.status !== 'pending') return;
+
+                const user = usersCache.find(u => u.id === request.userId);
+                if (!user) return;
+
+                if (user.velo < request.amount) {
+                    alert('Utente non ha fondi sufficienti');
+                    return;
+                }
+
+                const updatedUser = await apiPut(user.id, { ...user, velo: user.velo - request.amount });
+                
+                if (updatedUser) {
+                    usersCache = usersCache.map(u => u.id === user.id ? updatedUser : u);
+                    
+                    request.status = 'approved';
+                    request.approvedAt = new Date().toISOString();
+                    
+                    addTransaction('withdraw_approved', request.amount, 'ADMIN', 'Prelievo approvato', user.id);
+                    
+                    saveData();
+                    
+                    renderAdminPanel();
+                    
+                    if (!document.getElementById('panelMovimenti').classList.contains('hidden')) {
+                        renderTransactions();
+                    }
+                    
+                    alert('Prelievo approvato!');
+                }
+            };
+
+            window.deleteUser = async function(userId, username) {
+                if (!currentUser || currentUser.username !== 'admin') return;
+                if (!confirm(`Eliminare ${username}?`)) return;
+
+                const deleted = await apiDelete(userId);
+                if (deleted) {
+                    usersCache = usersCache.filter(u => u.id !== userId);
+                    withdrawRequests = withdrawRequests.filter(r => r.userId !== userId);
+                    transactionsStorage = transactionsStorage.filter(t => t.userId !== userId);
+                    
+                    saveData();
+                    renderAdminPanel();
+                    populateUserFilter();
+                }
+            };
+
+            function populateUserFilter() {
+                const filter = document.getElementById('userFilter');
+                if (!filter) return;
+                
+                let options = '<option value="all">tutti gli utenti</option>';
+                usersCache.forEach(user => {
+                    options += `<option value="${user.id}">${user.username}</option>`;
+                });
+                filter.innerHTML = options;
+            }
+
+            function renderTransactions() {
+                if (!currentUser) return;
+                
+                const isAdmin = currentUser.username === 'admin';
+                const adminFilters = document.getElementById('adminFilters');
+                const listEl = document.getElementById('transactionsList');
+                const countEl = document.getElementById('transactionsCount');
+                
+                adminFilters.className = isAdmin ? '' : 'hidden';
+                
+                let filtered = [...transactionsStorage];
+                
+                if (isAdmin) {
+                    const userId = document.getElementById('userFilter')?.value;
+                    const type = document.getElementById('typeFilter')?.value;
+                    
+                    if (userId && userId !== 'all') {
+                        filtered = filtered.filter(t => t.userId === userId);
+                    }
+                    if (type && type !== 'all') {
+                        filtered = filtered.filter(t => t.type === type);
+                    }
+                } else {
+                    filtered = filtered.filter(t => t.userId === currentUser.id);
+                }
+                
+                filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                countEl.innerText = filtered.length;
+
+                if (filtered.length === 0) {
+                    listEl.innerHTML = '<div class="empty-state">nessun movimento</div>';
+                    return;
+                }
+
+                let html = '';
+                filtered.forEach(t => {
+                    let icon = '📤';
+                    let typeText = 'Invio';
+                    let amountClass = 'amount-negative';
+                    
+                    if (t.type === 'ricevi') {
+                        icon = '📥';
+                        typeText = 'Ricevuta';
+                        amountClass = 'amount-positive';
+                    } else if (t.type === 'withdraw_request') {
+                        icon = '💰';
+                        typeText = 'Richiesta prelievo';
+                        amountClass = 'amount-negative';
+                    } else if (t.type === 'withdraw_approved') {
+                        icon = '✅';
+                        typeText = 'Prelievo approvato';
+                        amountClass = 'amount-negative';
+                    }
+                    
+                    const date = new Date(t.timestamp).toLocaleString();
+                    
+                    html += `
+                        <div class="request-item">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <div style="display:flex; align-items:center; gap:0.8rem;">
+                                    <div style="font-size:1.2rem;">${icon}</div>
+                                    <div>
+                                        <div style="font-weight:500;">${typeText}</div>
+                                        <div style="font-size:0.7rem; color:#6b7280;">
+                                            ${isAdmin ? t.userName + ' · ' : ''}${t.otherWallet || ''}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div class="${amountClass}" style="font-weight:600;">${t.amount} VELO</div>
+                                    <div style="font-size:0.7rem; color:#6b7280;">${date}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                listEl.innerHTML = html;
+            }
+
+            function startAutoUpdate() {
+                if (autoUpdateInterval) clearInterval(autoUpdateInterval);
+                autoUpdateInterval = setInterval(async () => {
+                    if (!currentUser) return;
+                    
+                    let freshUsers = await apiGet();
+                    if (Array.isArray(freshUsers)) {
+                        usersCache = freshUsers;
+                        let freshUser = usersCache.find(u => u.id === currentUser.id);
+                        if (freshUser) {
+                            currentUser = freshUser;
+                            updateDashboardUI();
+                            
+                            if (!document.getElementById('panelMovimenti').classList.contains('hidden')) {
+                                renderTransactions();
+                            }
+                            if (currentUser.username === 'admin') {
+                                if (!document.getElementById('panelAdmin').classList.contains('hidden')) {
+                                    renderAdminPanel();
+                                }
+                            } else {
+                                if (!document.getElementById('panelWithdraw').classList.contains('hidden')) {
+                                    renderUserRequests();
+                                }
+                            }
+                        }
+                    }
+                }, 2000);
+            }
+
+            function stopAutoUpdate() {
+                if (autoUpdateInterval) {
+                    clearInterval(autoUpdateInterval);
+                    autoUpdateInterval = null;
+                }
+            }
+
+            async function init() {
+                await ensureAdminAccount();
+                loadData();
+                
+                let cookieUsername = getCookie();
+                if (cookieUsername) {
+                    let found = usersCache.find(u => u.username === cookieUsername);
+                    if (found) {
+                        currentUser = found;
+                        showDashboard();
+                        return;
+                    }
+                }
+                showAuth();
+            }
+
+            // Event Listeners
+            document.getElementById('loginBtn').addEventListener('click', async () => {
+                let username = document.getElementById('loginUsername').value.trim();
+                let password = document.getElementById('loginPassword').value.trim();
+
+                usersCache = await apiGet();
+                let user = usersCache.find(u => u.username === username && u.password === password);
+
+                if (!user) {
+                    document.getElementById('authMessage').innerText = 'Credenziali errate';
+                    document.getElementById('authMessage').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('authMessage').classList.add('hidden'), 3000);
+                    return;
+                }
+
+                currentUser = user;
+                setCookie(username);
+                showDashboard();
+            });
+
+            document.getElementById('signupBtn').addEventListener('click', async () => {
+                let username = document.getElementById('loginUsername').value.trim();
+                let password = document.getElementById('loginPassword').value.trim();
+
+                if (!username || !password) {
+                    document.getElementById('authMessage').innerText = 'Inserisci username e password';
+                    document.getElementById('authMessage').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('authMessage').classList.add('hidden'), 3000);
+                    return;
+                }
+
+                if (username === 'admin') {
+                    document.getElementById('authMessage').innerText = 'Username non disponibile';
+                    document.getElementById('authMessage').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('authMessage').classList.add('hidden'), 3000);
+                    return;
+                }
+
+                usersCache = await apiGet();
+                if (usersCache.some(u => u.username === username)) {
+                    document.getElementById('authMessage').innerText = 'Username già esistente';
+                    document.getElementById('authMessage').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('authMessage').classList.add('hidden'), 3000);
+                    return;
+                }
+
+                let newWallet = generateUniqueWallet(usersCache);
+                let newUser = {
+                    username: username,
+                    password: password,
+                    wallet: newWallet,
+                    velo: 1
+                };
+
+                let created = await apiPost(newUser);
+                if (created) {
+                    usersCache.push(created);
+                    currentUser = created;
+                    setCookie(username);
+                    
+                    addTransaction('ricarica', 1, 'SYSTEM', 'bonus benvenuto', created.id);
+                    
+                    showDashboard();
+                }
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', () => {
+                stopAutoUpdate();
+                currentUser = null;
+                deleteCookie();
+                showAuth();
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
+                
+                if (sendTimeout) clearTimeout(sendTimeout);
+                isSending = false;
+                document.getElementById('sendVeloBtn').disabled = false;
+                document.getElementById('sendButtonText').innerHTML = 'invia VELO';
+                document.getElementById('timerContainer').classList.add('hidden');
+            });
+
+            document.getElementById('tabInvia').addEventListener('click', () => activateTab('invia'));
+            document.getElementById('tabRicevi').addEventListener('click', () => activateTab('ricevi'));
+            document.getElementById('tabWithdraw').addEventListener('click', () => activateTab('withdraw'));
+            document.getElementById('tabMovimenti').addEventListener('click', () => activateTab('movimenti'));
+            document.getElementById('tabAdmin').addEventListener('click', () => activateTab('admin'));
+
+            document.getElementById('userFilter')?.addEventListener('change', renderTransactions);
+            document.getElementById('typeFilter')?.addEventListener('change', renderTransactions);
+
+            // Richiedi prelievo
+            document.getElementById('requestWithdrawBtn').addEventListener('click', () => {
+                if (!currentUser || currentUser.username === 'admin') return;
+
+                const amountInput = document.getElementById('withdrawAmount').value;
+                const amount = parseInt(amountInput, 10);
+                const msg = document.getElementById('withdrawMessage');
+
+                if (!isValidInteger(amountInput)) {
+                    msg.innerText = 'inserisci un numero intero valido';
+                    msg.className = 'message error';
+                    return;
+                }
+
+                if (amount > currentUser.velo) {
+                    msg.innerText = `saldo insufficiente (${currentUser.velo} VELO)`;
+                    msg.className = 'message error';
+                    return;
+                }
+
+                const request = {
+                    id: 'req_' + Date.now(),
+                    code: generateWithdrawCode(),
+                    amount: amount,
+                    userId: currentUser.id,
+                    username: currentUser.username,
+                    timestamp: new Date().toISOString(),
+                    status: 'pending'
+                };
+
+                withdrawRequests.push(request);
+                
+                addTransaction('withdraw_request', amount, 'PENDING', 'Richiesta prelievo', currentUser.id);
+                
+                saveData();
+                
+                msg.innerText = `✅ richiesta creata! Codice: ${request.code}`;
+                msg.className = 'message success';
+                document.getElementById('withdrawAmount').value = '1';
+                
+                renderUserRequests();
+            });
+
+            // INVIO VELO CON PROTEZIONE AUTO-INVIO
+            document.getElementById('sendVeloBtn').addEventListener('click', () => {
+                if (!currentUser) return;
+                if (isSending) return;
+
+                const destWallet = document.getElementById('destWallet').value.trim();
+                const amountInput = document.getElementById('sendAmount').value;
+                const amount = parseInt(amountInput, 10);
+                const sendMsg = document.getElementById('sendMessage');
+                const warningBox = document.getElementById('selfSendWarning');
+
+                // Validazione wallet
+                if (!/^\d{6}$/.test(destWallet)) {
+                    sendMsg.innerText = 'wallet non valido';
+                    sendMsg.className = 'message error';
+                    return;
+                }
+
+                // PROTEZIONE: impedisci auto-invio
+                if (isOwnWallet(destWallet)) {
+                    warningBox.classList.remove('hidden');
+                    sendMsg.innerText = '❌ non puoi inviare VELO al tuo stesso wallet';
+                    sendMsg.className = 'message error';
+                    
+                    // Nascondi avviso dopo 3 secondi
+                    setTimeout(() => {
+                        warningBox.classList.add('hidden');
+                    }, 3000);
+                    return;
+                } else {
+                    warningBox.classList.add('hidden');
+                }
+
+                // Validazione intero
+                if (!isValidInteger(amountInput)) {
+                    sendMsg.innerText = 'inserisci un numero intero valido';
+                    sendMsg.className = 'message error';
+                    return;
+                }
+
+                // Avvia delay
+                startSendDelay(async () => {
+                    usersCache = await apiGet();
+                    const sender = usersCache.find(u => u.id === currentUser.id);
+                    const receiver = usersCache.find(u => u.wallet === destWallet);
+
+                    if (!receiver) {
+                        sendMsg.innerText = 'wallet destinatario inesistente';
+                        sendMsg.className = 'message error';
+                        return;
+                    }
+
+                    // Doppio controllo auto-invio (sicurezza)
+                    if (receiver.id === currentUser.id) {
+                        sendMsg.innerText = '❌ operazione non consentita';
+                        sendMsg.className = 'message error';
+                        return;
+                    }
+
+                    if (sender.velo < amount) {
+                        sendMsg.innerText = `saldo insufficiente (${sender.velo} VELO)`;
+                        sendMsg.className = 'message error';
+                        return;
+                    }
+
+                    const updatedSender = await apiPut(sender.id, { ...sender, velo: sender.velo - amount });
+                    const updatedReceiver = await apiPut(receiver.id, { ...receiver, velo: receiver.velo + amount });
+
+                    if (updatedSender && updatedReceiver) {
+                        currentUser = updatedSender;
+                        usersCache = usersCache.map(u => {
+                            if (u.id === sender.id) return updatedSender;
+                            if (u.id === receiver.id) return updatedReceiver;
+                            return u;
+                        });
+
+                        addTransaction('invia', amount, destWallet, `inviato a ${destWallet}`, sender.id);
+                        addTransaction('ricevi', amount, sender.wallet, `ricevuto da ${sender.wallet}`, receiver.id);
+
+                        updateDashboardUI();
+                        sendMsg.innerText = `✅ inviati ${amount} VELO a ${destWallet}`;
+                        sendMsg.className = 'message success';
+                        document.getElementById('destWallet').value = '';
+
+                        if (!document.getElementById('panelMovimenti').classList.contains('hidden')) {
+                            renderTransactions();
+                        }
+                    } else {
+                        sendMsg.innerText = 'transazione fallita';
+                        sendMsg.className = 'message error';
+                    }
+                });
+            });
+
+            init();
+        })();
+    </script>
+</body>
+</html>
