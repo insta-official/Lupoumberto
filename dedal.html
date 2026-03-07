@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>root@orsoline:~#</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Terminal header - minimale */
+        .terminal-line {
+            color: #0f0;
+            margin-bottom: 5px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .prompt {
+            color: #0f0;
+            margin-right: 8px;
+        }
+
+        .prompt::before {
+            content: '$';
+            color: #0f0;
+        }
+
+        /* Input area - minimale */
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            border-top: 1px solid #0f0;
+            border-bottom: 1px solid #0f0;
+            padding: 10px 0;
+        }
+
+        .input-prompt {
+            color: #0f0;
+            margin-right: 10px;
+        }
+
+        .input-prompt::before {
+            content: '>';
+            color: #0f0;
+        }
+
+        #searchInput {
+            background: transparent;
+            border: none;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            flex: 1;
+            outline: none;
+        }
+
+        #searchInput::placeholder {
+            color: #0f0;
+            opacity: 0.3;
+        }
+
+        /* Hacking console - scrollabile */
+        #hackConsole {
+            flex: 1;
+            overflow-y: auto;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #0f0;
+            padding: 10px;
+            min-height: 200px;
+            max-height: 400px;
+        }
+
+        .hack-line {
+            margin: 2px 0;
+            color: #0f0;
+            font-size: 13px;
+        }
+
+        .hack-line.success {
+            color: #0f0;
+        }
+
+        .hack-line.error {
+            color: #f00;
+        }
+
+        .hack-line.warning {
+            color: #ff0;
+        }
+
+        /* Results area - solo testo */
+        #resultArea {
+            margin-top: 15px;
+            border-top: 1px solid #0f0;
+            padding-top: 15px;
+            display: none;
+        }
+
+        .result-line {
+            color: #0f0;
+            margin: 5px 0;
+        }
+
+        .email-found {
+            color: #0f0;
+            margin-left: 20px;
+        }
+
+        /* No table, solo testo */
+        .hidden {
+            display: none;
+        }
+
+        /* Cursore lampeggiante */
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: #0f0;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        footer {
+            margin-top: 10px;
+            color: #0f0;
+            opacity: 0.5;
+            font-size: 11px;
+            border-top: 1px solid #0f0;
+            padding-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="terminal-line">┌──(root㉿kali)-[~]</div>
+    <div class="terminal-line">└─$ ./orsoline_exploit --target registro.orsoline.it</div>
+    <div class="terminal-line">[+] Target acquired. Waiting for input...</div>
+    
+    <!-- Input area ultra minimale -->
+    <div class="input-line">
+        <span class="input-prompt"></span>
+        <input type="text" id="searchInput" placeholder="dedaloroma130774 / 130776 / nome" autocomplete="off">
+        <span class="cursor"></span>
+    </div>
+
+    <!-- Hacking console - qui avviene la magia -->
+    <div id="hackConsole"></div>
+
+    <!-- Results area - mostra solo quando trovato -->
+    <div id="resultArea"></div>
+
+    <footer>root@orsoline:~# connection established • 20s sim</footer>
+</div>
+
+<script>
+    // Database minimale per lookup
+    const database = [
+        {id: '130776', email1: 'daniela.carosi@live.com', email2: 'nicola.macri@cultura.gov.it'},
+        {id: '130777', email1: 'daniela.carosi@live.com', email2: 'nicola.macri@cultura.gov.it'},
+        {id: '130778', email1: 'lucia.pellegrino@corteconti.it', email2: 'hdemia2002@yahoo.it'},
+        {id: '130779', email1: 'bgiancola@yahoo.it', email2: 'Giraffa.Antonio@gdf.it'},
+        {id: '130780', email1: 'c.marotti@yahoo.it', email2: 'simona.maiuri@icloud.com'},
+        {id: '130781', email1: 'mcortesani@gmail.it', email2: 'andrea.pietrangeli.1977@gmail.com'},
+        {id: '130783', email1: 'brunella.appicciafuoco@gmail.com', email2: 'manuel.patacca@gmail.com'},
+        {id: '130787', email1: 'elisa.ercoli86@gmail.com', email2: 'sotgiuandrea86@tiscali.it'},
+        {id: '130788', email1: 'freddy.code@gmail.com', email2: 'giorgio.fontana@gmail.com'},
+        {id: '130790', email1: 'giada.daddario@gmail.com', email2: 'andresgalanchillon@gmail.com'},
+        {id: '130791', email1: 'c.rapetti@icloud.com', email2: 'edmondo@mgita.com'},
+        {id: '130793', email1: 'eusepi66@gmail.com', email2: 'josielle_ale_gael@hotmail.com'},
+        {id: '130794', email1: 'barbara.pestilli@gmail.com', email2: 'gp.zizzo@yahoo.it'},
+        {id: '130795', email1: 'barbara.pestilli@gmail.com', email2: 'gp.zizzo@yahoo.it'},
+        {id: '130796', email1: 'simone.bonafede@libero.it', email2: 'danielabiadene@yahoo.it'},
+        {id: '130797', email1: 'simone.bonafede@libero.it', email2: 'danielabiadene@yahoo.it'},
+        {id: '130798', email1: 'ilariadamiani@libero.it', email2: 'palomar2003@libero.it'},
+        {id: '130800', email1: 'deangelisilvia@gmail.com', email2: 'alessioforgetta@gmail.com'},
+        {id: '130801', email1: 'valentinapennisi@gmail.com', email2: 'andreamartino@gmail.com'},
+        {id: '130802', email1: 'zecca_valentina@yahoo.it', email2: 'alessandro.ravasio@gmail.com'},
+        {id: '130803', email1: 'hilarogo@gmail.com', email2: 'ronroger84@gmail.com'},
+        {id: '130804', email1: 'hilarogo@gmail.com', email2: 'ronroger84@gmail.com'},
+        {id: '130805', email1: 'paris.eleonora@yahoo.it', email2: 'andreazaccagna@gmail.com'},
+        {id: '130808', email1: 'arch.antonia.donofrio@gmail.com', email2: 'piero.milotti@gmail.com'},
+        {id: '130809', email1: 'ilaria.mangino@live.it', email2: 'marchese.ivo@gdf.it'},
+        {id: '130810', email1: 'R.PILEGGI@inapp.gov.it', email2: 'mario1.lamarca@telecomitalia.it'},
+        {id: '130812', email1: 'violanteplacidomail@gmail.com', email2: 'massimilianodepiro@gmail.com'},
+        {id: '130813', email1: 'saramartiello@gmail.com', email2: 'avv.cariotibruno@gmail.com'},
+        {id: '130814', email1: 'brunetti.luci@gmail.com', email2: 'gzanolli@gmail.com'},
+        {id: '130815', email1: 'emyringhi78@hotmail.com', email2: 'valeriocaratelli@gmail.com'},
+        {id: '130816', email1: 'v.potenza@liceo-orazio.edu.it', email2: 'matteo@studiosavarese.com'},
+        {id: '130817', email1: 'giusy.nappa82@gmail.com', email2: 'alfonsodonofrio80@yahoo.it'},
+        {id: '130818', email1: 'b-rita@hotmail.it', email2: 'savorex@hotmail.com'},
+        {id: '130819', email1: 'daniela.mossini@hotmail.it', email2: 'danilo.cloud85@gmail.com'},
+        {id: '130821', email1: 'valebaldo@gmail.com', email2: 'robylamura@yahoo.it'},
+        {id: '130822', email1: 'loredanatrotta@outlook.com', email2: 'stefanoromano@outlook.com'},
+        {id: '130823', email1: 'alessandra.ciccolella@gmail.com', email2: 'stefano.iacovella@gmail.com'},
+        {id: '130828', email1: 'serenaprs@gmail.com', email2: 'pietromano@gmail.com'},
+        {id: '130829', email1: 'ilaria.carofano@gmail.com', email2: 'alissimo@hotmail.it'},
+        {id: '130831', email1: 'sspitalieri@gmail.com', email2: 'l.lantero@cimea.it'},
+        {id: '130833', email1: 'salasonia@hotmail.com', email2: 'manliomar@hotmail.com'},
+        {id: '130834', email1: 'livia.risoluti@libero.it', email2: 'estella@sogin.it'},
+        {id: '130836', email1: 'daniela.delbianco@libero.it', email2: 'filipposavoia@hotmail.com'},
+        {id: '130838', email1: 'federica.ferraiuolo83@gmail.com', email2: 'saladino.andrea@gmail.com'},
+        {id: '130839', email1: 'mikaelacaldaro@gmail.com', email2: 'mgenova@alveria.it'},
+        {id: '130840', email1: 'mikaelacaldaro@gmail.com', email2: 'mgenova@alveria.it'},
+        {id: '130841', email1: 'kela822@hotmail.com', email2: 'costa.urciuoli@gmail.com'},
+        {id: '130842', email1: 'laura.gabri@gmail.com', email2: 'tomas.kazulenas@gmail.com'},
+        {id: '130843', email1: 'lucia.marchegiani@uniroma3.it', email2: 'mrizzolli@gmail.com'},
+        {id: '130845', email1: 'claudiarug@yahoo.it', email2: 'serafino.ruscica@gmail.com'},
+        {id: '130846', email1: 'manu140778@hotmail.it', email2: 'm.alfonsi040177@gmail.com'},
+        {id: '130847', email1: 'antonilli.noemi1@gmail.com', email2: 'ing.angelo.adamo@gmail.com'},
+        {id: '130848', email1: 'francescasamperi91@gmail.com', email2: 'fabrizioivomattei@gmail.com'},
+        {id: '130849', email1: 'federicamonti788@gmail.com', email2: 'danilo_56@msn.com'},
+        {id: '130850', email1: 'lamorticellap@gmail.com', email2: 'gianluca.bigoli@gmail.com'},
+        {id: '130851', email1: 'montagna.mariacristina@gmail.com', email2: 'manuel230783@live.it'},
+        {id: '130852', email1: 'beatriceianniruberto@libero.it', email2: 'fabio.bisegna@uniroma1.it'},
+        {id: '130853', email1: 'caijianiirene@gmail.com', email2: 'zhouhao78@hotmail.com'},
+        {id: '130854', email1: 'muraristefania@gmail.com', email2: 'maxbarc@gmail.com'},
+        {id: '130855', email1: 'sara17.cingolani@gmail.com', email2: 'm.balzarini14@gmail.com'},
+        {id: '130856', email1: 'maria.fnoia@gmail.com', email2: 'gianfranco.morrone@gmail.com'},
+        {id: '130857', email1: 'pellegrini.francesca@virgilio.it', email2: 'rrezzonico1977@gmail.com'},
+        {id: '130858', email1: 'mikatonelli@gmail.com', email2: 'fabio.grimaldi@fastwebnet.it'},
+        {id: '130859', email1: 't.mulone@zetema.it', email2: 'camers@outlook.it'},
+        {id: '130860', email1: 'flavsab@gmail.com', email2: 'cesare.ramazzotti@leonardo.com'},
+        {id: '130861', email1: 'valeria.cirigliano03@gmail.com', email2: 'ema.piergentili@gmail.com'},
+        {id: '130862', email1: 'chiara.lattanzi13@gmail.com', email2: 'lucamattoni92@gmail.com'},
+        {id: '130863', email1: 'vivianadevincentis1@gmail.com', email2: 'alessandromiliti1@gmail.com'},
+        {id: '130864', email1: 'valentina.saporiti77@gmail.com', email2: 'eugenio.corsi@gmail.com'},
+        {id: '130865', email1: 'gio.picarelli85@gmail.com', email2: 'marco.ceccanti@uniroma1.it'},
+        {id: '130866', email1: 'ing.andrea.paolini@gmail.com', email2: 'gabriellabascelli@gmail.com'},
+        {id: '130867', email1: 'ing.andrea.paolini@gmail.com', email2: 'gabriellabascelli@gmail.com'},
+        {id: '130868', email1: 'f.casadei@unitus.it', email2: 'amedeodelongis@gmail.com'},
+        {id: '130869', email1: 'la.nicolosi@gmail.com', email2: 'saccag77@gmail.com'},
+        {id: '130870', email1: 'mercantiilaria72@gmail.com', email2: 'costantino1@icloud.com'},
+        {id: '130871', email1: 'alessandradiclaudio@libero.it', email2: 'tiberio.caporossi@gmail.com'},
+        {id: '130872', email1: 'rtrossitto1@gmail.com', email2: 'tmax17@gmail.com'},
+        {id: '130873', email1: 'mariaconcetta.altieri@interno.it', email2: 'iandoliparolise.antonio@gdf.it'},
+        {id: '130874', email1: 'cristiana.disanto55@gmail.com', email2: 'mirco.bianchi@yahoo.it'},
+        {id: '130875', email1: 'sarabonizzardi@gmail.com', email2: 'andreatancredi83@gmail.com'},
+        {id: '130876', email1: 'sara.montozzi@gmail.com', email2: 'gianluca.principessa@gmail.com'},
+        {id: '130877', email1: 'beatrice.perotto@gmail.com', email2: 'g.carletti0@gmail.com'},
+        {id: '130878', email1: 'helen.chiappini@gmail.com', email2: 'leonardodepalma@ymail.com'},
+        {id: '130881', email1: 'lavinia275@yahoo.it', email2: 'lavnemo@gmail.com'},
+        {id: '130882', email1: 'scalettafrancesco@libero.it', email2: 'francesca.amici14@gmail.com'},
+        {id: '130883', email1: 'patrizia.fusaro@gmail.com', email2: 'luciano.zu@gmail.com'},
+        {id: '130884', email1: 'benedetta.fruttarol@gmail.com', email2: 'ludovico.fabbri@gmail.com'},
+        {id: '130885', email1: 'raffaellaraffio@gmail.com', email2: 'claudio.coco@gmail.com'},
+        {id: '130886', email1: 'angela.pettorruso@gmail.com', email2: 'carlogiuseppe.dimaria@interno.it'},
+        {id: '130887', email1: 'ddpd@hotmail.it', email2: 'daniele_dorazi@hotmail.it'},
+        {id: '130889', email1: 'jessica92spoletini@gmail.com', email2: 'simonemagni16@gmail.com'},
+        {id: '130890', email1: 'margo.dimarco@gmail.com', email2: 'maurodilanzo@yahoo.it'},
+        {id: '130891', email1: 'mariadaniela.gliubizzi@gmail.com', email2: 'fabrizio.buceti@gmail.com'},
+        {id: '130892', email1: 'mariadaniela.gliubizzi@gmail.com', email2: 'fabrizio.buceti@gmail.com'},
+        {id: '130893', email1: 'ariballabene@hotmail.com', email2: 'ciccioguzzo2@hotmail.com'},
+        {id: '130894', email1: 'francesca.didonna@outlook.it', email2: 'giampieroasta@gmail.com'},
+        {id: '130895', email1: 'panielisabetta@gmail.com', email2: 'a.protomail@gmail.com'},
+        {id: '130898', email1: 'saratosti8@gmail.com', email2: 'erwinmonticone@gmail.com'},
+        {id: '130899', email1: 'elepinzi@yahoo.com', email2: 'formisan@yahoo.it'},
+        {id: '130900', email1: 'cinzia.coscarelli.cc@gmail.com', email2: 'mc9459@mclink.it'},
+        {id: '130902', email1: 'marti.giovannetti@libero.it', email2: 'manuelgneo@libero.it'},
+        {id: '130904', email1: 'vferrari72@hotmail.com', email2: 'paolino_rob_halford@virgilio.it'},
+        {id: '130906', email1: 'claratitoli18@gmail.com', email2: 'a.ferrante@outlook.com'},
+        {id: '130908', email1: 'emanuelelucchini@gmail.com', email2: 'martinaguenzi4@gmail.com'},
+        {id: '130909', email1: 'francescasamperi91@gmail.com', email2: 'fabrizioivomattei@gmail.com'},
+        {id: '130911', email1: 'marzia.ciangola@gmail.com', email2: 'bione73@gmail.com'},
+        {id: '130912', email1: 'silvia.pao@libero.it', email2: 'ale.bracci@gmail.com'},
+        {id: '130913', email1: 'brunalodoli74@gmail.com', email2: 'alessandrocamboni@gmail.com'},
+        {id: '130914', email1: 'egledebonis@gmail.com', email2: 'pdimuro@gmail.com'},
+        {id: '130915', email1: 'bbonito@luiss.it', email2: 'max.minnucci@gmail.com'},
+        {id: '130916', email1: 'ale.morici@gmail.com', email2: 'giulio.miliotti@gmail.com'},
+        {id: '130917', email1: 'nicla1472@gmail.com', email2: 'massimiliano.bechini@gmail.com'},
+        {id: '130918', email1: 'vaianellaluana@yahoo.it', email2: 'roger.cal.4692@gmail.com'},
+        {id: '130919', email1: 'xiaotingyu849@gmail.com', email2: 'jiang_sophia@yahoo.com'},
+        {id: '130920', email1: 'antonellaformisano1972@gmail.com', email2: 'gfcarrubba@gmail.com'},
+        {id: '130921', email1: 'angela.tretola@enel.com', email2: 'claudio.dicembrino@gmail.com'},
+        {id: '130922', email1: 'dariocapotorto@vintieassociati.com', email2: 'rllantieri@gmail.com'},
+        {id: '130923', email1: 'danielaperciballi@virgilio.it', email2: 'mariodezi79@gmail.com'},
+        {id: '130925', email1: 'livia.balduccini@gmail.com', email2: 'fbfabio09@gmail.com'}
+    ];
+
+    // Elementi DOM
+    const hackConsole = document.getElementById('hackConsole');
+    const resultArea = document.getElementById('resultArea');
+    const searchInput = document.getElementById('searchInput');
+
+    // Variabili per il simulation interval
+    let simulationInterval = null;
+    let simulationStep = 0;
+    let currentQuery = '';
+    let targetId = '';
+
+    // Pulizia console
+    function clearConsole() {
+        hackConsole.innerHTML = '';
+    }
+
+    // Aggiunge linea alla console
+    function addLine(text, type = '') {
+        const line = document.createElement('div');
+        line.className = `hack-line ${type}`;
+        line.textContent = text;
+        hackConsole.appendChild(line);
+        hackConsole.scrollTop = hackConsole.scrollHeight;
+    }
+
+    // Simulazione cracking - 20 secondi di attacco realistico
+    function startHackingSimulation(query) {
+        clearConsole();
+        simulationStep = 0;
+        currentQuery = query;
+        
+        // Estrai ID da dedaloroma + numero o solo numero
+        const idMatch = query.match(/(?:dedaloroma)?(\d{5,6})/i);
+        targetId = idMatch ? idMatch[1] : '';
+
+        // Fasi dell'attacco - 20 secondi totali (~20 step)
+        const attackPhases = [
+            { text: '[*] Initializing exploit module...', delay: 0 },
+            { text: '[*] Target: registro.orsoline.it:443', delay: 300 },
+            { text: '[*] Checking SSL/TLS... OK', delay: 600 },
+            { text: `[*] Extracting ID from query: ${query}`, delay: 1000 },
+            { text: `[*] Target ID: ${targetId || 'unknown'}`, delay: 1400 },
+            { text: '[*] Connecting to database server...', delay: 1800 },
+            { text: '[+] Connection established (10.0.0.45:3306)', delay: 2200 },
+            { text: '[*] Bypassing WAF...', delay: 2600 },
+            { text: '[+] WAF bypass successful', delay: 3000 },
+            { text: '[*] Injecting SQL payload...', delay: 3500 },
+            { text: "[*] Payload: ' UNION SELECT * FROM users WHERE id=" + (targetId || '?'), delay: 4000 },
+            { text: '[*] Evading detection...', delay: 4500 },
+            { text: '[+] Payload accepted', delay: 5000 },
+            { text: '[*] Extracting user data...', delay: 5500 },
+            { text: '[*] Cracking password hash (MD5)...', delay: 6200 },
+            { text: '[*] 10% complete', delay: 7000 },
+            { text: '[*] 25% complete', delay: 8000 },
+            { text: '[*] 40% complete', delay: 9000 },
+            { text: '[*] 55% complete', delay: 10000 },
+            { text: '[*] 70% complete', delay: 11000 },
+            { text: '[*] 85% complete', delay: 12000 },
+            { text: '[*] 95% complete', delay: 13000 },
+            { text: '[+] Hash cracked!', delay: 14000 },
+            { text: '[*] Decrypting email addresses...', delay: 15000 },
+            { text: '[*] Accessing user profile...', delay: 16000 },
+            { text: '[*] Retrieving contact information...', delay: 17000 },
+            { text: '[+] Data extraction complete', delay: 18000 },
+            { text: '[+] Session token: 0x' + Math.random().toString(16).substring(2, 10), delay: 19000 },
+        ];
+
+        // Aggiungi linee con delay
+        attackPhases.forEach(phase => {
+            setTimeout(() => {
+                addLine(phase.text, phase.text.includes('[+]') ? 'success' : '');
+                simulationStep++;
+                
+                // Se è l'ultimo step, mostra i risultati
+                if (phase.delay >= 19000) {
+                    setTimeout(() => showResults(query), 500);
+                }
+            }, phase.delay);
+        });
+    }
+
+    // Mostra risultati dopo il cracking
+    function showResults(query) {
+        const idMatch = query.match(/(?:dedaloroma)?(\d{5,6})/i);
+        if (!idMatch) {
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = `<div class="result-line">[-] No valid ID found in query: ${query}</div>`;
+            return;
+        }
+
+        const searchId = idMatch[1];
+        const user = database.find(u => u.id === searchId);
+
+        resultArea.style.display = 'block';
+        resultArea.innerHTML = '';
+
+        if (user) {
+            const resultDiv = document.createElement('div');
+            resultDiv.innerHTML = `
+                <div class="result-line">[+] TARGET ACQUIRED: dedaloroma${user.id}</div>
+                <div class="result-line email-found">📧 EMAIL 1: ${user.email1}</div>
+                <div class="result-line email-found">📧 EMAIL 2: ${user.email2}</div>
+                <div class="result-line">[+] Data exfiltrated successfully</div>
+            `;
+            resultArea.appendChild(resultDiv);
+            
+            // Aggiungi linea di successo alla console
+            addLine('[+] Email addresses extracted!', 'success');
+        } else {
+            resultArea.innerHTML = `<div class="result-line error">[-] User ID ${searchId} not found in database</div>`;
+            addLine(`[-] User ID ${searchId} not found`, 'error');
+        }
+    }
+
+    // Ricerca per nome nelle email (fallback)
+    function searchByName(name) {
+        const results = database.filter(u => 
+            u.email1.toLowerCase().includes(name.toLowerCase()) || 
+            u.email2.toLowerCase().includes(name.toLowerCase())
+        );
+        
+        if (results.length > 0) {
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = '<div class="result-line">[+] Multiple matches found:</div>';
+            results.forEach(user => {
+                resultArea.innerHTML += `
+                    <div class="result-line">→ dedaloroma${user.id}</div>
+                    <div class="result-line email-found">  📧 ${user.email1}</div>
+                    <div class="result-line email-found">  📧 ${user.email2}</div>
+                `;
+            });
+            addLine(`[+] Found ${results.length} matches for "${name}"`, 'success');
+        } else {
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = `<div class="result-line error">[-] No matches found for "${name}"</div>`;
+            addLine(`[-] No matches found`, 'error');
+        }
+    }
+
+    // Event listener per ricerca (Enter)
+    searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            // Pulisci risultati precedenti
+            resultArea.style.display = 'none';
+            
+            // Ferma simulazioni precedenti
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+            }
+
+            // Determina se è un ID/username o una ricerca per nome
+            const hasNumbers = /\d{5,6}/.test(query);
+            
+            if (hasNumbers) {
+                // È un ID o username - fai simulazione completa
+                startHackingSimulation(query);
+            } else {
+                // Ricerca per nome - simulazione più breve
+                clearConsole();
+                addLine(`[*] Searching database for: "${query}"`);
+                addLine('[*] Scanning email fields...');
+                setTimeout(() => {
+                    searchByName(query);
+                }, 500);
+            }
+        }
+    });
+
+    // Welcome message
+    addLine('[+] System ready. Enter target (dedaloroma + ID or name)');
+    addLine('[+] Example: dedaloroma130776 or 130777 or "daniela"');
+</script>
+</body>
+</html>
