@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tanti Auguri Papà</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+  font-family: Arial, sans-serif;
+  background: linear-gradient(180deg,#0b1f3a,#123c75,#1f5db3);
+  overflow:hidden;
+  height:100vh;
+}
+
+/* schermate */
+.screen{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:0.7s ease;
+}
+
+.hidden{
+  transform:translateY(-100%);
+  opacity:0;
+}
+
+/* card */
+.card{
+  background:rgba(255,255,255,0.92);
+  padding:35px;
+  border-radius:28px;
+  text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,0.35);
+  width:min(92vw,700px);
+}
+
+/* testi */
+h1{
+  font-size:3rem;
+  color:#1e4e8c;
+  margin-bottom:20px;
+}
+
+.subtitle{
+  font-size:1.4rem;
+  color:#2f6fb0;
+  margin-bottom:25px;
+}
+
+/* bottoni */
+.buttons{
+  position:relative;
+  height:70px;
+}
+
+button{
+  position:absolute;
+  top:0;
+  width:48%;
+  padding:15px;
+  border-radius:999px;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+#yesBtn{
+  left:0;
+  background:#2f80ff;
+  color:white;
+}
+
+#allBtn{
+  right:0;
+  background:white;
+  color:#1e4e8c;
+  border:2px solid #6fa9ff;
+}
+
+/* scambio */
+.swap{
+  transition:all .1s ease;
+}
+
+/* click finto */
+@keyframes fakeClick{
+  0%{transform:scale(1)}
+  50%{transform:scale(0.8)}
+  100%{transform:scale(1)}
+}
+
+.click{
+  animation:fakeClick .25s ease;
+}
+
+/* CUORI */
+.heart{
+  position:absolute;
+  top:-30px;
+  font-size:22px;
+  animation:fall linear forwards;
+}
+
+@keyframes fall{
+  to{
+    transform:translateY(110vh) rotate(540deg);
+    opacity:0.2;
+  }
+}
+
+/* schermata finale */
+.final{
+  position:relative;
+  width:100%;
+  height:100%;
+}
+
+.final img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,0.2),rgba(0,0,0,0.5));
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  text-align:center;
+}
+
+.big{
+  font-size:4rem;
+  margin-bottom:10px;
+}
+
+.small{
+  font-size:1.4rem;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- PRIMA -->
+<section class="screen" id="s1">
+  <div class="card">
+    <h1>Tanti auguri papà Fabio</h1>
+    <div class="subtitle">Sono il tuo figlio preferito?</div>
+
+    <div class="buttons">
+      <button id="yesBtn">Sì</button>
+      <button id="allBtn">Siete tutti i miei preferiti</button>
+    </div>
+  </div>
+</section>
+
+<!-- FINALE -->
+<section class="screen" id="s2" style="transform:translateY(100%)">
+  <div class="final">
+    <img src="https://image2url.com/r2/default/images/1773944794757-697146e5-7b8c-4b2c-8bbf-4f4ba6c9c71d.jpg">
+    <div class="overlay">
+      <div class="big">Evvaiiii 💙🎉</div>
+      <div class="small">Auguri papà ❤️</div>
+    </div>
+  </div>
+</section>
+
+<script>
+const yes = document.getElementById("yesBtn");
+const all = document.getElementById("allBtn");
+const s1 = document.getElementById("s1");
+const s2 = document.getElementById("s2");
+
+let swapped=false;
+
+function action(){
+  if(swapped) return;
+  swapped=true;
+
+  const yesLeft = yes.offsetLeft;
+  const allLeft = all.offsetLeft;
+
+  yes.classList.add("swap");
+  all.classList.add("swap");
+
+  // scambio veloce
+  yes.style.left = allLeft + "px";
+  all.style.left = yesLeft + "px";
+
+  // click finto DOPO 0.1s
+  setTimeout(()=>{
+    yes.classList.add("click");
+  },100);
+
+  // dopo 1.5s finale
+  setTimeout(()=>{
+    s1.classList.add("hidden");
+    s2.style.transform="translateY(0)";
+    hearts();
+  },1500);
+}
+
+yes.addEventListener("click",action);
+all.addEventListener("click",action);
+
+function hearts(){
+  setInterval(()=>{
+    const h=document.createElement("div");
+    h.className="heart";
+    h.innerHTML="💙";
+    h.style.left=Math.random()*100+"vw";
+    h.style.fontSize=(18+Math.random()*30)+"px";
+    h.style.animationDuration=(3+Math.random()*3)+"s";
+    document.body.appendChild(h);
+
+    setTimeout(()=>h.remove(),6000);
+  },120);
+}
+</script>
+
+</body>
+</html>
