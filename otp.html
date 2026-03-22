@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Test OTP - Verifica Telegram</title>
+    <style>
+        /* Stile minimal: bianco e nero, nessuna grafica superflua */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #ffffff;
+            font-family: system-ui, -apple-system, 'Segoe UI', 'Roboto', monospace;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Contenitore semplice, solo bordo nero sottile se serve struttura */
+        .container {
+            max-width: 420px;
+            width: 100%;
+            background: white;
+            border: 1px solid black;
+            padding: 2rem 1.5rem;
+            box-shadow: none;
+        }
+
+        /* Nessun gradiente, ombra, solo testo nero su sfondo bianco */
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 500;
+            text-align: center;
+            letter-spacing: -0.3px;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid black;
+            display: inline-block;
+            width: auto;
+            padding-bottom: 6px;
+        }
+
+        .title-wrap {
+            text-align: center;
+        }
+
+        /* Sezione generazione OTP */
+        .gen-section {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        /* Solo due bottoni: nero su bianco, senza sfumature, bordi netti */
+        button {
+            background: white;
+            color: black;
+            border: 1.5px solid black;
+            font-size: 1rem;
+            font-weight: 500;
+            padding: 12px 20px;
+            margin: 0 6px 12px 6px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: none;
+            border-radius: 0px;      /* completamente squadrato - minimal assoluto */
+            box-shadow: none;
+            outline: none;
+        }
+
+        button:active {
+            background: black;
+            color: white;
+            transform: none;
+        }
+
+        /* focus solo per accessibilità, senza effetti colorati */
+        button:focus-visible {
+            outline: 2px solid black;
+            outline-offset: 2px;
+        }
+
+        /* Messaggi di stato minimal */
+        .status {
+            margin: 1rem 0 1.5rem 0;
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 450;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 8px;
+            background: transparent;
+            color: black;
+            word-break: break-word;
+        }
+
+        /* area verifica OTP */
+        .verify-section {
+            margin-top: 1.2rem;
+            border-top: 1px solid black;
+            padding-top: 1.8rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 10px;
+            font-size: 1.3rem;
+            text-align: center;
+            font-family: monospace;
+            letter-spacing: 4px;
+            background: white;
+            border: 1.5px solid black;
+            border-radius: 0px;
+            outline: none;
+            color: black;
+            font-weight: 500;
+        }
+
+        input:focus {
+            border-color: black;
+            background: white;
+        }
+
+        .verify-btn {
+            width: 100%;
+            margin: 8px 0 0 0;
+            background: white;
+        }
+
+        /* hint minimale */
+        .note {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #444;
+            border-top: 1px solid #ddd;
+            padding-top: 1rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid black;
+            margin: 8px 0;
+        }
+
+        /* completamente monocromatico */
+        a, a:visited {
+            color: black;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="title-wrap">
+        <h1>VERIFICA OTP</h1>
+    </div>
+
+    <!-- Sezione generazione nuovo OTP (invia al bot) -->
+    <div class="gen-section">
+        <button id="generateBtn">+ GENERA NUOVO OTP</button>
+        <!-- secondo bottone? Richiesta: "solo 2 bottoni senza grafica" 
+             ma le funzionalità: 1) genera e invia al bot, 2) verifica codice.
+             Quindi esattamente due bottoni: uno "Genera nuovo OTP" e l'altro "Verifica codice"
+             Il pulsante di verifica sta nella sezione sotto. Ma sono esattamente due.
+             Per rispettare minimal: non ci sono altri pulsanti. OK -->
+    </div>
+
+    <!-- Area per messaggi di stato -->
+    <div id="statusMessage" class="status">
+        ⚫ In attesa di azione
+    </div>
+
+    <!-- Sezione verifica OTP a 4 cifre -->
+    <div class="verify-section">
+        <div class="input-group">
+            <label for="otpInput">INSERISCI CODICE A 4 CIFRE</label>
+            <input type="text" id="otpInput" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="____" autocomplete="off">
+        </div>
+        <button id="verifyBtn" class="verify-btn">VERIFICA OTP</button>
+    </div>
+    <div class="note">
+        ⚫ Il codice OTP generato viene inviato al bot Telegram.<br>
+        ⚫ Inserisci il codice ricevuto (o quello generato) per verificarlo.
+    </div>
+</div>
+
+<script>
+    // --------------------------------------------------------------
+    // Configurazione BOT TELEGRAM (dati forniti)
+    // token: 8402483141:AAFRWGSpD_zILMu-ia2Frb86YyO4Ci-nTBs
+    // chat_id: 5709299213
+    // --------------------------------------------------------------
+    const BOT_TOKEN = "8402483141:AAFRWGSpD_zILMu-ia2Frb86YyO4Ci-nTBs";
+    const CHAT_ID = "5709299213";
+
+    // URL API Telegram (sendMessage)
+    const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+
+    // Variabile per tenere traccia dell'ultimo OTP generato e inviato al bot
+    // (Usata per il confronto lato client, ma la verifica finale interroga anche il bot
+    //  perché il bot potrebbe essere l'unico a conoscere l'OTP? Il requisito dice:
+    //  "quando lo genra lo invia al bot e se vuoi verificarlo lo metti nella barra a 4 cifre 
+    //   lui fa un controllo con quello inviato al bot e verifica se è giusto".
+    //  Per sicurezza facciamo in modo che il bot memorizzi l'ultimo OTP generato per questa chat_id?
+    //  Ma il bot non ha stato persistente nel semplice sendMessage, possiamo però usare un semplice
+    //  store lato client + invio al bot come riferimento. Tuttavia il controllo finale deve
+    //  corrispondere con l'ultimo OTP inviato al bot. Dato che non c'è un webhook che restituisce 
+    //  il valore memorizzato dal bot, useremo una logica trasparente:
+    //  1) Quando si genera un nuovo OTP (casuale 4 cifre) viene inviato al bot tramite messaggio.
+    //     Contestualmente salviamo l'OTP in una variabile locale (lastGeneratedOTP).
+    //  2) Quando l'utente inserisce un codice e preme Verifica, confrontiamo con lastGeneratedOTP.
+    //     Se corrisponde -> corretto, altrimenti sbagliato.
+    //  Questo soddisfa "lui fa un controllo con quello inviato al bot" perché l'OTP inviato al bot
+    //  è lo stesso che abbiamo generato e tenuto in memoria. Inoltre l'utente potrebbe testare OTP
+    //  ricevuto tramite canale Telegram (se il bot inoltra), quindi la logica combacia.
+    //  Il bot riceve il codice OTP come messaggio (esempio: "Nuovo OTP: 2847").
+    //  Per garantire robustezza, se per qualche motivo il bot non riceve il messaggio (errore rete)
+    //  mostriamo errore ma non salviamo l'OTP. 
+    //  --------------------------------------------------------------
+
+    let lastGeneratedOTP = null;       // memorizza l'ultimo codice a 4 cifre generato con successo
+    let isGenerating = false;          // flag per evitare spam
+
+    // Elementi DOM
+    const generateBtn = document.getElementById('generateBtn');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const otpInput = document.getElementById('otpInput');
+    const statusDiv = document.getElementById('statusMessage');
+
+    // Helper: aggiorna il messaggio di stato
+    function setStatus(text, isError = false) {
+        statusDiv.innerText = text;
+        // mantieni stile minimal, ma possiamo evidenziare errore solo con testo normale
+        if (isError) {
+            // non cambiamo colore di sfondo, solo un piccolo indicatore testuale (nessuna grafica extra)
+            // ma eventualmente si potrebbe aggiungere una '✗' ma minimal. Lasciamo così.
+        }
+    }
+
+    // Genera OTP casuale a 4 cifre (stringa)
+    function generateRandomOTP() {
+        const num = Math.floor(1000 + Math.random() * 9000);
+        return num.toString();
+    }
+
+    // Invia messaggio al bot Telegram con il codice OTP
+    async function sendOTPToTelegram(otpCode) {
+        // Costruisce messaggio testuale
+        const messageText = `🔐 NUOVO OTP GENERATO: ${otpCode}\nUsa questo codice per la verifica.`;
+        
+        // Parametri per la richiesta POST
+        const params = new URLSearchParams();
+        params.append('chat_id', CHAT_ID);
+        params.append('text', messageText);
+        // Opzionale: disable_notification false, ma va bene così
+        
+        try {
+            const response = await fetch(TELEGRAM_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params.toString()
+            });
+            
+            const data = await response.json();
+            if (response.ok && data.ok) {
+                return { success: true, data };
+            } else {
+                // errore API Telegram
+                console.error('Errore API Telegram:', data);
+                return { success: false, error: data.description || 'Errore nell\'invio al bot' };
+            }
+        } catch (err) {
+            console.error('Errore di rete / fetch:', err);
+            return { success: false, error: 'Problema di connessione con Telegram' };
+        }
+    }
+
+    // Funzione principale: genera nuovo OTP, lo invia al bot e lo memorizza localmente
+    async function handleGenerateOTP() {
+        if (isGenerating) {
+            setStatus("⏳ Attendere, generazione in corso...");
+            return;
+        }
+        
+        isGenerating = true;
+        setStatus("⚙️ Generazione nuovo OTP in corso...");
+        
+        // Genera codice a 4 cifre
+        const newOTP = generateRandomOTP();
+        
+        // Invia al bot Telegram
+        const result = await sendOTPToTelegram(newOTP);
+        
+        if (result.success) {
+            // Invio riuscito: salva il codice come ultimo OTP valido
+            lastGeneratedOTP = newOTP;
+            setStatus(`✅ OTP generato e inviato al bot! (codice: ${newOTP}) - Usalo per verificare.`);
+            // Pulisco campo input OTP per nuova verifica (opzionale)
+            otpInput.value = '';
+            // Aggiungo anche un piccolo feedback sonoro? Non necessario, solo minimal
+        } else {
+            // Fallimento nell'invio al bot: non aggiornare lastGeneratedOTP
+            setStatus(`❌ Errore: ${result.error || "Impossibile inviare OTP al bot. Riprova."}`, true);
+            // lastGeneratedOTP rimane invariato (precedente o null)
+        }
+        
+        isGenerating = false;
+    }
+
+    // Funzione di verifica: confronta il codice inserito con l'ultimo OTP inviato al bot (lastGeneratedOTP)
+    function handleVerifyOTP() {
+        const enteredCode = otpInput.value.trim();
+        
+        // Validazione: deve essere esattamente 4 cifre numeriche
+        if (!/^\d{4}$/.test(enteredCode)) {
+            setStatus("❌ SBAGLIATO: inserire esattamente 4 cifre numeriche.", true);
+            return;
+        }
+        
+        // Controllo se esiste un OTP generato in precedenza
+        if (lastGeneratedOTP === null) {
+            setStatus("⚠️ Nessun OTP generato finora. Premi 'GENERA NUOVO OTP' prima di verificare.", true);
+            return;
+        }
+        
+        // Confronto con l'OTP inviato al bot
+        if (enteredCode === lastGeneratedOTP) {
+            setStatus("✅ CORRETTO! Il codice OTP corrisponde.");
+            // opzionale: possiamo resettare lastGeneratedOTP? Non necessario, ma diamo la possibilità 
+            // di generarne un altro dopo verifica corretta. Non resettiamo per evitare doppia verifica,
+            // ma se l'utente riprova con stesso codice dirà corretto finché non si rigenera.
+            // Ottimo comportamento.
+        } else {
+            setStatus("❌ SBAGLIATO. Il codice non corrisponde all'OTP inviato al bot.", true);
+        }
+    }
+
+    // Event listeners per i due pulsanti
+    generateBtn.addEventListener('click', handleGenerateOTP);
+    verifyBtn.addEventListener('click', handleVerifyOTP);
+    
+    // Aggiungo supporto per tasto "Invio" nel campo input per comodità (non richiesto ma migliora UX senza grafica)
+    otpInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            handleVerifyOTP();
+        }
+    });
+    
+    // Pulizia iniziale: nessun OTP generato, messaggio benvenuto minimal
+    // opzionale: generazione automatica? NO, l'utente deve premere il primo bottone.
+    // per sicurezza all'avvio nessun OTP preimpostato.
+    setStatus("⚫ Premere 'GENERA NUOVO OTP' per inviare un codice al bot Telegram.");
+    
+    // (Extra) dato che il bot riceve ogni nuovo OTP, l'utente può visualizzare il codice 
+    // nello stato dopo la generazione. Ma la richiesta dice: "quando lo genra lo invia al bot 
+    // (non te lo dice ovviamente)" – il non te lo dice ovviamente si riferisce al fatto che 
+    // nell'interfaccia non deve essere mostrato in chiaro? Il requisito: "non te lo dice ovviamente"
+    // significa che premendo genera nuovo OTP, la UI non deve rivelare il codice? 
+    // Dal testo: "puoi preme genra un nuovo otp (non te lo dice ovviamente ) quando lo genra lo invia al bot"
+    // Quindi l'OTP non deve essere mostrato visivamente all'utente nell'interfaccia al momento della generazione.
+    // Nel nostro stato attuale, dopo la generazione mostriamo il codice nel messaggio di stato (✅ OTP generato e inviato al bot! (codice: 1234)).
+    // Questo viola "non te lo dice ovviamente". Dobbiamo correggere per non mostrare il codice nell'interfaccia.
+    // L'utente non deve vedere il codice generato, ma deve riceverlo tramite bot (Telegram).
+    // L'unico modo per verificarlo è inserire il codice ricevuto dal bot. Quindi modifichiamo:
+    // - Non visualizzare mai il codice nella UI (né in status, né in console, né in alert).
+    // - lastGeneratedOTP viene salvato in memoria per il confronto, ma l'utente non lo vede.
+    // - Il messaggio dopo generazione dirà solo "Nuovo OTP generato e inviato al bot. Controlla Telegram."
+    // - Per il controllo "se vuoi verificarlo lo metti nella barra a 4 cifre lui fa un controllo"
+    //   Ottimo, l'utente deve vedere il codice solo su Telegram.
+    
+    // CORREZIONE: riscriviamo la funzione handleGenerateOTP senza mostrare il codice.
+    // Adattiamo subito per rispettare "non te lo dice ovviamente".
+    // Override della funzione handleGenerateOTP originale per nascondere il codice.
+    // Siccome lo script è già stato dichiarato, sostituiamo il comportamento.
+    // Nota: la funzione handleGenerateOTP è già definita sopra, ma per essere precisi ridefiniamo.
+    // Rimuoviamo la precedente implementazione e la sostituiamo con una versione che non rivela il codice.
+    // Poiché il codice viene eseguito in ordine, sovrascriviamo il metodo dopo la definizione.
+    // Inoltre modifichiamo anche la gestione dello stato per non stampare il codice.
+    
+    // Sostituiamo la funzione handleGenerateOTP con una versione anonima che rispetta il requisito
+    // di non mostrare mai il codice nell'interfaccia.
+    // Per sicurezza, cancelliamo l'event listener originale e riattacchiamo.
+    generateBtn.removeEventListener('click', handleGenerateOTP);
+    
+    // Nuova implementazione che nasconde completamente il codice all'utente (nessun log o visualizzazione)
+    const newGenerateHandler = async function() {
+        if (isGenerating) {
+            setStatus("⏳ Attendere, generazione in corso...");
+            return;
+        }
+        
+        isGenerating = true;
+        setStatus("⚙️ Generazione nuovo OTP in corso...");
+        
+        const newOTP = generateRandomOTP();
+        const result = await sendOTPToTelegram(newOTP);
+        
+        if (result.success) {
+            lastGeneratedOTP = newOTP;
+            // IMPORTANTE: non mostrare il codice, solo conferma generico
+            setStatus("📨 Nuovo OTP generato e inviato al bot. Controlla Telegram per il codice.");
+            otpInput.value = '';   // pulisce campo per nuova verifica
+        } else {
+            setStatus(`❌ Errore: ${result.error || "Invio fallito. Riprova."}`, true);
+            // lastGeneratedOTP non viene aggiornato
+        }
+        
+        isGenerating = false;
+    };
+    
+    generateBtn.addEventListener('click', newGenerateHandler);
+    
+    // La funzione handleVerifyOTP rimane invariata: confronta con lastGeneratedOTP 
+    // e mostra solo esito "corretto" o "sbagliato". Non rivela il codice atteso.
+    // Per sicurezza evitiamo anche di stampare il codice in altri messaggi di stato.
+    // Modifichiamo anche il messaggio di stato iniziale e altri per non rivelare nulla.
+    setStatus("⚫ Premi 'GENERA NUOVO OTP' per inviare un codice segreto al bot Telegram.");
+    
+    // Inoltre, nel caso in cui l'utente tenti la verifica senza aver generato, messaggio neutro.
+    // Verifichiamo che non ci siano fughe di informazioni tramite console o errori.
+    // Il vecchio listener per verify rimane corretto.
+    
+    // Piccola modifica: nella funzione handleVerifyOTP, se lastGeneratedOTP è nullo,
+    // il messaggio non rivela informazioni sensibili.
+    // Miglioriamo anche il testo quando verifica fallisce per non dare suggerimenti.
+    // La funzione esiste già: va bene.
+    
+    // Per sicurezza, ridefiniamo anche handleVerifyOTP per assicurarci che non venga rivelato 
+    // il codice corretto in alcun messaggio (non lo fa già, solo "corretto" o "sbagliato")
+    // ma se qualcuno inspeziona il DOM? È accettabile poiché è lato client ma l'OTP 
+    // rimane in lastGeneratedOTP, ma è una variabile javascript. Il requisito è solo UI "non te lo dice ovviamente"
+    // e che la verifica avvenga confrontando con l'invio al bot. Va bene così.
+    
+    // Rimuovere ogni riferimento visivo al codice anche nel note.
+    // modifichiamo anche il contenuto del .note per evitare fraintesi.
+    const noteDiv = document.querySelector('.note');
+    if (noteDiv) {
+        noteDiv.innerHTML = `⚫ Il codice OTP generato viene inviato privatamente al bot Telegram.<br>
+                             ⚫ Inserisci il codice ricevuto (4 cifre) per verificarlo.`;
+    }
+    
+    // Rimuovere anche eventuali log in console che potrebbero involontariamente mostrare il codice
+    // (la nostra funzione non stampa newOTP in console, ma in sendOTPToTelegram non ci sono log espliciti)
+    // Inoltre, per sicurezza extra, intercetto se qualche errore mostra il codice, ma non serve.
+    
+    // Piccola verifica: se l'utente prova a rigenerare più volte, il bot riceve ogni codice.
+    // lastGeneratedOTP viene aggiornato solo se l'invio ha successo.
+    // L'utente potrebbe provare a inviare un OTP vecchio, ma la verifica fallirà.
+    // Per ottemperare totalmente: "fa un controllo con quello inviato al bot" abbiamo conferma.
+    
+    // Vogliamo anche gestire un eventuale timeout/errori di rete.
+    console.log("Test OTP Minimal avviato - bot configurato, solo due bottoni, nessuna grafica, codice mai mostrato in UI");
+    
+    // Se l'utente fa doppio click su generazione, evitare race condition: il flag isGenerating funziona.
+    
+    // Forniamo una validazione aggiuntiva: limitare input a soli numeri e 4 cifre
+    otpInput.addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^0-9]/g, '').slice(0,4);
+    });
+    
+    // Nota: i due bottoni esistenti sono: "GENERA NUOVO OTP" e "VERIFICA OTP" (senza altri)
+    // Questo corrisponde alla specifica "solo 2 bottoni senza grafica"
+    // La UI è bianco e nero, senza ombre, curve, sfumature. Border nero netto. Perfetto.
+</script>
+</body>
+</html>
